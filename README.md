@@ -1,29 +1,23 @@
-# README #
+# thingweb #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+Thingweb is an open source implementation of the WoT servient model of W3C's interest group on the web of things (W3C WoT IG).
 
 ### What is this repository for? ###
 
-* Quick summary
-* Version
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
-### How do I get set up? ###
+### Building ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+* use maven to build and test.
+
 
 ### Contribution guidelines ###
 
-* Writing tests
-* Code review
-* Other guidelines
+* just open a PR
+* Writing tests is mandatory
+* Code review will be
+
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+* W3C WoT IG Members from Siemens
