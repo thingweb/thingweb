@@ -1,7 +1,7 @@
 package de.webthing.servient;
 
-import de.openwot.thing.binding.coap.CoapBinding;
-import de.openwot.thing.binding.http.HttpBinding;
+import de.webthing.binding.coap.CoapBinding;
+import de.webthing.binding.http.HttpBinding;
 import de.webthing.servient.impl.MultiBindingThingServer;
 import de.webthing.thing.Thing;
 

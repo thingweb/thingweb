@@ -1,9 +1,9 @@
-package de.openwot.thing.binding.http;
+package de.webthing.binding.http;
 
 import java.io.IOException;
 
-import de.openwot.thing.binding.RESTListener;
-import de.openwot.thing.binding.ResourceBuilder;
+import de.webthing.binding.RESTListener;
+import de.webthing.binding.ResourceBuilder;
 
 
 public class HttpBinding {

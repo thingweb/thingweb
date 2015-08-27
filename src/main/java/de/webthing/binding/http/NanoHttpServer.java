@@ -1,4 +1,4 @@
-package de.openwot.thing.binding.http;
+package de.webthing.binding.http;
 
 import java.io.IOException;
 

@@ -1,7 +1,7 @@
-package de.openwot.thing.launcher;
+package de.webthing.launcher;
 
-import de.openwot.thing.things.WotGreeter;
 import de.webthing.servient.ServientBuilder;
+import de.webthing.things.WotGreeter;
 
 
 /**

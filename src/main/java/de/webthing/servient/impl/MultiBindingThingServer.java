@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import de.openwot.thing.binding.AbstractRESTListener;
-import de.openwot.thing.binding.ResourceBuilder;
+import de.webthing.binding.AbstractRESTListener;
+import de.webthing.binding.ResourceBuilder;
 import de.webthing.servient.Defines;
 import de.webthing.servient.InteractionListener;
 import de.webthing.servient.ThingServer;

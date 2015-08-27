@@ -1,4 +1,4 @@
-package de.openwot.thing.binding;
+package de.webthing.binding;
 
 
 public interface RESTListener {

@@ -1,4 +1,4 @@
-package de.openwot.thing.binding.coap;
+package de.webthing.binding.coap;
 
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.CoapServer;
@@ -6,8 +6,8 @@ import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.eclipse.californium.core.server.resources.Resource;
 
-import de.openwot.thing.binding.RESTListener;
-import de.openwot.thing.binding.ResourceBuilder;
+import de.webthing.binding.RESTListener;
+import de.webthing.binding.ResourceBuilder;
 
 import static org.eclipse.californium.core.coap.MediaTypeRegistry.*;
 

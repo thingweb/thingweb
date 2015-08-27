@@ -1,4 +1,4 @@
-package de.openwot.thing.things;
+package de.webthing.things;
 
 import de.webthing.thing.Property;
 import de.webthing.thing.Thing;
