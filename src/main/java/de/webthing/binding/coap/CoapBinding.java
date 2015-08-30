@@ -68,6 +68,8 @@ public class CoapBinding {
 							exchange.respond(ResponseCode.METHOD_NOT_ALLOWED);
 						}
 					}
+
+					//TODO add POST
 				});
 			}
 		};

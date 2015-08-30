@@ -2,6 +2,8 @@ package de.webthing.servient;
 
 import de.webthing.thing.Property;
 
+import java.util.concurrent.Callable;
+
 
 /**
  * The ThingInterface provides methods for interacting with things.
@@ -40,4 +42,9 @@ public interface ThingInterface {
 	
 	
 	Object getProperty(String propertyName);
+
+	//TODO decide whether to announce unsuccessful invocation by exception or retval
+	void onInvoke(String actionName, Callable<Object> callback);
+
+
 }

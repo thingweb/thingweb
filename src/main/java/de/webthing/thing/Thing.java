@@ -147,7 +147,21 @@ public final class Thing {
 		
 		notifyListeners();
 	}
-	
+
+	public void addAction(Action action) {
+		if (null == action) {
+			throw new IllegalArgumentException("action must not be null");
+		}
+
+		if (getProperty(action.getName()) != null) {
+			throw new IllegalArgumentException("duplicate action: " +
+					action.getName());
+		}
+
+		m_actions.add(action);
+
+		notifyListeners();
+	}
 	
 	private void notifyListeners() {
 		for (ModelListener listener : m_listeners) {
@@ -177,4 +191,17 @@ public final class Thing {
 	
 	private final Collection<ModelListener> m_listeners = 
 			new CopyOnWriteArrayList<>();
+
+	public Action getAction(String actionName) {
+		if (null == actionName) {
+			throw new IllegalArgumentException("actionName must not be null");
+		}
+
+		for (Action action : m_actions) {
+			if(action.getName().equals(actionName))
+				return action;
+		}
+
+		return null;
+	}
 }

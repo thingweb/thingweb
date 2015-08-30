@@ -2,13 +2,15 @@ package de.webthing.servient.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 import de.webthing.binding.AbstractRESTListener;
 import de.webthing.binding.ResourceBuilder;
 import de.webthing.servient.Defines;
 import de.webthing.servient.InteractionListener;
 import de.webthing.servient.ThingServer;
+import de.webthing.thing.Action;
 import de.webthing.thing.Property;
 import de.webthing.thing.Thing;
 
@@ -32,8 +34,11 @@ public class MultiBindingThingServer implements ThingServer {
 		
 		m_thingModel = thingModel;
 		m_state = new StateContainer(m_thingModel);
-		
+
+		m_executor = Executors.newCachedThreadPool();
+
 		createBindings();
+
 	}
 	
 
@@ -94,6 +99,11 @@ public class MultiBindingThingServer implements ThingServer {
 		return getProperty(prop);
 	}
 
+	@Override
+	public void onInvoke(String actionName, Callable<Object> callback) {
+		Action action = m_thingModel.getAction(actionName);
+		m_state.addCallback(action,callback);
+	}
 
 	@Override
 	public void addInteractionListener(InteractionListener listener) {
@@ -140,6 +150,53 @@ public class MultiBindingThingServer implements ThingServer {
 				}
 			});
 		}
+
+		for (Action action : m_thingModel.getActions()) {
+			//TODO optimize by preconstructing strings and using format
+			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
+					Defines.REL_ACTION_URL + action.getName();
+
+			resources.newResource(url, new AbstractRESTListener() {
+
+				@Override
+				public String onGet() {
+					return "Action: "  + action.getName();
+				}
+
+
+				@Override
+				public void onPut(String data) {
+					List<Callable<Object>> callbacks = m_state.getCallbacks(action);
+
+					try {
+						System.out.println("invoking " + action.getName());
+						List<Future<Object>> futures = m_executor.invokeAll((Collection<? extends Callable<Object>>) callbacks);
+					} catch (Exception e) {
+						/*
+					 	 * How do I return a 500?
+					     */
+					}
+				}
+
+				@Override
+				public String onPost(String data) {
+
+					List<Callable<Object>> callbacks = m_state.getCallbacks(action);
+
+					try {
+						System.out.println("invoking " + action.getName());
+						List<Future<Object>> futures = m_executor.invokeAll((Collection<? extends Callable<Object>>) callbacks);
+					} catch (Exception e) {
+						/*
+					 	 * How do I return a 500?
+					     */
+						return "Error";
+					}
+
+					return "OK";
+				}
+			});
+		}
 	}
 	
 	
@@ -177,7 +234,8 @@ public class MultiBindingThingServer implements ThingServer {
 	
 	
 	private final Collection<ResourceBuilder> m_bindings = new ArrayList<>(); 
-	
-	
+
+	private final ExecutorService m_executor;
+
 	private final Thing m_thingModel;
 }
