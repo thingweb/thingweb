@@ -30,7 +30,7 @@ public class DescriptionParser {
     private static ThingDescription parseJson(JSONObject json) {
         ThingDescriptionBuilder tdb = ThingDescription.getBuilder();
 
-        //Magic happens here
+        //TODO Magic happens here
 
         return tdb.build();
     }
