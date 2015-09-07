@@ -137,7 +137,7 @@ public class MultiBindingThingServer implements ThingServer {
 						throw new UnsupportedOperationException();
 					}
 					
-					return readProperty(property).toString().getBytes();
+					return (byte[]) readProperty(property);
 				}
 
 				@Override
