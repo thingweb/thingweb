@@ -1,5 +1,6 @@
 package de.webthing.binding.coap;
 
+import de.webthing.binding.Binding;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -12,16 +13,17 @@ import de.webthing.binding.ResourceBuilder;
 import static org.eclipse.californium.core.coap.MediaTypeRegistry.*;
 
 
-public class CoapBinding {
+public class CoapBinding implements Binding {
 
 	private CoapServer m_coapServer;
 
 
+	@Override
 	public void initialize() {
 		m_coapServer = new CoapServer();
 	}
 
-	
+	@Override
 	public ResourceBuilder getResourceBuilder() {
 		return new ResourceBuilder() {
 			@Override
@@ -75,7 +77,7 @@ public class CoapBinding {
 		};
 	}
 	
-	
+	@Override
 	public void start() {
 		m_coapServer.start();
 	}
