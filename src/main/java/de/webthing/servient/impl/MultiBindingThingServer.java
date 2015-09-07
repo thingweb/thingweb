@@ -132,16 +132,16 @@ public class MultiBindingThingServer implements ThingServer {
 			
 			resources.newResource(url, new AbstractRESTListener() {
 				@Override
-				public String onGet() {
+				public byte[] onGet() {
 					if (!property.isReadable()) {
 						throw new UnsupportedOperationException();
 					}
 					
-					return readProperty(property).toString();
+					return readProperty(property).toString().getBytes();
 				}
 
 				@Override
-				public void onPut(String data) {
+				public void onPut(byte[] data) {
 					if (!property.isWriteable()) {
 						throw new UnsupportedOperationException();
 					}
@@ -159,13 +159,13 @@ public class MultiBindingThingServer implements ThingServer {
 			resources.newResource(url, new AbstractRESTListener() {
 
 				@Override
-				public String onGet() {
-					return "Action: "  + action.getName();
+				public byte[] onGet() {
+					return ("Action: "  + action.getName()).getBytes();
 				}
 
 
 				@Override
-				public void onPut(String data) {
+				public void onPut(byte[] data) {
 					List<Callable<Object>> callbacks = m_state.getCallbacks(action);
 
 					try {
@@ -179,7 +179,7 @@ public class MultiBindingThingServer implements ThingServer {
 				}
 
 				@Override
-				public String onPost(String data) {
+				public byte[] onPost(byte[] data) {
 
 					List<Callable<Object>> callbacks = m_state.getCallbacks(action);
 
@@ -190,10 +190,10 @@ public class MultiBindingThingServer implements ThingServer {
 						/*
 					 	 * How do I return a 500?
 					     */
-						return "Error";
+						return "Error".getBytes();
 					}
 
-					return "OK";
+					return "OK".getBytes();
 				}
 			});
 		}

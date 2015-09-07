@@ -3,23 +3,20 @@ package de.webthing.binding;
 public class AbstractRESTListener implements RESTListener {
 
 	@Override
-	public String onGet() {
+	public byte[] onGet() {
 		throw new UnsupportedOperationException();
 	}
 
-	
 	@Override
-	public void onPut(String data) {
+	public void onPut(byte[] data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException {
 		throw new UnsupportedOperationException();
 	}
 
-	
 	@Override
-	public String onPost(String data) {
+	public byte[] onPost(byte[] data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException {
 		throw new UnsupportedOperationException();
 	}
 
-	
 	@Override
 	public void onDelete() {
 		throw new UnsupportedOperationException();

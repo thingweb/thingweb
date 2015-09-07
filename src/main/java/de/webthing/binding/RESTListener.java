@@ -3,14 +3,13 @@ package de.webthing.binding;
 
 public interface RESTListener {
 
-	String onGet();
+	byte[] onGet() throws UnsupportedOperationException, RuntimeException;
+
+	void onPut(byte[] data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
 	
 	
-	void onPut(String data);
+	byte[] onPost(byte[] data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
 	
 	
-	String onPost(String data);
-	
-	
-	void onDelete();
+	void onDelete() throws UnsupportedOperationException,  RuntimeException;
 }

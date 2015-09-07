@@ -35,22 +35,22 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
             return new Response(Response.Status.NOT_FOUND,MIME_PLAINTEXT,"Resource not found");
         }
 
-        String result = null;
+        byte[] result = null;
         
         //get result
         switch (session.getMethod()) {
             case GET:
                  result = listener.onGet();
-                return new Response(result);
+                return new Response(new String(result));
             case PUT:
-                listener.onPut(getPayload(session));
-                return new Response(result);
+                listener.onPut(getPayload(session).getBytes());
+                return new Response(null);
             case POST:
-                result = listener.onPost(getPayload(session));
-                return new Response(result);
+                result = listener.onPost(getPayload(session).getBytes());
+                return new Response(new String(result));
             case DELETE:
                 listener.onDelete();
-                return new Response(result);
+                return new Response(null);
             default:
                 return new Response(Response.Status.METHOD_NOT_ALLOWED,MIME_PLAINTEXT,"Method not allowed");
         }

@@ -50,7 +50,7 @@ public class CoapBinding implements Binding {
 					@Override
 					public void handleGET(CoapExchange exchange) {
 						try {
-							String response = restListener.onGet();
+							byte[] response = restListener.onGet();
 							
 							exchange.respond(ResponseCode.CONTENT, response, TEXT_PLAIN);
 						}
@@ -62,7 +62,7 @@ public class CoapBinding implements Binding {
 					@Override
 					public void handlePUT(CoapExchange exchange) {
 						try {
-							restListener.onPut(exchange.getRequestText());
+							restListener.onPut(exchange.getRequestText().getBytes());
 							
 							exchange.respond(ResponseCode.CHANGED);
 						}
