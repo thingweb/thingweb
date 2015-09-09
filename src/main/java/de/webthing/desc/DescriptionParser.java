@@ -31,6 +31,7 @@ public class DescriptionParser {
         ThingDescriptionBuilder tdb = ThingDescription.getBuilder();
 
         //TODO Magic happens here
+        
 
         return tdb.build();
     }
