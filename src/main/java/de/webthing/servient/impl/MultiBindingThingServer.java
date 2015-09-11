@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.logging.Logger;
 
 import de.webthing.binding.AbstractRESTListener;
 import de.webthing.binding.ResourceBuilder;
@@ -20,6 +21,9 @@ import de.webthing.thing.Thing;
  * bindings simultaneously.
  */
 public class MultiBindingThingServer implements ThingServer {
+	
+	/** The logger. */
+	private final static Logger LOGGER = Logger.getLogger(MultiBindingThingServer.class.getCanonicalName());
 	
 	public MultiBindingThingServer(Thing thingModel, 
 			ResourceBuilder ... bindings) {
@@ -137,7 +141,16 @@ public class MultiBindingThingServer implements ThingServer {
 						throw new UnsupportedOperationException();
 					}
 					
-					return (byte[]) readProperty(property);
+					Object o = readProperty(property);
+					if(o instanceof byte[]) {
+						return ((byte[])o);
+					} else if (o instanceof String) {
+						return ((String) o).getBytes();
+					} else {
+						// TODO how to best inform?
+						LOGGER.warning("property " + property + " does not return value of type byte[]");
+						return new byte[0];
+					}
 				}
 
 				@Override
