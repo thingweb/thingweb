@@ -47,7 +47,7 @@
       "@id": "td:stability",
       "@type": "xsd:integer"
     },
-    "writeable": {
+    "writable": {
       "@id": "td:writeable",
       "@type": "xsd:boolean"
     },

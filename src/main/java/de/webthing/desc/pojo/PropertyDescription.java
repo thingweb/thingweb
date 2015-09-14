@@ -14,10 +14,10 @@ public class PropertyDescription extends InteractionDescription {
     private String outputType;
     
     @JsonCreator
-    public PropertyDescription(@JsonProperty("name") String name, @JsonProperty("writable") boolean writable, @JsonProperty("outputData") String outputType) {
+    public PropertyDescription(@JsonProperty("name") String name, @JsonProperty("writable") Boolean writable, @JsonProperty("outputData") String outputType) {
 	this.name = name;
 	this.writable = writable;
 	this.outputType = outputType;
     }
-    
+
 }

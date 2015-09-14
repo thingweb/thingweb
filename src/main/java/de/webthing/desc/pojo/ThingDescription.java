@@ -19,8 +19,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.webthing.desc.ThingDescriptionBuilder;
-
 /**
  * Created by Johannes on 02.09.2015.
  */
@@ -37,19 +35,5 @@ public class ThingDescription {
     public ThingDescription(@JsonProperty("metadata") Metadata metadata, @JsonProperty("interactions") List<InteractionDescription> interactions) {
 	this.metadata = metadata;
 	this.interactions = interactions;
-    }
-
-    public static ThingDescriptionBuilder getBuilder() {
-        return new ThingDescriptionBuilder();
-    }
-    
-    public static void main(String[] args) throws JsonGenerationException, JsonMappingException, IOException {
-	Map<String, Protocol> p = new HashMap<>();
-	p.put("HTTP", new Protocol("http://example.com", 2));
-	List<String> e = new ArrayList<>();
-	e.add("JSON");
-	e.add("XML");
-	Metadata md = new Metadata("test", p, e);
-	new ObjectMapper().convertValue(md, Metadata.class);
     }
 }

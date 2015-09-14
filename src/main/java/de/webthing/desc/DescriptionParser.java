@@ -51,25 +51,9 @@ public class DescriptionParser {
     // default JSON-LD context for TDs
     private static Object context;
 
-    private static String readStream(InputStream is) throws IOException {
-	BufferedReader reader = null;
-	try {
-	    reader = new BufferedReader(new InputStreamReader(is));
-	    StringBuilder sb = new StringBuilder();
-	    int read;
-	    char[] chars = new char[1024];
-	    while ((read = reader.read(chars)) != -1)
-		sb.append(chars, 0, read);
-
-	    return sb.toString();
-	} finally {
-	    if (reader != null)
-		reader.close();
-	}
-    }
-
     @SuppressWarnings("unchecked")
-    // note: the jsonld-java implementation uses java.util.Map to store JSON objects
+    // note: the jsonld-java implementation uses java.util.LinkedHashMap to store JSON objects
+    // see http://wiki.fasterxml.com/JacksonInFiveMinutes
     private static JSONObject compactJson(Object jsonld) throws IOException {
 	if (context == null) {
 	    throw new IOException("Default TD context could not be retrieved");
