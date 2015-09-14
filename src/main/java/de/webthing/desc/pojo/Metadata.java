@@ -33,4 +33,16 @@ public class Metadata {
 	this.protocols = protocols;
     }
     
+    public String getName() {
+	return name;
+    }
+    
+    public Map<String, Protocol> getProtocols() {
+	return protocols;
+    }
+    
+    public List<String> getEncodings() {
+	return encodings;
+    }
+    
 }

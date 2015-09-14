@@ -12,5 +12,9 @@ public abstract class InteractionDescription {
     
     @JsonProperty
     protected String name;
+    
+    public String getName() {
+	return name;
+    }
 
 }

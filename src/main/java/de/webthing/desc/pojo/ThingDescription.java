@@ -36,4 +36,13 @@ public class ThingDescription {
 	this.metadata = metadata;
 	this.interactions = interactions;
     }
+    
+    public Metadata getMetadata() {
+	return metadata;
+    }
+    
+    public List<InteractionDescription> getInteractions() {
+	return interactions;
+    }
+    
 }

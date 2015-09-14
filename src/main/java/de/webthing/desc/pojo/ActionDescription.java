@@ -20,4 +20,12 @@ public class ActionDescription extends InteractionDescription {
 	this.inputType = inputType;
     }
 
+    public String getInputType() {
+	return inputType;
+    }
+    
+    public String getOutputType() {
+	return outputType;
+    }
+    
 }

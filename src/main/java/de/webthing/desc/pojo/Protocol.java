@@ -19,4 +19,12 @@ public final class Protocol {
 	this.priority = priority;
     }
     
+    public String getUri() {
+	return uri;
+    }
+    
+    public Integer getPriority() {
+	return priority;
+    }
+    
 }
