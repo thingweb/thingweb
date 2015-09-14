@@ -1,11 +1,8 @@
 {
-  "@context": {
-    "@vocab": "https://w3c.github.io/wot/w3c-wot-td-context.jsonld",
-	  "xsd": "http://www.w3.org/2001/XMLSchema#"
-  },
+  "@context": "http://w3c.github.io/wot/w3c-wot-td-context.jsonld",
   "metadata": {
     "name": "MyLED",
-    "protocols" : [
+    "protocols" : {
       "CoAP" : {
         "uri" : "coap://www.example.com:5683/ledlamp",
         "priority" : 1
@@ -14,7 +11,7 @@
         "uri" : "http://www.example.com:80/ledlamp",
         "priority" : 2
       }
-	  ],
+	  },
     "encodings": [
       "JSON"
     ]
@@ -25,8 +22,7 @@
       "name": "colorTemperature",
       "outputData": "xsd:unsignedShort",
       "writable": true
-    },
-    {
+    }, {
       "@type": "Property",
       "name": "rgbValueRed",
       "outputData": "xsd:unsignedByte",
@@ -42,7 +38,7 @@
       "outputData": "xsd:unsignedByte",
       "writable": false
     }, {
-      "@type": "Property",
+      "@type": "Action",
       "name": "ledOnOff",
       "inputData": "xsd:boolean",
       "outputData": ""
@@ -56,11 +52,6 @@
       "name": "fadeOut",
       "inputData": "xsd:unsignedByte",
       "outputData": ""
-    },
-    {
-      "@type": "Event",
-      "outputData": "xsd:unsignedShort",
-      "name": "colorTemperatureChanged"
     }
   ]
 }
