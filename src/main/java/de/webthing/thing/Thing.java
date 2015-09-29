@@ -4,6 +4,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import de.webthing.desc.pojo.ActionDescription;
+import de.webthing.desc.pojo.InteractionDescription;
+import de.webthing.desc.pojo.PropertyDescription;
+import de.webthing.desc.pojo.ThingDescription;
 import de.webthing.servient.ThingClient;
 import de.webthing.servient.ThingServer;
 
@@ -50,9 +54,31 @@ public final class Thing {
 		m_name = name;
 	}
 	
+	public Thing(ThingDescription desc) {
+	    this(desc.getMetadata().getName());
+	    m_td = desc;
+	    // TODO check support for HTTP and/or CoAP
+	    for (InteractionDescription i : desc.getInteractions()) {
+		if (i instanceof PropertyDescription) {
+		    Property.Builder b = Property.getBuilder(i.getName());
+		    b.setReadable(true);
+		    b.setWriteable(((PropertyDescription) i).isWritable());
+		    addProperty(b.build());
+		} else if (i instanceof ActionDescription) {
+		    Action.Builder b = Action.getBuilder(i.getName());
+		    // TODO case with several inputs?
+		    b.addParam("parm", ((ActionDescription) i).getInputType());
+		    addAction(b.build());
+		}
+	    }
+	}
 
 	public String getName() {
 		return m_name;
+	}
+	
+	public ThingDescription getThingDescription() {
+	    return m_td;
 	}
 	
 	
@@ -171,6 +197,9 @@ public final class Thing {
 	
 	
 	private final String m_name;
+	
+	
+	private ThingDescription m_td;
 	
 	
 	private final Collection<Property> m_properties = 

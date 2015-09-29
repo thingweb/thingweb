@@ -10,7 +10,7 @@ public class Property {
 	 * Thing relies on this class to be immutable for synchronization purposes!
 	 */
 
-	public Property(String name, boolean isReadable, boolean isWriteable) {
+	protected Property(String name, boolean isReadable, boolean isWriteable) {
 		if (null == name) {
 			throw new IllegalArgumentException("name must not be null");
 		}
