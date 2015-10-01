@@ -7,6 +7,7 @@ import de.webthing.things.WotGreeter;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 
 
 /**
@@ -30,6 +31,9 @@ public class Launcher {
 
 		Timer tiktak = new Timer(true);
 		tiktak.schedule(valueChanger, 500,500);
+
+		server.onInvoke("selftest", () -> {	System.out.println("I am selftesting..."); return true;  });
+
 
 		ServientBuilder.start();
 		
