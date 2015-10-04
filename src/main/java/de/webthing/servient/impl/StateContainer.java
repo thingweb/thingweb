@@ -64,7 +64,7 @@ public class StateContainer {
 		if (null == callback) {
 			throw new IllegalArgumentException("callback must not be null");
 		}
-		if (!m_values.containsKey(action)) {
+		if (!m_callbacks.containsKey(action)) {
 			throw new IllegalArgumentException("Unknown action: " + action);
 		}
 

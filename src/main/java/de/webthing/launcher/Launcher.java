@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 
 
 /**
@@ -23,8 +24,11 @@ public class Launcher {
 		String ledTD = "jsonld" + File.separator + "led.jsonld";
 		
 		Thing led = new Thing(DescriptionParser.fromFile(ledTD));
-		
-		ServientBuilder.newThingServer(led);
+
+		ThingServer server = ServientBuilder.newThingServer(led);
+
+		server.onInvoke("fadeIn", () -> {	System.out.println("I am fading in..."); return true;  });
+
 
 		ServientBuilder.start();
 		
