@@ -1,17 +1,13 @@
 package de.webthing.binding.http;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.webthing.binding.GrantAllTokenVerifier;
+import de.webthing.binding.auth.GrantAllTokenVerifier;
 import de.webthing.binding.RESTListener;
 import de.webthing.binding.ResourceBuilder;
-import de.webthing.binding.TokenVerifier;
+import de.webthing.binding.auth.TokenVerifier;
 import fi.iki.elonen.NanoHTTPD;
 
 
