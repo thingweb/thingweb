@@ -71,7 +71,29 @@ public class CoapBinding implements Binding {
 						}
 					}
 
-					//TODO add POST
+					@Override
+					public void handlePOST(CoapExchange exchange) {
+						try {
+							byte[] resp = restListener.onPost(exchange.getRequestText().getBytes());
+							//TODO: add Location Option to response
+							exchange.respond(ResponseCode.CREATED, resp, TEXT_PLAIN);
+						}
+						catch (UnsupportedOperationException e) {
+							exchange.respond(ResponseCode.METHOD_NOT_ALLOWED);
+						}
+					}
+
+					@Override
+					public void handleDELETE(CoapExchange exchange) {
+						try {
+							restListener.onDelete();
+
+							exchange.respond(ResponseCode.DELETED);
+						}
+						catch (UnsupportedOperationException e) {
+							exchange.respond(ResponseCode.METHOD_NOT_ALLOWED);
+						}
+					}
 				});
 			}
 		};
