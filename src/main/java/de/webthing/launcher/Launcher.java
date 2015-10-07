@@ -27,7 +27,8 @@ public class Launcher {
 
 		ThingServer server = ServientBuilder.newThingServer(led);
 
-		server.onInvoke("fadeIn", () -> {	System.out.println("I am fading in..."); return true;  });
+		server.onInvoke("fadeIn", (secs) -> {	String msg = "I am fading out over " + secs + "  s..."; System.out.println(msg); return msg;  });
+		server.onInvoke("fadeOut", (secs) -> {	String msg = "I am fading out over " + secs + "  s..."; System.out.println(msg); return msg;  });
 
 
 		ServientBuilder.start();

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import de.webthing.binding.AbstractRESTListener;
@@ -104,7 +105,7 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 
 	@Override
-	public void onInvoke(String actionName, Callable<Object> callback) {
+	public void onInvoke(String actionName, Function<Object, Object> callback) {
 		Action action = m_thingModel.getAction(actionName);
 		m_state.addCallback(action,callback);
 	}
@@ -179,11 +180,16 @@ public class MultiBindingThingServer implements ThingServer {
 
 				@Override
 				public void onPut(byte[] data) {
-					List<Callable<Object>> callbacks = m_state.getCallbacks(action);
+					Function<?, ?> handler = m_state.getHandler(action);
 
 					try {
 						System.out.println("invoking " + action.getName());
-						List<Future<Object>> futures = m_executor.invokeAll((Collection<? extends Callable<Object>>) callbacks);
+
+						//TODO parsing and smart cast
+
+						Function<byte[],byte[]> bytehandler = (Function<byte[],byte[]>) handler;
+						bytehandler.apply(data);
+
 					} catch (Exception e) {
 						/*
 					 	 * How do I return a 500?
@@ -194,11 +200,14 @@ public class MultiBindingThingServer implements ThingServer {
 				@Override
 				public byte[] onPost(byte[] data) {
 
-					List<Callable<Object>> callbacks = m_state.getCallbacks(action);
+					Function<?, ?> handler = m_state.getHandler(action);
 
 					try {
 						System.out.println("invoking " + action.getName());
-						List<Future<Object>> futures = m_executor.invokeAll((Collection<? extends Callable<Object>>) callbacks);
+
+						Function<byte[],byte[]> bytehandler = (Function<byte[],byte[]>) handler;
+						bytehandler.apply(data);
+
 					} catch (Exception e) {
 						/*
 					 	 * How do I return a 500?
