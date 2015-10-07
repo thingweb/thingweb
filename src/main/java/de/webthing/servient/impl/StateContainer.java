@@ -60,7 +60,7 @@ public class StateContainer {
 		return m_values.get(property);
 	}
 
-	public void addCallback(Action action, Function<?,?> handler) {
+	public void addHandler(Action action, Function<?, ?> handler) {
 		if (null == action) {
 			throw new IllegalArgumentException("action must not be null");
 		}

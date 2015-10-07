@@ -103,7 +103,7 @@ public class MultiBindingThingServer implements ThingServer {
 	@Override
 	public void onInvoke(String actionName, Function<Object, Object> callback) {
 		Action action = m_thingModel.getAction(actionName);
-		m_state.addCallback(action,callback);
+		m_state.addHandler(action, callback);
 	}
 
 	@Override
@@ -157,7 +157,7 @@ public class MultiBindingThingServer implements ThingServer {
 		setProperty(property, value);
 		
 		for (InteractionListener listener : m_listeners) {
-			listener.onReadProperty(this);
+			listener.onWriteProperty(this);
 		}
 	}
 

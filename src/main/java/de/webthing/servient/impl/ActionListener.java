@@ -51,6 +51,8 @@ class ActionListener extends AbstractRESTListener {
 		try {
 			System.out.println("invoking " + action.getName());
 
+			//TODO parsing and smart cast
+
 			Function<byte[], byte[]> bytehandler = (Function<byte[], byte[]>) handler;
 			bytehandler.apply(data);
 
