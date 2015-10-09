@@ -1,10 +1,8 @@
 package de.webthing.servient.impl;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 import de.webthing.servient.ThingServer;
 import de.webthing.thing.Action;
@@ -12,21 +10,26 @@ import de.webthing.thing.Content;
 import de.webthing.thing.MediaType;
 import de.webthing.thing.Property;
 import de.webthing.thing.Thing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * The StateContainer saves all state belonging to a {@link ThingServer}.
  */
 public class StateContainer {
-	
+
+	protected static final Logger log = LoggerFactory.getLogger(StateContainer.class);
+
 	public StateContainer(Thing thingModel) {
 		for (Property property : thingModel.getProperties()) {
 			m_values.put(property, new Content("".getBytes(), MediaType.TEXT_PLAIN));
 		}
 
 		for (Action action : thingModel.getActions()) {
-			m_callbacks.put(action,new LinkedList<Callable<Object>>());
+			m_handlers.put(action, Void -> {log.info("unhandled action " + action.getName() + " called"); return Void;});
 		}
+
 	}
 	
 
@@ -59,38 +62,37 @@ public class StateContainer {
 		return m_values.get(property);
 	}
 
-	public void addCallback(Action action, Callable<Object> callback) {
+	public void addHandler(Action action, Function<?, ?> handler) {
 		if (null == action) {
 			throw new IllegalArgumentException("action must not be null");
 		}
-		if (null == callback) {
-			throw new IllegalArgumentException("callback must not be null");
+		if (null == handler) {
+			throw new IllegalArgumentException("handler must not be null");
 		}
-		if (!m_callbacks.containsKey(action)) {
+		if (!m_handlers.containsKey(action)) {
 			throw new IllegalArgumentException("Unknown action: " + action);
 		}
 
-		List<Callable<Object>> cblist = m_callbacks.get(action);
-		if(cblist == null) {
-			//paranoia mode: this should never happen
-			cblist = new LinkedList<>();
-			m_callbacks.put(action,cblist);
+		Function<?, ?> oldhandler = m_handlers.get(action);
+		if(oldhandler != null) {
+			log.info("replacing existing handler.");
 		}
-		cblist.add(callback);
+		m_handlers.put(action, handler);
 	}
 
-	public List<Callable<Object>> getCallbacks(Action action) {
+	public Function<?, ?> getHandler(Action action) {
 		if (null == action) {
 			throw new IllegalArgumentException("action must not be null");
 		}
-		if (!m_callbacks.containsKey(action)) {
+		if (!m_handlers.containsKey(action)) {
 			throw new IllegalArgumentException("Unknown action: " + action);
 		}
 
-		return m_callbacks.get(action);
+		return m_handlers.get(action);
 	}
 	
 	
 	private final Map<Property,Content> m_values = new HashMap<>();
-	private final Map<Action, List<Callable<Object>>> m_callbacks = new HashMap<>();
+//	private final Map<Action, List<Callable<Object>>> m_callbacks = new HashMap<>();
+	private final Map<Action, Function<?, ?>> m_handlers = new HashMap<>();
 }

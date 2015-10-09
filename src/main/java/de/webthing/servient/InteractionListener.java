@@ -1,6 +1,8 @@
 package de.webthing.servient;
 
 
+import de.webthing.servient.impl.MultiBindingThingServer;
+
 /**
  * Called for each interaction with a ThingServer, e.g., reading or writing of 
  * values, invocation of actions, etc.
@@ -24,4 +26,6 @@ public interface InteractionListener {
 	 * @param thingServer the server affected by the interaction, never null
 	 */
 	void onReadProperty(ThingServer thingServer);
+
+	void onWriteProperty(ThingServer thingServer);
 }

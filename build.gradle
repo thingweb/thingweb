@@ -23,6 +23,7 @@ dependencies {
     compile 'org.eclipse.californium:californium-core:1.0.0-M3'
     compile 'org.json:json:20141113'
     compile 'com.github.jsonld-java:jsonld-java:0.6.0'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
 
     runtime files("lib/jsonld-context.jar")
 

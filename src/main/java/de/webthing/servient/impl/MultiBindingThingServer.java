@@ -2,17 +2,15 @@ package de.webthing.servient.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
-import de.webthing.binding.AbstractRESTListener;
 import de.webthing.binding.ResourceBuilder;
 import de.webthing.servient.Defines;
 import de.webthing.servient.InteractionListener;
 import de.webthing.servient.ThingServer;
 import de.webthing.thing.Action;
-import de.webthing.thing.MediaType;
 import de.webthing.thing.Property;
 import de.webthing.thing.Content;
 import de.webthing.thing.Thing;
@@ -25,7 +23,7 @@ import de.webthing.thing.Thing;
 public class MultiBindingThingServer implements ThingServer {
 	
 	/** The logger. */
-	private final static Logger LOGGER = Logger.getLogger(MultiBindingThingServer.class.getCanonicalName());
+	private final static Logger log = Logger.getLogger(MultiBindingThingServer.class.getCanonicalName());
 	
 	public MultiBindingThingServer(Thing thingModel, 
 			ResourceBuilder ... bindings) {
@@ -40,8 +38,6 @@ public class MultiBindingThingServer implements ThingServer {
 		
 		m_thingModel = thingModel;
 		m_state = new StateContainer(m_thingModel);
-
-		m_executor = Executors.newCachedThreadPool();
 
 		createBindings();
 
@@ -106,9 +102,9 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 
 	@Override
-	public void onInvoke(String actionName, Callable<Object> callback) {
+	public void onInvoke(String actionName, Function<Object, Object> callback) {
 		Action action = m_thingModel.getAction(actionName);
-		m_state.addCallback(action,callback);
+		m_state.addHandler(action, callback);
 	}
 
 	@Override
@@ -129,80 +125,19 @@ public class MultiBindingThingServer implements ThingServer {
 		for (Property property : m_thingModel.getProperties()) {
 			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
 					Defines.REL_PROPERTY_URL + property.getName();
-			
-			resources.newResource(url, new AbstractRESTListener() {
-				@Override
-				public Content onGet() {
-					if (!property.isReadable()) {
-						throw new UnsupportedOperationException();
-					}
-					
-					Content cont = readProperty(property);
-					return cont;
-				}
-
-				@Override
-				public void onPut(Content data) {
-					if (!property.isWriteable()) {
-						throw new UnsupportedOperationException();
-					}
-					
-					writeProperty(property, data);
-				}
-			});
+			resources.newResource(url, new PropertyListener(this, property));
 		}
 
 		for (Action action : m_thingModel.getActions()) {
 			//TODO optimize by preconstructing strings and using format
 			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
 					Defines.REL_ACTION_URL + action.getName();
-
-			resources.newResource(url, new AbstractRESTListener() {
-
-				@Override
-				public Content onGet() {
-					Content r = new Content(("Action: " + action.getName()).getBytes(), MediaType.TEXT_PLAIN);
-					return r;
-				}
-
-
-				@Override
-				public void onPut(Content data) {
-					List<Callable<Object>> callbacks = m_state.getCallbacks(action);
-
-					try {
-						System.out.println("invoking " + action.getName());
-						List<Future<Object>> futures = m_executor.invokeAll((Collection<? extends Callable<Object>>) callbacks);
-					} catch (Exception e) {
-						/*
-					 	 * How do I return a 500?
-					     */
-					}
-				}
-
-				@Override
-				public Content onPost(Content data) {
-					
-					List<Callable<Object>> callbacks = m_state.getCallbacks(action);
-
-					try {
-						System.out.println("invoking " + action.getName());
-						List<Future<Object>> futures = m_executor.invokeAll((Collection<? extends Callable<Object>>) callbacks);
-					} catch (Exception e) {
-						/*
-					 	 * How do I return a 500?
-					     */
-						return new Content("Error".getBytes(), MediaType.TEXT_PLAIN);
-					}
-					
-					return new Content("OK".getBytes(), MediaType.TEXT_PLAIN);
-				}
-			});
+			resources.newResource(url, new ActionListener(m_state, action));
 		}
 	}
 	
 	
-	private Content readProperty(Property property) {
+	Content readProperty(Property property) {
 		for (InteractionListener listener : m_listeners) {
 			listener.onReadProperty(this);
 		}
@@ -211,17 +146,14 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 	
 	
-	private void writeProperty(Property property, Content value) {
+	void writeProperty(Property property, Content value) {
 		setProperty(property, value);
 		
 		for (InteractionListener listener : m_listeners) {
-			listener.onReadProperty(this);
+			listener.onWriteProperty(this);
 		}
 	}
 
-	
-	
-	
 	/**
 	 * Sync object for {@link #m_stateSync}.
 	 */
@@ -237,7 +169,6 @@ public class MultiBindingThingServer implements ThingServer {
 	
 	private final Collection<ResourceBuilder> m_bindings = new ArrayList<>(); 
 
-	private final ExecutorService m_executor;
-
 	private final Thing m_thingModel;
+
 }

@@ -4,6 +4,7 @@ import de.webthing.thing.Content;
 import de.webthing.thing.Property;
 
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 
 /**
@@ -45,7 +46,7 @@ public interface ThingInterface {
 	Content getProperty(String propertyName);
 
 	//TODO decide whether to announce unsuccessful invocation by exception or retval
-	void onInvoke(String actionName, Callable<Object> callback);
+	void onInvoke(String actionName, Function<Object, Object> callback);
 
 
 }
