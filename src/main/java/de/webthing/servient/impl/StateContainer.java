@@ -8,6 +8,8 @@ import java.util.concurrent.Callable;
 
 import de.webthing.servient.ThingServer;
 import de.webthing.thing.Action;
+import de.webthing.thing.Content;
+import de.webthing.thing.MediaType;
 import de.webthing.thing.Property;
 import de.webthing.thing.Thing;
 
@@ -19,7 +21,7 @@ public class StateContainer {
 	
 	public StateContainer(Thing thingModel) {
 		for (Property property : thingModel.getProperties()) {
-			m_values.put(property, "");
+			m_values.put(property, new Content("".getBytes(), MediaType.TEXT_PLAIN));
 		}
 
 		for (Action action : thingModel.getActions()) {
@@ -28,7 +30,7 @@ public class StateContainer {
 	}
 	
 
-	public void setProperty(Property property, Object value) {
+	public void setProperty(Property property, Content value) {
 		if (null == property) {
 			throw new IllegalArgumentException("property must not be null");
 		}
@@ -46,7 +48,7 @@ public class StateContainer {
 	}
 	
 	
-	public Object getProperty(Property property) {
+	public Content getProperty(Property property) {
 		if (null == property) {
 			throw new IllegalArgumentException("property must not be null");
 		}
@@ -89,6 +91,6 @@ public class StateContainer {
 	}
 	
 	
-	private final Map<Property,Object> m_values = new HashMap<>();
+	private final Map<Property,Content> m_values = new HashMap<>();
 	private final Map<Action, List<Callable<Object>>> m_callbacks = new HashMap<>();
 }

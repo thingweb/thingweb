@@ -12,7 +12,9 @@ import de.webthing.servient.Defines;
 import de.webthing.servient.InteractionListener;
 import de.webthing.servient.ThingServer;
 import de.webthing.thing.Action;
+import de.webthing.thing.MediaType;
 import de.webthing.thing.Property;
+import de.webthing.thing.Content;
 import de.webthing.thing.Thing;
 
 
@@ -47,7 +49,7 @@ public class MultiBindingThingServer implements ThingServer {
 	
 
 	@Override
-	public void setProperty(Property property, Object value) {
+	public void setProperty(Property property, Content value) {
 		if (null == property) {
 			throw new IllegalArgumentException("property must not be null");
 		}
@@ -63,7 +65,7 @@ public class MultiBindingThingServer implements ThingServer {
 
 
 	@Override
-	public void setProperty(String propertyName, Object value) {
+	public void setProperty(String propertyName, Content value) {
 		Property prop = m_thingModel.getProperty(propertyName);
 		
 		if (null == prop) {
@@ -76,7 +78,7 @@ public class MultiBindingThingServer implements ThingServer {
 	
 	
 	@Override
-	public Object getProperty(Property property) {
+	public Content getProperty(Property property) {
 		if (null == property) {
 			throw new IllegalArgumentException("property must not be null");
 		}
@@ -92,7 +94,7 @@ public class MultiBindingThingServer implements ThingServer {
 
 
 	@Override
-	public Object getProperty(String propertyName) {
+	public Content getProperty(String propertyName) {
 		Property prop = m_thingModel.getProperty(propertyName);
 		
 		if (null == prop) {
@@ -123,38 +125,24 @@ public class MultiBindingThingServer implements ThingServer {
 
 		
 	private void createBinding(ResourceBuilder resources) {
-		/*
-		 * FIXME: add support for mime types.
-		 * The current implementation returns always text/plain via a String
-		 * return value from RESTListener. Content type based serialization
-		 * should be wedged in between here.
-		 */
-		
+		// System.out.println("createBinding " + resources);
 		for (Property property : m_thingModel.getProperties()) {
 			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
 					Defines.REL_PROPERTY_URL + property.getName();
 			
 			resources.newResource(url, new AbstractRESTListener() {
 				@Override
-				public byte[] onGet() {
+				public Content onGet() {
 					if (!property.isReadable()) {
 						throw new UnsupportedOperationException();
 					}
 					
-					Object o = readProperty(property);
-					if(o instanceof byte[]) {
-						return ((byte[])o);
-					} else if (o instanceof String) {
-						return ((String) o).getBytes();
-					} else {
-						// TODO how to best inform?
-						LOGGER.warning("property " + property + " does not return value of type byte[]");
-						return new byte[0];
-					}
+					Content cont = readProperty(property);
+					return cont;
 				}
 
 				@Override
-				public void onPut(byte[] data) {
+				public void onPut(Content data) {
 					if (!property.isWriteable()) {
 						throw new UnsupportedOperationException();
 					}
@@ -172,13 +160,14 @@ public class MultiBindingThingServer implements ThingServer {
 			resources.newResource(url, new AbstractRESTListener() {
 
 				@Override
-				public byte[] onGet() {
-					return ("Action: "  + action.getName()).getBytes();
+				public Content onGet() {
+					Content r = new Content(("Action: " + action.getName()).getBytes(), MediaType.TEXT_PLAIN);
+					return r;
 				}
 
 
 				@Override
-				public void onPut(byte[] data) {
+				public void onPut(Content data) {
 					List<Callable<Object>> callbacks = m_state.getCallbacks(action);
 
 					try {
@@ -192,8 +181,8 @@ public class MultiBindingThingServer implements ThingServer {
 				}
 
 				@Override
-				public byte[] onPost(byte[] data) {
-
+				public Content onPost(Content data) {
+					
 					List<Callable<Object>> callbacks = m_state.getCallbacks(action);
 
 					try {
@@ -203,17 +192,17 @@ public class MultiBindingThingServer implements ThingServer {
 						/*
 					 	 * How do I return a 500?
 					     */
-						return "Error".getBytes();
+						return new Content("Error".getBytes(), MediaType.TEXT_PLAIN);
 					}
-
-					return "OK".getBytes();
+					
+					return new Content("OK".getBytes(), MediaType.TEXT_PLAIN);
 				}
 			});
 		}
 	}
 	
 	
-	private Object readProperty(Property property) {
+	private Content readProperty(Property property) {
 		for (InteractionListener listener : m_listeners) {
 			listener.onReadProperty(this);
 		}
@@ -222,7 +211,7 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 	
 	
-	private void writeProperty(Property property, Object value) {
+	private void writeProperty(Property property, Content value) {
 		setProperty(property, value);
 		
 		for (InteractionListener listener : m_listeners) {

@@ -1,15 +1,14 @@
 package de.webthing.binding;
 
+import de.webthing.thing.Content;
 
 public interface RESTListener {
 
-	byte[] onGet() throws UnsupportedOperationException, RuntimeException;
+	Content onGet() throws UnsupportedOperationException, RuntimeException;
 
-	void onPut(byte[] data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
+	void onPut(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
 	
-	
-	byte[] onPost(byte[] data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
-	
+	Content onPost(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
 	
 	void onDelete() throws UnsupportedOperationException,  RuntimeException;
 }

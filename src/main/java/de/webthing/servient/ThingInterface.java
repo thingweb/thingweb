@@ -1,5 +1,6 @@
 package de.webthing.servient;
 
+import de.webthing.thing.Content;
 import de.webthing.thing.Property;
 
 import java.util.concurrent.Callable;
@@ -19,7 +20,7 @@ public interface ThingInterface {
 	 * @param property the property, must not be null
 	 * @param value the new value must not be null
 	 */
-	void setProperty(Property property, Object value);
+	void setProperty(Property property, Content value);
 	
 	
 	/**
@@ -35,13 +36,13 @@ public interface ThingInterface {
 	 * @param propertyName name of the property to set, must not be null
 	 * @param value the new value must not be null
 	 */
-	void setProperty(String propertyName, Object value);
+	void setProperty(String propertyName, Content value);
 	
 	
-	Object getProperty(Property property);
+	Content getProperty(Property property);
 	
 	
-	Object getProperty(String propertyName);
+	Content getProperty(String propertyName);
 
 	//TODO decide whether to announce unsuccessful invocation by exception or retval
 	void onInvoke(String actionName, Callable<Object> callback);
