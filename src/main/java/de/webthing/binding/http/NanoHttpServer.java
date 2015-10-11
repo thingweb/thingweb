@@ -1,26 +1,22 @@
 package de.webthing.binding.http;
 
+import de.webthing.binding.RESTListener;
+import de.webthing.binding.ResourceBuilder;
+import de.webthing.thing.Content;
+import de.webthing.thing.MediaType;
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoHTTPD.Response.Status;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import de.webthing.binding.auth.GrantAllTokenVerifier;
-import de.webthing.binding.RESTListener;
-import de.webthing.binding.ResourceBuilder;
-import de.webthing.binding.auth.TokenVerifier;
-import de.webthing.thing.Content;
-import de.webthing.thing.MediaType;
-import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.NanoHTTPD.Response.Status;
-
 
 public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
     private final Map<String,RESTListener> resmap = new HashMap<>();
-    private final TokenVerifier tokenVerifier = new GrantAllTokenVerifier();
-
 
 	public NanoHttpServer() throws IOException {
         super(8080);
@@ -71,14 +67,16 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 	}
 
     private boolean authorize(IHTTPSession session) {
-        String jwt = null;
-        String auth = session.getHeaders().get("Authorization");
-        if(auth != null) {
-            if(auth.startsWith("Bearer ")) {
-                jwt = auth.substring("Bearer ".length());
-            }
-        }
-        return tokenVerifier.isAuthorized(jwt);
+		//to be replaced once tokenverifier is in place
+		return true;
+
+		//String jwt = null;
+        //String auth = session.getHeaders().get("Authorization");
+        //if(auth != null) {
+        //    if(auth.startsWith("Bearer ")) {
+        //        jwt = auth.substring("Bearer ".length());
+        //    }
+        //return tokenVerifier.isAuthorized(jwt);
     }
 
     private static Content getPayload(IHTTPSession session) throws IOException {

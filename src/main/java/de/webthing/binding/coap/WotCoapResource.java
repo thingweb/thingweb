@@ -1,51 +1,25 @@
 package de.webthing.binding.coap;
 
 import de.webthing.binding.RESTListener;
-import de.webthing.binding.auth.TokenVerifier;
-import de.webthing.thing.MediaType;
 import de.webthing.thing.Content;
-
+import de.webthing.thing.MediaType;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
-import org.eclipse.californium.core.coap.Option;
-import org.eclipse.californium.core.coap.OptionSet;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.coap.OptionSet;
 import org.eclipse.californium.core.server.resources.CoapExchange;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by Johannes on 05.10.2015.
  */
 public class WotCoapResource extends CoapResource {
     private final RESTListener m_restListener;
-    private TokenVerifier m_tokenVerifier;
 
-    public WotCoapResource(String name, RESTListener restListener, TokenVerifier tokenVerifier) {
+    public WotCoapResource(String name, RESTListener restListener) {
         super(name);
         this.m_restListener = restListener;
-        this.m_tokenVerifier = tokenVerifier;
     }
 
-    //TODO set this right
-    private static int TOKEN_BEARER_OPTION_NUMBER = 42;
-
-    private boolean authorize(CoapExchange exchange) {
-        String jwt = null;
-        List<Option> options = exchange.getRequestOptions().asSortedList();
-        int idx = Collections.binarySearch(options, new Option(TOKEN_BEARER_OPTION_NUMBER));
-
-        if (idx >= 0) {
-            jwt = options.get(idx).getStringValue();
-        } else {
-            //no token, jwt == null
-        }
-
-        return m_tokenVerifier.isAuthorized(jwt);
-    }
-    
-    
     private static int getCoapContentFormat(MediaType mediaType) {
     	int contentFormat;
     	switch(mediaType) {
@@ -70,10 +44,6 @@ public class WotCoapResource extends CoapResource {
     
     @Override
     public void handleGET(CoapExchange exchange) {
-        if (!authorize(exchange)) {
-            exchange.respond(CoAP.ResponseCode.UNAUTHORIZED);
-            return;
-        }
         try {
             Content response = m_restListener.onGet();
         	int contentFormat = getCoapContentFormat(response.getMediaType());
@@ -88,10 +58,6 @@ public class WotCoapResource extends CoapResource {
 
     @Override
     public void handlePUT(CoapExchange exchange) {
-        if (!authorize(exchange)) {
-            exchange.respond(CoAP.ResponseCode.UNAUTHORIZED);
-            return;
-        }
         try {
         	// e.g., "Content-Format":"application/exi", "Accept":"application/xml"
         	OptionSet os = exchange.getRequestOptions();
@@ -117,10 +83,6 @@ public class WotCoapResource extends CoapResource {
 
     @Override
     public void handlePOST(CoapExchange exchange) {
-        if (!authorize(exchange)) {
-            exchange.respond(CoAP.ResponseCode.UNAUTHORIZED);
-            return;
-        }
         try {
         	byte[] reqPayload = exchange.getRequestPayload();
         	System.out.println("RequestOptions: " + exchange.getRequestOptions());
@@ -144,10 +106,6 @@ public class WotCoapResource extends CoapResource {
 
     @Override
     public void handleDELETE(CoapExchange exchange) {
-        if (!authorize(exchange)) {
-            exchange.respond(CoAP.ResponseCode.UNAUTHORIZED);
-            return;
-        }
         try {
             m_restListener.onDelete();
             exchange.respond(CoAP.ResponseCode.DELETED);
