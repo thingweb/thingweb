@@ -7,6 +7,10 @@ Thingweb is an open source implementation of the WoT servient model of W3C's int
 * we are using [Gradle](https://gradle.org/) as build tool
 * the application is built using the [Gradle Application Plugin](https://docs.gradle.org/current/userguide/application_plugin.html)
 
+There is a also build setup on [drone.io](https://drone.io/bitbucket.org/ascholz/thingweb/latest). 
+[![Build Status](https://drone.io/bitbucket.org/ascholz/thingweb/status.png)](https://drone.io/bitbucket.org/ascholz/thingweb/latest)
+
+
 ### Contribution guidelines ###
 
 * we are happy for contributions
