@@ -2,6 +2,7 @@ package de.webthing.servient;
 
 
 import de.webthing.servient.impl.MultiBindingThingServer;
+import de.webthing.thing.Content;
 
 /**
  * Called for each interaction with a ThingServer, e.g., reading or writing of 
@@ -25,7 +26,7 @@ public interface InteractionListener {
 	 * 
 	 * @param thingServer the server affected by the interaction, never null
 	 */
-	void onReadProperty(ThingServer thingServer);
+	void onReadProperty(String propertyName, ThingServer thingServer);
 
-	void onWriteProperty(ThingServer thingServer);
+	void onWriteProperty(String propertyName, Content newValue, ThingServer thingServer);
 }

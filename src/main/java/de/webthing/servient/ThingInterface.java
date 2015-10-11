@@ -45,8 +45,5 @@ public interface ThingInterface {
 	
 	Content getProperty(String propertyName);
 
-	//TODO decide whether to announce unsuccessful invocation by exception or retval
-	void onInvoke(String actionName, Function<Object, Object> callback);
-
 
 }

@@ -2,7 +2,10 @@ package de.webthing.servient.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -102,6 +105,23 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 
 	@Override
+	public void onUpdate(String propertyName, Consumer<Content> callback) {
+		this.addInteractionListener(new InteractionListener() {
+			@Override
+			public void onReadProperty(String propertyName, ThingServer thingServer) {
+
+			}
+
+			@Override
+			public void onWriteProperty(String changedPropertyName, Content newValue, ThingServer thingServer) {
+				if(changedPropertyName.equals(propertyName)) {
+					callback.accept(newValue);
+				}
+			}
+		});
+	}
+
+	@Override
 	public void onInvoke(String actionName, Function<Object, Object> callback) {
 		Action action = m_thingModel.getAction(actionName);
 		m_state.addHandler(action, callback);
@@ -139,7 +159,7 @@ public class MultiBindingThingServer implements ThingServer {
 	
 	Content readProperty(Property property) {
 		for (InteractionListener listener : m_listeners) {
-			listener.onReadProperty(this);
+			listener.onReadProperty(property.getName(), this);
 		}
 		
 		return getProperty(property);
@@ -150,7 +170,7 @@ public class MultiBindingThingServer implements ThingServer {
 		setProperty(property, value);
 		
 		for (InteractionListener listener : m_listeners) {
-			listener.onWriteProperty(this);
+			listener.onWriteProperty(property.getName(), value, this);
 		}
 	}
 
@@ -165,8 +185,7 @@ public class MultiBindingThingServer implements ThingServer {
 
 	private final Collection<InteractionListener> m_listeners = 
 			new CopyOnWriteArrayList<>();
-	
-	
+
 	private final Collection<ResourceBuilder> m_bindings = new ArrayList<>(); 
 
 	private final Thing m_thingModel;
