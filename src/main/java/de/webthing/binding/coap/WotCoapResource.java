@@ -81,6 +81,8 @@ public class WotCoapResource extends CoapResource {
             
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
+        } catch (Exception e) {
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -107,6 +109,8 @@ public class WotCoapResource extends CoapResource {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
         } catch (IllegalArgumentException e) {
             exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+        } catch (Exception e) {
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
     }
@@ -132,6 +136,8 @@ public class WotCoapResource extends CoapResource {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
         } catch (IllegalArgumentException e) {
             exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+        } catch (Exception e) {
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
     }
@@ -147,6 +153,8 @@ public class WotCoapResource extends CoapResource {
             exchange.respond(CoAP.ResponseCode.DELETED);
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
+        } catch (Exception e) {
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }

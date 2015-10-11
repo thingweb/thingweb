@@ -49,21 +49,12 @@ class ActionListener extends AbstractRESTListener {
 	public Content onPost(Content data) {
 
 		Function<?, ?> handler = m_state.getHandler(action);
+		System.out.println("invoking " + action.getName());
 
-		try {
-			System.out.println("invoking " + action.getName());
+		//TODO parsing and smart cast
 
-			//TODO parsing and smart cast
-
-			Function<Content, Content> bytehandler = (Function<Content, Content>) handler;
-			bytehandler.apply(data);
-
-		} catch (Exception e) {
-/*
-* How do I return a 500?
-*/
-			return new Content("Error".getBytes(), MediaType.TEXT_PLAIN);
-		}
+		Function<Content, Content> bytehandler = (Function<Content, Content>) handler;
+		bytehandler.apply(data);
 
 		return new Content("OK".getBytes(), MediaType.TEXT_PLAIN);
 	}

@@ -17,7 +17,6 @@ public interface ThingServer extends ThingInterface {
 	 */
 	void addInteractionListener(InteractionListener listener);
 
-	//TODO decide whether to announce unsuccessful invocation by exception or retval
 	void onInvoke(String actionName, Function<Object, Object> callback);
 
 	void onUpdate(String propertyName, Consumer<Content> callback);
