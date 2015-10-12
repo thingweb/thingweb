@@ -1,7 +1,6 @@
 package de.webthing.binding.coap;
 
 import de.webthing.binding.Binding;
-import de.webthing.binding.auth.GrantAllTokenVerifier;
 import de.webthing.binding.RESTListener;
 import de.webthing.binding.ResourceBuilder;
 import org.eclipse.californium.core.CoapResource;
@@ -12,12 +11,10 @@ import org.eclipse.californium.core.server.resources.Resource;
 public class CoapBinding implements Binding {
 
 	private CoapServer m_coapServer;
-	private GrantAllTokenVerifier m_tokenVerifier;
 
 	@Override
 	public void initialize() {
 		m_coapServer = new CoapServer();
-		m_tokenVerifier = new GrantAllTokenVerifier();
 	}
 
 	@Override
@@ -43,7 +40,7 @@ public class CoapBinding implements Binding {
                     current = child;
                 }
 
-                current.add(new WotCoapResource(parts[parts.length - 1], restListener, m_tokenVerifier));
+                current.add(new WotCoapResource(parts[parts.length - 1], restListener));
             }
 		};
 	}
