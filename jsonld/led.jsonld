@@ -52,6 +52,10 @@
       "name": "fadeOut",
       "inputData": "xsd:unsignedByte",
       "outputData": ""
+    }, {
+      "@type": "Event",
+      "outputData": "xsd:unsignedShort",
+      "name": "colorTemperatureChanged"
     }
   ]
 }

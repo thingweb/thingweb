@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 @JsonTypeInfo(use=Id.NAME, include=As.PROPERTY, property="@type")
-@JsonSubTypes({@JsonSubTypes.Type(PropertyDescription.class), @JsonSubTypes.Type(ActionDescription.class)})
+@JsonSubTypes({@JsonSubTypes.Type(PropertyDescription.class), @JsonSubTypes.Type(ActionDescription.class), @JsonSubTypes.Type(EventDescription.class)})
 public abstract class InteractionDescription {
     
     @JsonProperty
