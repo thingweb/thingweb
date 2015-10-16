@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -33,9 +35,38 @@ public class DescriptionParserTest {
     }
 
     @Test
-    public void testFromURL() {
-	// TODO
-//	fail("Not yet implemented");
+    public void testFromURLDoor() throws JsonParseException, IOException {
+    	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/door.jsonld");
+    	DescriptionParser.fromURL(jsonld);
+    	// TODO any further checks?
+    }
+    
+    @Test
+    public void testFromURLLed() throws JsonParseException, IOException {
+    	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led.jsonld");
+    	DescriptionParser.fromURL(jsonld);
+    	// TODO any further checks?
+    }
+    
+    @Test
+    public void testFromURLLed_v02() throws JsonParseException, IOException {
+    	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led_v02.jsonld");
+    	DescriptionParser.fromURL(jsonld);
+    	// TODO any further checks?
+    }
+    
+    @Test
+    public void testFromURLOutlet() throws JsonParseException, IOException {
+    	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/outlet.jsonld");
+    	DescriptionParser.fromURL(jsonld);
+    	// TODO any further checks?
+    }
+    
+    @Test
+    public void testFromURLWeather() throws JsonParseException, IOException {
+    	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/weather.jsonld");
+    	DescriptionParser.fromURL(jsonld);
+    	// TODO any further checks?
     }
 
     @Test
