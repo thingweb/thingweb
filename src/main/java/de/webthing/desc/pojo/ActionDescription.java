@@ -14,7 +14,7 @@ public class ActionDescription extends InteractionDescription {
     private String inputType;
     
     @JsonCreator
-    public ActionDescription(@JsonProperty("name") String name, @JsonProperty("inputData") String outputType, @JsonProperty("outputData") String inputType) {
+    public ActionDescription(@JsonProperty("name") String name, @JsonProperty("inputData") String inputType, @JsonProperty("outputData") String outputType) {
 	this.name = name;
 	this.outputType = outputType;
 	this.inputType = inputType;
