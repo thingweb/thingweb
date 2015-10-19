@@ -26,21 +26,12 @@ public class CoapClientImpl extends AbstractClientImpl {
 	Map<String, CoapObserveRelation> observes = new HashMap<>();
 	
 	/** e.g., http://www.example.com:80/ledlamp */
-	final String coapRoot;
+	String coapRoot;
 	final String coapProperties = "/properties/";
 	final String coapActions = "/actions/";
 	
 	public CoapClientImpl() {
 		super();
-		
-		// TODO use the ones there.. currently not usable
-		// see mismatching coap://www.example.com:5683/ledlamp
-		@SuppressWarnings("unused")
-		List<Protocol> prots = getProtocols();
-		log.warn("TODO use thing description protocols (currently 'coap://localhost:5683/thingsMyLED' is used)");
-
-		// TODO use clientListener information
-		coapRoot = "coap://localhost:5683/thingsMyLED";
 	}
 	
 	
@@ -52,6 +43,29 @@ public class CoapClientImpl extends AbstractClientImpl {
 //	// synchronous
 //	String content1 = coap.get().getResponseText();
 //	System.out.println("bla: " + content1);
+	
+	@Override
+	protected void processThingDescription() {
+		super.processThingDescription();
+		
+		boolean success = false;
+		
+		// check for right protocol&encoding
+		for(Protocol p: this.protocols) {
+			if(p.getUri().startsWith("coap:") && this.encodings.contains("JSON")) {
+				// ok, use this one
+				log.info("Use Protocol uri='" + p.uri + "' with JSON encoding");
+				coapRoot = "coap://localhost:5683/thingsMyLED";
+				success = true;
+				break;
+			}
+		}
+		
+		if(!success) {
+			// no CoAP/JSON protocol/encoding found
+			throw new UnsupportedOperationException("No CoAP/JSON protocol/encoding defined in thing description");
+		}
+	}
 	
 	
 	public void put(String propertyName, Content propertyValue, Callback callback) {
