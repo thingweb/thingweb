@@ -14,8 +14,10 @@ import org.eclipse.californium.core.CoapResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.webthing.binding.coap.WotCoapResource;
 import de.webthing.client.Callback;
 import de.webthing.desc.pojo.Protocol;
+import de.webthing.thing.Content;
 
 public class CoapClientImpl extends AbstractClientImpl {
 	
@@ -52,21 +54,21 @@ public class CoapClientImpl extends AbstractClientImpl {
 //	System.out.println("bla: " + content1);
 	
 	
-	public void put(String propertyName, String propertyValue, Callback callback) {
+	public void put(String propertyName, Content propertyValue, Callback callback) {
 		CoapClient coap = new CoapClient(coapRoot + coapProperties + propertyName);
-		// TODO retrieve format client listener
 		coap.put(new CoapHandler() {
 
 			@Override
 			public void onLoad(CoapResponse response) {
-				callback.onPut(propertyName, response.getResponseText());
+				Content content = new Content(response.getPayload(), WotCoapResource.getMediaType(response.getOptions()));
+				callback.onPut(propertyName, content);
 			}
 
 			@Override
 			public void onError() {
 				callback.onPutError(propertyName);
 			}
-		}, propertyValue, org.eclipse.californium.core.coap.MediaTypeRegistry.APPLICATION_JSON);
+		}, propertyValue.getContent(), WotCoapResource.getCoapContentFormat(propertyValue.getMediaType()));
 	}
 	
 	public void get(String propertyName, Callback callback) {
@@ -76,7 +78,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 		coap.get(new CoapHandler() {
 			@Override
 			public void onLoad(CoapResponse response) {
-				String content = response.getResponseText();
+				Content content = new Content(response.getPayload(), WotCoapResource.getMediaType(response.getOptions()));
 				callback.onGet(propertyName, content);
 			}
 
@@ -94,7 +96,8 @@ public class CoapClientImpl extends AbstractClientImpl {
 		CoapObserveRelation relation = coap.observe(new CoapHandler() {
 			@Override
 			public void onLoad(CoapResponse response) {
-				callback.onObserve(propertyName, response.getResponseText());
+				Content content = new Content(response.getPayload(), WotCoapResource.getMediaType(response.getOptions()));
+				callback.onObserve(propertyName, content);
 			}
 
 			@Override
@@ -110,7 +113,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 		observes.remove(propertyName).proactiveCancel();
 	}
 	
-	public void action(String actionName, String actionValue, Callback callback) {
+	public void action(String actionName, Content actionValue, Callback callback) {
 		// TODO similar to PUT ?
 		
 		CoapClient coap = new CoapClient(coapRoot + coapActions + actionName);
@@ -118,14 +121,15 @@ public class CoapClientImpl extends AbstractClientImpl {
 
 			@Override
 			public void onLoad(CoapResponse response) {
-				callback.onAction(actionName, response.getResponseText());
+				Content content = new Content(response.getPayload(), WotCoapResource.getMediaType(response.getOptions()));
+				callback.onAction(actionName, content);
 			}
 
 			@Override
 			public void onError() {
 				callback.onActionError(actionName);
 			}
-		}, actionValue, org.eclipse.californium.core.coap.MediaTypeRegistry.APPLICATION_JSON);
+		}, actionValue.getContent(), WotCoapResource.getCoapContentFormat(actionValue.getMediaType()));
 	}
 	
 	

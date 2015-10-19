@@ -33,6 +33,8 @@ import de.webthing.desc.pojo.PropertyDescription;
 import de.webthing.gui.text.BooleanDocumentFilter;
 import de.webthing.gui.text.HintTextFieldUI;
 import de.webthing.gui.text.IntegerRangeDocumentFilter;
+import de.webthing.thing.Content;
+import de.webthing.thing.MediaType;
 
 public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	
@@ -41,6 +43,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	private static final long serialVersionUID = 2117762031555752901L;
 	
 	final Client clientListener;
+	final MediaType mediaType = MediaType.APPLICATION_JSON;
 
 	JButton buttonPropertiesGET;
 
@@ -68,6 +71,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		switch(type) {
 		case "xsd:unsignedLong":
 			pd.setDocumentFilter(new IntegerRangeDocumentFilter(BigInteger.ZERO, MAX_UNSIGNED_LONG));
+			break;
 		case "xsd:unsignedInt":
 			pd.setDocumentFilter(new IntegerRangeDocumentFilter(BigInteger.ZERO, MAX_UNSIGNED_INT));
 			break;
@@ -206,7 +210,8 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 								JOptionPane.showMessageDialog(null, "No valid value of type '" + p.getOutputType() + "' given", "Value Error", JOptionPane.ERROR_MESSAGE);
 							} else {
 								// any other value handled by text field input control...
-								clientListener.put(p.getName(), svalue, ThingPanelUI.this);
+								Content c = new Content(svalue.getBytes(), mediaType);
+								clientListener.put(p.getName(), c, ThingPanelUI.this);
 							}
 						}
 					});
@@ -271,7 +276,8 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 						if(svalue.length() == 0) {
 							JOptionPane.showMessageDialog(null, "No valid value of type '" + a.getInputType() + "' given", "Value Error", JOptionPane.ERROR_MESSAGE);
 						} else {
-							clientListener.action(a.getName(), textField.getText(), ThingPanelUI.this);
+							Content c = new Content(svalue.getBytes(), mediaType);
+							clientListener.action(a.getName(), c, ThingPanelUI.this);
 						}
 					}
 				});
@@ -342,7 +348,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	///////// Thing CALLBACKS
 
 	@Override
-	public void onPut(String propertyName, String response) {
+	public void onPut(String propertyName, Content response) {
 		refreshProperty(propertyName);
 	}
 
@@ -352,9 +358,11 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	}
 
 	@Override
-	public void onGet(String propertyName, String response) {
+	public void onGet(String propertyName, Content response) {
+		// TODO deal with other media-types
+		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
 		JTextComponent text = propertyComponents.get(propertyName);
-		text.setText(response);
+		text.setText(new String(response.getContent()));
 	}
 
 	@Override
@@ -363,9 +371,11 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	}
 
 	@Override
-	public void onObserve(String propertyName, String response) {
+	public void onObserve(String propertyName, Content response) {
+		// TODO deal with other media-types
+		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
 		JTextComponent text = propertyComponents.get(propertyName);
-		text.setText(response);
+		text.setText(new String(response.getContent()));
 	}
 
 	@Override
@@ -374,10 +384,12 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	}
 
 	@Override
-	public void onAction(String actionName, String response) {
+	public void onAction(String actionName, Content response) {
+		// TODO deal with other media-types
+		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
 		// TODO how to deal with action response?
-		if(response != null && response.length()>0) {
-			JOptionPane.showMessageDialog(null, "Response of action: " + response);
+		if(response != null && response.getContent().length >0) {
+			JOptionPane.showMessageDialog(null, "Response of action: " + new String(response.getContent()));
 		}
 	}
 

@@ -11,6 +11,7 @@ import de.webthing.desc.pojo.ActionDescription;
 import de.webthing.desc.pojo.EventDescription;
 import de.webthing.desc.pojo.PropertyDescription;
 import de.webthing.desc.pojo.Protocol;
+import de.webthing.thing.Content;
 
 public interface Client {
 	
@@ -27,7 +28,7 @@ public interface Client {
 	public List<Protocol> getProtocols();
 	
 	
-	public void put(String propertyName, String propertyValue, Callback callback);
+	public void put(String propertyName, Content propertyValue, Callback callback);
 	
 	public void get(String propertyName, Callback callback);
 	
@@ -35,6 +36,6 @@ public interface Client {
 	
 	public void observeRelease(String propertyName);
 	
-	public void action(String actionName, String actionValue, Callback callback);
+	public void action(String actionName, Content actionValue, Callback callback);
 
 }

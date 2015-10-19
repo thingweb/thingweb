@@ -20,7 +20,7 @@ public class WotCoapResource extends CoapResource {
         this.m_restListener = restListener;
     }
 
-    private static int getCoapContentFormat(MediaType mediaType) {
+    public static int getCoapContentFormat(MediaType mediaType) {
     	int contentFormat;
     	switch(mediaType) {
     	case TEXT_PLAIN:
@@ -42,6 +42,18 @@ public class WotCoapResource extends CoapResource {
     	return contentFormat;
     }
     
+    public static MediaType getMediaType(OptionSet os) {
+        MediaType mt;
+        if(os.getContentFormat() == -1) {
+        	// undefined
+        	mt = MediaType.UNDEFINED;
+        } else {
+        	String mediaType = MediaTypeRegistry.toString(os.getContentFormat());
+        	mt = MediaType.getMediaType(mediaType);
+        }
+        return mt;
+    }
+    
     @Override
     public void handleGET(CoapExchange exchange) {
         try {
@@ -60,15 +72,7 @@ public class WotCoapResource extends CoapResource {
     public void handlePUT(CoapExchange exchange) {
         try {
         	// e.g., "Content-Format":"application/exi", "Accept":"application/xml"
-        	OptionSet os = exchange.getRequestOptions();
-            MediaType mt;
-            if(os.getContentFormat() == -1) {
-            	// undefined
-            	mt = MediaType.UNDEFINED;
-            } else {
-            	String mediaType = MediaTypeRegistry.toString(os.getContentFormat());
-            	mt = MediaType.getMediaType(mediaType);
-            }
+            MediaType mt = getMediaType(exchange.getRequestOptions());
             m_restListener.onPut(new Content(exchange.getRequestPayload(), mt));
             exchange.respond(CoAP.ResponseCode.CHANGED);
         } catch (UnsupportedOperationException e) {
