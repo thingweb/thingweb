@@ -30,6 +30,9 @@ import de.webthing.client.Client;
 import de.webthing.desc.pojo.ActionDescription;
 import de.webthing.desc.pojo.EventDescription;
 import de.webthing.desc.pojo.PropertyDescription;
+import de.webthing.gui.text.BooleanDocumentFilter;
+import de.webthing.gui.text.HintTextFieldUI;
+import de.webthing.gui.text.IntegerRangeDocumentFilter;
 
 public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	

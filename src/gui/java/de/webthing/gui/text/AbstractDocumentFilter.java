@@ -1,4 +1,4 @@
-package de.webthing.gui;
+package de.webthing.gui.text;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;

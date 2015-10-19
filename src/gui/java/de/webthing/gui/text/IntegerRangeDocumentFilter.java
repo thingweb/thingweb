@@ -1,4 +1,4 @@
-package de.webthing.gui;
+package de.webthing.gui.text;
 
 import java.math.BigInteger;
 
