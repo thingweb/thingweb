@@ -27,6 +27,9 @@ public interface Client {
 	
 	public List<Protocol> getProtocols();
 	
+	public String getUsedProtocolURI();
+	public String getUsedEncoding();
+	
 	
 	public void put(String propertyName, Content propertyValue, Callback callback);
 	

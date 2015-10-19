@@ -62,20 +62,20 @@ public class ThingsClient extends JFrame {
 		CoapClientImpl cl = new CoapClientImpl();
 		cl.parse(fname);
 		
-		addThingPanel(cl, tabTitle);
+		addThingPanel(cl, tabTitle, fname);
 	}
 	
 	void addThingPanel(URL url, String tabTitle) throws FileNotFoundException, IOException {
 		Client cl = new CoapClientImpl();
 		cl.parse(url);
 		
-		addThingPanel(cl, tabTitle);
+		addThingPanel(cl, tabTitle, url.toString());
 	}
 	
 	
-	void addThingPanel(Client cl, String tabTitle) throws FileNotFoundException, IOException {
+	void addThingPanel(Client cl, String tabTitle, String tip) throws FileNotFoundException, IOException {
 		JPanel panelLed = new ThingPanelUI(cl);
-		tabbedPane.addTab(tabTitle, null, new JScrollPane(panelLed), null);
+		tabbedPane.addTab(tabTitle, null, new JScrollPane(panelLed), tip);
 		tabbedPane.setSelectedIndex(tabbedPane.getTabCount()-1);
 	}
 

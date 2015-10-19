@@ -25,6 +25,8 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	Map<String, CoapObserveRelation> observes = new HashMap<>();
 	
+	final String encoding = "JSON";
+	
 	/** e.g., http://www.example.com:80/ledlamp */
 	String coapRoot;
 	final String coapProperties = "/properties/";
@@ -52,10 +54,10 @@ public class CoapClientImpl extends AbstractClientImpl {
 		
 		// check for right protocol&encoding
 		for(Protocol p: this.protocols) {
-			if(p.getUri().startsWith("coap:") && this.encodings.contains("JSON")) {
+			if(p.getUri().startsWith("coap:") && this.encodings.contains(encoding)) {
 				// ok, use this one
 				log.info("Use Protocol uri='" + p.uri + "' with JSON encoding");
-				coapRoot = "coap://localhost:5683/thingsMyLED";
+				coapRoot = p.getUri(); // "coap://localhost:5683/thingsMyLED";
 				success = true;
 				break;
 			}
@@ -65,6 +67,13 @@ public class CoapClientImpl extends AbstractClientImpl {
 			// no CoAP/JSON protocol/encoding found
 			throw new UnsupportedOperationException("No CoAP/JSON protocol/encoding defined in thing description");
 		}
+	}
+	
+	public String getUsedProtocolURI() {
+		return this.coapRoot;
+	}
+	public String getUsedEncoding() {
+		return encoding;
 	}
 	
 	

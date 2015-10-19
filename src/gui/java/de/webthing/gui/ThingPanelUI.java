@@ -2,13 +2,18 @@ package de.webthing.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +21,9 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
 import javax.swing.plaf.basic.BasicTextUI;
 import javax.swing.text.JTextComponent;
@@ -46,6 +53,8 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	final MediaType mediaType = MediaType.APPLICATION_JSON;
 
 	JButton buttonPropertiesGET;
+	
+	JTextPane infoTextPane;
 
 	Map<String, JTextComponent> propertyComponents;
 	
@@ -68,6 +77,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		BasicTextUI textFieldUI = new HintTextFieldUI(" " + type, editable, Color.GRAY);
 		textField.setUI(textFieldUI);
 		PlainDocument pd = (PlainDocument) textField.getDocument();
+		textField.setToolTipText(type);
 		switch(type) {
 		case "xsd:unsignedLong":
 			pd.setDocumentFilter(new IntegerRangeDocumentFilter(BigInteger.ZERO, MAX_UNSIGNED_LONG));
@@ -112,11 +122,29 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		JPanel gbPanel = new JPanel();
 		gbPanel.setLayout(new GridBagLayout());
 		
+		infoTextPane = new JTextPane();
+		infoTextPane.setEditable(false);
+		infoTextPane.setContentType("text/html");
+		// infoTextPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		
 		this.setLayout(new BorderLayout());
 		this.add(gbPanel, BorderLayout.NORTH);
+		
+		JScrollPane jsp = new JScrollPane(infoTextPane);
+		jsp.setPreferredSize(new Dimension(-1, 40));
+		this.add(jsp, BorderLayout.SOUTH);
 
 		Insets ins2 = new Insets(2, 2, 2, 2);
 		int yline = 0;
+		
+		// URI and such
+		GridBagConstraints gbc0_0 = new GridBagConstraints();
+		gbc0_0.gridx = 0;
+		gbc0_0.gridy = yline;
+		gbc0_0.gridwidth = 4;
+		gbPanel.add(new JLabel("<html><h4>" + clientListener.getUsedProtocolURI() + " (" + clientListener.getUsedEncoding() + ")</h4></html>"), gbc0_0);
+		
+		yline++;
 
 		// ###### Properties
 		List<PropertyDescription> properties = clientListener.getProperties();
@@ -346,15 +374,63 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	}
 	
 	///////// Thing CALLBACKS
+	
+	class InfoMessage {
+		final String msg;
+		final Timestamp timestamp;
+		final boolean error;
+		public InfoMessage(String msg, Timestamp timestamp, boolean error) {
+			this.msg = msg;
+			this.timestamp = timestamp;
+			this.error = error;
+		}
+	}
+	
+	LinkedList<InfoMessage> infoMessages = new LinkedList<InfoMessage>();
+	final int MAX_INFO_LINES = 10;
+	
+	private void printInfo(String msg, boolean error) {
+		synchronized(this) {
+			if(infoMessages.size() > MAX_INFO_LINES) {
+				infoMessages.removeFirst();
+			}
+			Timestamp ts = new Timestamp((new Date()).getTime());
+			InfoMessage imsg = new InfoMessage(msg, ts, error);
+			infoMessages.add(imsg);
+			
+			// update info panel
+			StringBuilder sb = new StringBuilder();
+			sb.append("<html><body  style=\"font-size:small\"");
+			for(InfoMessage im : infoMessages) {
+				sb.append("<span");
+				if(im.error) {
+					sb.append(" style=\"color:red\"");
+				}
+				sb.append(">");
+				sb.append(im.timestamp + ": " + im.msg);
+				sb.append("</span><br />");
+			}
+			sb.append("</body></html>");
+			
+			String s = sb.toString();
+			infoTextPane.setText(s);
+			int len = infoTextPane.getDocument().getLength();
+			infoTextPane.setCaretPosition(len);
+
+		}
+		
+	}
 
 	@Override
 	public void onPut(String propertyName, Content response) {
 		refreshProperty(propertyName);
+		printInfo("PUT response for " + propertyName, false);
 	}
 
 	@Override
 	public void onPutError(String propertyName) {
-		JOptionPane.showMessageDialog(null, "Could not put property for " + propertyName, "Put Error", JOptionPane.ERROR_MESSAGE);
+		// JOptionPane.showMessageDialog(null, "Could not put property for " + propertyName, "Put Error", JOptionPane.ERROR_MESSAGE);
+		printInfo("PUT failure for " + propertyName, true);
 	}
 
 	@Override
@@ -362,12 +438,15 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		// TODO deal with other media-types
 		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
 		JTextComponent text = propertyComponents.get(propertyName);
-		text.setText(new String(response.getContent()));
+		String sresp = new String(response.getContent()); 
+		text.setText(sresp);
+		printInfo("GET response for " + propertyName + ": " + sresp, false);
 	}
 
 	@Override
 	public void onGetError(String propertyName) {
-		JOptionPane.showMessageDialog(null, "Could not get property " + propertyName, "Get Error", JOptionPane.ERROR_MESSAGE);
+		// JOptionPane.showMessageDialog(null, msg, "Get Error", JOptionPane.ERROR_MESSAGE);
+		printInfo("GET failure for " + propertyName, true);
 	}
 
 	@Override
@@ -375,12 +454,16 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		// TODO deal with other media-types
 		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
 		JTextComponent text = propertyComponents.get(propertyName);
-		text.setText(new String(response.getContent()));
+		String sresp = new String(response.getContent()); 
+		text.setText(sresp);
+		
+		printInfo("Observe response for " + propertyName + ": " + sresp, false);
 	}
 
 	@Override
 	public void onObserveError(String propertyName) {
-		JOptionPane.showMessageDialog(null, "Could not register oberver " + propertyName, "Observe Error", JOptionPane.ERROR_MESSAGE);
+		// JOptionPane.showMessageDialog(null, "Could not register oberver " + propertyName, "Observe Error", JOptionPane.ERROR_MESSAGE);
+		printInfo("Observe failure for " + propertyName, true);
 	}
 
 	@Override
@@ -388,14 +471,17 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		// TODO deal with other media-types
 		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
 		// TODO how to deal with action response?
-		if(response != null && response.getContent().length >0) {
-			JOptionPane.showMessageDialog(null, "Response of action: " + new String(response.getContent()));
-		}
+		String sresp = new String(response.getContent());
+//		if(response != null && response.getContent().length >0) {
+//			JOptionPane.showMessageDialog(null, "Response of action: " + sresp);
+//		}
+		printInfo("Action response for " + actionName + ": " + sresp, false);
 	}
 
 	@Override
 	public void onActionError(String actionName) {
-		JOptionPane.showMessageDialog(null, "Could not execute action " + actionName, "Action Error", JOptionPane.ERROR_MESSAGE);
+		// JOptionPane.showMessageDialog(null, "Could not execute action " + actionName, "Action Error", JOptionPane.ERROR_MESSAGE);
+		printInfo("Action failure for " + actionName, true);
 	}
 
 }
