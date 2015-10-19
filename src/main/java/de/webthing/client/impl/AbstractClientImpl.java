@@ -9,6 +9,9 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParseException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.webthing.client.Client;
 import de.webthing.desc.DescriptionParser;
 import de.webthing.desc.pojo.ActionDescription;
@@ -19,7 +22,9 @@ import de.webthing.desc.pojo.PropertyDescription;
 import de.webthing.desc.pojo.Protocol;
 import de.webthing.desc.pojo.ThingDescription;
 
-public abstract class AbstractClientImpl implements Client{
+public abstract class AbstractClientImpl implements Client {
+	
+	private static final Logger log = LoggerFactory.getLogger(AbstractClientImpl.class);
 	
 	ThingDescription td;
 	List<ActionDescription> actions;
@@ -52,45 +57,46 @@ public abstract class AbstractClientImpl implements Client{
 		encodings = new ArrayList<>();
 		protocols = new ArrayList<>();
 
-		System.out.println("# Interactions");
+		log.debug("Process thing dedesription");
+		log.debug("# Interactions");
 		List<InteractionDescription> interactions = td.getInteractions();
 		for(InteractionDescription id : interactions) {
 			String iname = id.getName();
-			System.out.println(iname);
+			log.debug("InteractionDescription name: " + iname);
 			if(id instanceof ActionDescription) {
 				ActionDescription ad = (ActionDescription) id;
-				System.out.println("\tinput:  " + ad.getInputType());
-				System.out.println("\toutput: " + ad.getOutputType());
+				log.debug("\tinput:  " + ad.getInputType());
+				log.debug("\toutput: " + ad.getOutputType());
 				actions.add(ad);
 			} else if(id instanceof PropertyDescription) {
 				PropertyDescription pd = (PropertyDescription) id;
-				System.out.println("\toutput: " + pd.getOutputType());
-				System.out.println("\twritable: " + pd.isWritable());
+				log.debug("\toutput: " + pd.getOutputType());
+				log.debug("\twritable: " + pd.isWritable());
 				properties.add(pd);
 			} else if(id instanceof EventDescription) {
 				EventDescription ed = (EventDescription) id;
-				System.out.println("\toutput: " + ed.getOutputType());
+				log.debug("\toutput: " + ed.getOutputType());
 				events.add(ed);
 			} else {
-				System.out.println("Unexpted interaction type: " + id);
+				log.warn("Unexpected interaction type: " + id);
 			}
 		}
 		
 		Metadata metadata = td.getMetadata();
-		System.out.println("# Metadata " + metadata.getName());
-		System.out.println("# Encodings");
+		log.debug("# Metadata " + metadata.getName());
+		log.debug("# Encodings");
 		List<String> encs = metadata.getEncodings();
 		for(String enc : encs) {
-			System.out.println(enc);
+			log.debug(enc);
 			encodings.add(enc);
 		}
-		System.out.println("# Encodings");
+		log.debug("# Encodings");
 		Map<String,Protocol> prots = metadata.getProtocols();
 		for(String ps : prots.keySet()) {
-			System.out.println(ps);
+			log.debug(ps);
 			Protocol p = prots.get(ps);
 			protocols.add(p);
-			System.out.println("\t" + p.getUri());
+			log.debug("\t" + p.getUri());
 		}
 	}
 	

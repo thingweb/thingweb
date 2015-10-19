@@ -11,11 +11,15 @@ import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapObserveRelation;
 import org.eclipse.californium.core.CoapResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.webthing.client.Callback;
 import de.webthing.desc.pojo.Protocol;
 
 public class CoapClientImpl extends AbstractClientImpl {
+	
+	private static final Logger log = LoggerFactory.getLogger(CoapClientImpl.class);
 	
 	Map<String, CoapObserveRelation> observes = new HashMap<>();
 	
@@ -29,8 +33,9 @@ public class CoapClientImpl extends AbstractClientImpl {
 		
 		// TODO use the ones there.. currently not usable
 		// see mismatching coap://www.example.com:5683/ledlamp
+		@SuppressWarnings("unused")
 		List<Protocol> prots = getProtocols();
-		System.err.println(prots);
+		log.warn("TODO use thing description protocols (currently 'coap://localhost:5683/thingsMyLED' is used)");
 
 		// TODO use clientListener information
 		coapRoot = "coap://localhost:5683/thingsMyLED";
@@ -124,6 +129,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	
+	// simple test
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
 //		// led (local)

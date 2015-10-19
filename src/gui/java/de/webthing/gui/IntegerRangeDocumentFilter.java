@@ -1,12 +1,18 @@
 package de.webthing.gui;
 
+import java.math.BigInteger;
+
 import javax.swing.text.BadLocationException;
 
 public class IntegerRangeDocumentFilter extends AbstractDocumentFilter {
 
-		int minimum, maximum;
-
-		public IntegerRangeDocumentFilter(int minimum, int maximum) {
+		BigInteger minimum, maximum;
+		
+		public IntegerRangeDocumentFilter(long minimum, long maximum) {
+			this(BigInteger.valueOf(minimum), BigInteger.valueOf(maximum));
+		}
+		
+		public IntegerRangeDocumentFilter(BigInteger minimum, BigInteger maximum) {
 			super();
 			this.minimum = minimum;
 			this.maximum = maximum;
@@ -15,15 +21,17 @@ public class IntegerRangeDocumentFilter extends AbstractDocumentFilter {
 		@Override
 		Object checkInput(String proposedValue, int offset)
 				throws BadLocationException {
-			int newValue = 0;
+			BigInteger newValue = BigInteger.ZERO;
 			if (proposedValue.length() > 0) {
 				try {
-					newValue = Integer.parseInt(proposedValue);
+					newValue = new BigInteger(proposedValue);
+					// newValue = Integer.parseInt(proposedValue);
 				} catch (NumberFormatException e) {
 					throw new BadLocationException(proposedValue, offset);
 				}
 			}
-			if ((minimum <= newValue) && (newValue <= maximum)) {
+			if(minimum.compareTo(newValue) <= 0 && newValue.compareTo(maximum) <= 0) {
+			//if ((minimum <= newValue) && (newValue <= maximum)) {
 				return newValue;
 			} else {
 				throw new BadLocationException(proposedValue, offset);
