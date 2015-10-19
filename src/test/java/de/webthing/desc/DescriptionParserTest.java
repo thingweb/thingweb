@@ -51,8 +51,12 @@ public class DescriptionParserTest {
     @Test
     public void testFromURLLed_v02() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led_v02.jsonld");
-    	DescriptionParser.fromURL(jsonld);
-    	// TODO any further checks?
+    	try {
+    		DescriptionParser.fromURL(jsonld);
+    	    fail();
+    	} catch (IOException e) {
+    		// OK, expect failure
+    	}
     }
     
     @Test
