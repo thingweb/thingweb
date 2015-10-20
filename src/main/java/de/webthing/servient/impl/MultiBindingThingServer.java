@@ -141,15 +141,22 @@ public class MultiBindingThingServer implements ThingServer {
 		
 	private void createBinding(ResourceBuilder resources) {
 
+		// root
 		resources.newResource(Defines.BASE_URL, new HypermediaIndex(
-						new HyperMediaLink("thing", Defines.BASE_THING_URL + m_thingModel.getName())
+						new HyperMediaLink("things", Defines.BASE_THING_URL)
 			)
+		);
+
+		// things
+		resources.newResource(Defines.BASE_THING_URL, new HypermediaIndex(
+						new HyperMediaLink("thing", Defines.BASE_THING_URL + m_thingModel.getName())
+				)
 		);
 
 		List<HyperMediaLink> actions = new LinkedList<>();
 		List<HyperMediaLink> properties = new LinkedList<>();
 
-		// System.out.println("createBinding " + resources);
+		// properties
 		for (Property property : m_thingModel.getProperties()) {
 			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
 					Defines.REL_PROPERTY_URL + property.getName();
@@ -157,6 +164,7 @@ public class MultiBindingThingServer implements ThingServer {
 			properties.add(new HyperMediaLink("property",url));
 		}
 
+		// actions
 		for (Action action : m_thingModel.getActions()) {
 			//TODO optimize by preconstructing strings and using format
 			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
@@ -165,6 +173,7 @@ public class MultiBindingThingServer implements ThingServer {
 			actions.add(new HyperMediaLink("action",url));
 		}
 
+		// thing root
 		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName(), new HypermediaIndex(
 						new HyperMediaLink("actions",Defines.BASE_THING_URL + m_thingModel.getName() +
 								Defines.REL_ACTION_URL),
@@ -173,10 +182,12 @@ public class MultiBindingThingServer implements ThingServer {
 				)
 		);
 
+		// actions
 		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName() +
 						Defines.REL_ACTION_URL,
 				new HypermediaIndex(actions));
 
+		// properties
 		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName() +
 						Defines.REL_PROPERTY_URL,
 				new HypermediaIndex(properties));
