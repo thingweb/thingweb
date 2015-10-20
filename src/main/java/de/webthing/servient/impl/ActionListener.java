@@ -30,7 +30,6 @@ public class ActionListener extends AbstractRESTListener {
 	public void onPut(Content data) {
 		Function<?, ?> handler = m_state.getHandler(action);
 
-		try {
 			System.out.println("invoking " + action.getName());
 
 			//TODO parsing and smart cast
@@ -38,11 +37,6 @@ public class ActionListener extends AbstractRESTListener {
 			Function<Content, Content> bytehandler = (Function<Content, Content>) handler;
 			bytehandler.apply(data);
 
-		} catch (Exception e) {
-            /*
-* How do I return a 500?
-*/
-		}
 	}
 
     @Override
