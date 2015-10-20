@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 
 public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
@@ -33,7 +34,11 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
         
         //if not found return 404
         if(listener== null) {
-            return new Response(Response.Status.NOT_FOUND,MIME_PLAINTEXT,"Resource not found");
+            String msg = "Resource not found, availiable resources:\n";
+			msg += resmap.keySet().stream().collect(Collectors.joining("\n"));
+
+			return new Response(Response.Status.NOT_FOUND,MIME_PLAINTEXT,msg);
+
         }
 
         if(!authorize(session)) {

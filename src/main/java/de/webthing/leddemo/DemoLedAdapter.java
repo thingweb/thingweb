@@ -1,11 +1,42 @@
 package de.webthing.leddemo;
 
+import com.github.h0ru5.neopixel.NeoPixelColor;
+import com.github.h0ru5.neopixel.Neopixels;
+import com.github.h0ru5.neopixel.NeopixelsImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+
 /**
  * Created by Johannes on 18.10.2015.
  */
 public class DemoLedAdapter implements DemoLed {
     private int colorTemperature;
-    private byte red;
+    private int lastBrightness = (byte) 255;
+
+    private Neopixels neopixels;
+    private static final String libname = "rpi_ws281x";
+
+    private static final Logger log = LoggerFactory.getLogger(DemoLedAdapter.class);
+
+
+    public DemoLedAdapter()
+    {
+        try {
+            log.info("loading library for LED...");
+            System.loadLibrary(libname);
+            neopixels = NeopixelsImpl.createWithDefaults(64);
+        } catch (UnsatisfiedLinkError e) {
+            log.error("could not find lib {} in {}",libname,System.getProperty("java.library.path"));
+            log.error("creating mockup");
+            neopixels = new FakeNeopixels();
+        }
+
+        neopixels.init();
+        neopixels.colorWipe(NeoPixelColor.fromValue(0));
+        neopixels.setBrightness(255);
+    }
 
     @Override
     public int getColorTemperature() {
@@ -19,44 +50,56 @@ public class DemoLedAdapter implements DemoLed {
 
     @Override
     public byte getRed() {
-        return red;
+        NeoPixelColor color = neopixels.getColor(0);
+        return color.red;
     }
 
     @Override
     public void setRed(byte red) {
-        this.red = red;
+        NeoPixelColor color = neopixels.getColor(0);
+        color.red = (byte) 255;
+        neopixels.colorWipe(color);
     }
 
     @Override
     public byte getGreen() {
-        return green;
+        NeoPixelColor color = neopixels.getColor(0);
+        return color.green;
     }
 
     @Override
     public void setGreen(byte green) {
-        this.green = green;
+        NeoPixelColor color = neopixels.getColor(0);
+        color.red = (byte) 255;
+        neopixels.colorWipe(color);
     }
 
     @Override
     public byte getBlue() {
-        return blue;
+        NeoPixelColor color = neopixels.getColor(0);
+        return color.blue;
     }
 
     @Override
     public void setBlue(byte blue) {
-        this.blue = blue;
+        NeoPixelColor color = neopixels.getColor(0);
+        color.red = (byte) 255;
+        neopixels.colorWipe(color);
     }
-
-    private byte green;
-    private byte blue;
 
     @Override
     public void ledOnOff(boolean target) {
-
+        if(target)
+            neopixels.setBrightness(lastBrightness);
+        else {
+            lastBrightness = neopixels.getBrightness();
+            neopixels.setBrightness(0);
+        }
     }
 
     @Override
     public void setBrightness(short percent) {
-
+        byte target = (byte) (((float) percent / 100.0) * 255);
+        neopixels.setBrightness(target);
     }
 }
