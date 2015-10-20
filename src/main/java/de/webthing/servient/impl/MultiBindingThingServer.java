@@ -153,26 +153,6 @@ public class MultiBindingThingServer implements ThingServer {
 				)
 		);
 
-		List<HyperMediaLink> actions = new LinkedList<>();
-		List<HyperMediaLink> properties = new LinkedList<>();
-
-		// properties
-		for (Property property : m_thingModel.getProperties()) {
-			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
-					Defines.REL_PROPERTY_URL + property.getName();
-			resources.newResource(url, new PropertyListener(this, property));
-			properties.add(new HyperMediaLink("property",url));
-		}
-
-		// actions
-		for (Action action : m_thingModel.getActions()) {
-			//TODO optimize by preconstructing strings and using format
-			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
-					Defines.REL_ACTION_URL + action.getName();
-			resources.newResource(url, new ActionListener(m_state, action));
-			actions.add(new HyperMediaLink("action",url));
-		}
-
 		// thing root
 		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName(), new HypermediaIndex(
 						new HyperMediaLink("actions",Defines.BASE_THING_URL + m_thingModel.getName() +
@@ -182,16 +162,47 @@ public class MultiBindingThingServer implements ThingServer {
 				)
 		);
 
+
+
+		Collection<Property> properties = m_thingModel.getProperties();
+		Collection<Action> actions = m_thingModel.getActions();
+
+		List<HyperMediaLink> actionLinks = new LinkedList<>();
+		List<HyperMediaLink> propertyLinks = new LinkedList<>();
+
+		Map<String,RESTListener> interactionListeners = new HashMap<>();
+
+		// collect properties
+		for (Property property : properties) {
+			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
+					Defines.REL_PROPERTY_URL + property.getName();
+			interactionListeners.put(url, new PropertyListener(this, property));
+			propertyLinks.add(new HyperMediaLink("property", url));
+		}
+
+		// collect actions
+		for (Action action : actions) {
+			//TODO optimize by preconstructing strings and using format
+			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
+					Defines.REL_ACTION_URL + action.getName();
+			interactionListeners.put(url, new ActionListener(m_state, action));
+			actionLinks.add(new HyperMediaLink("action", url));
+		}
+
 		// actions
 		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName() +
 						Defines.REL_ACTION_URL,
-				new HypermediaIndex(actions));
+				new HypermediaIndex(actionLinks));
 
 		// properties
 		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName() +
 						Defines.REL_PROPERTY_URL,
-				new HypermediaIndex(properties));
+				new HypermediaIndex(propertyLinks));
 
+		// leaves last (side-effect of coap-binding)
+		interactionListeners.entrySet().stream().forEachOrdered(
+				entry -> resources.newResource(entry.getKey(),entry.getValue())
+		);
 	}
 	
 	

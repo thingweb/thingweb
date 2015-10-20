@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Johannes on 07.10.2015.
  */
-class PropertyListener extends AbstractRESTListener {
+public class PropertyListener extends AbstractRESTListener {
     private final Property property;
     private MultiBindingThingServer multiBindingThingServer;
 	private static final Logger log = LoggerFactory.getLogger(PropertyListener.class);

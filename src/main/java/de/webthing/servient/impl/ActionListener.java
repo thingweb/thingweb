@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  * Created by Johannes on 07.10.2015.
  */
-class ActionListener extends AbstractRESTListener {
+public class ActionListener extends AbstractRESTListener {
 
     private final Action action;
     private StateContainer m_state;

@@ -6,10 +6,13 @@ import de.webthing.binding.ResourceBuilder;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.server.resources.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class CoapBinding implements Binding {
 
+    private static final Logger log = LoggerFactory.getLogger(CoapBinding.class);
 	private CoapServer m_coapServer;
 
 	@Override
@@ -23,8 +26,10 @@ public class CoapBinding implements Binding {
 			@Override
             public void newResource(String url, RESTListener restListener) {
                 String[] parts = url.split("/");
+                if(parts.length == 0) return;
 
                 Resource current = m_coapServer.getRoot();
+
                 for (int i = 0; i < parts.length - 1; i++) {
                     if (parts[i].isEmpty()) {
                         continue;
@@ -40,7 +45,10 @@ public class CoapBinding implements Binding {
                     current = child;
                 }
 
-                current.add(new WotCoapResource(parts[parts.length - 1], restListener));
+                String lastPart = parts[parts.length - 1];
+                // TODO this has a side-effect: replacing the resource makes the children unreachable
+                // a clean tree-replace would require to store the children and append them to the new resource
+                current.add(new WotCoapResource(lastPart, restListener));
             }
 		};
 	}

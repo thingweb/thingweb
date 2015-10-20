@@ -30,15 +30,12 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
         //compare uri against resmap
         RESTListener listener = resmap.get(uri);
 
-        //FIXME partial uris and overviews should be added
-        
         //if not found return 404
         if(listener== null) {
             String msg = "Resource not found, availiable resources:\n";
 			msg += resmap.keySet().stream().collect(Collectors.joining("\n"));
 
 			return new Response(Response.Status.NOT_FOUND,MIME_PLAINTEXT,msg);
-
         }
 
         if(!authorize(session)) {
