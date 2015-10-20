@@ -1,11 +1,10 @@
 package de.webthing.util.encoding;
 
-import java.io.UnsupportedEncodingException;
-
-import org.json.JSONObject;
-
 import de.webthing.thing.Content;
 import de.webthing.thing.MediaType;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 
 public class JSONContent {
 	

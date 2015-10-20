@@ -1,15 +1,15 @@
 package de.webthing.thing;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import de.webthing.desc.pojo.ActionDescription;
 import de.webthing.desc.pojo.InteractionDescription;
 import de.webthing.desc.pojo.PropertyDescription;
 import de.webthing.desc.pojo.ThingDescription;
 import de.webthing.servient.ThingClient;
 import de.webthing.servient.ThingServer;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**

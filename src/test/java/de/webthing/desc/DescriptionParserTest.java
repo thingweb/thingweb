@@ -1,20 +1,13 @@
 package de.webthing.desc;
 
-import static org.junit.Assert.*;
+import com.fasterxml.jackson.core.JsonParseException;
+import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.github.jsonldjava.core.JsonLdError;
+import static org.junit.Assert.fail;
 
 public class DescriptionParserTest {
 

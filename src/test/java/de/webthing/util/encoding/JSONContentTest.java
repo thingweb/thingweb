@@ -1,15 +1,14 @@
 package de.webthing.util.encoding;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.UnsupportedEncodingException;
-
+import de.webthing.thing.Content;
+import de.webthing.thing.MediaType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import de.webthing.thing.Content;
-import de.webthing.thing.MediaType;
+import java.io.UnsupportedEncodingException;
+
+import static org.junit.Assert.assertTrue;
 
 public class JSONContentTest {
 

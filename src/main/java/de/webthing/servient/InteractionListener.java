@@ -1,7 +1,6 @@
 package de.webthing.servient;
 
 
-import de.webthing.servient.impl.MultiBindingThingServer;
 import de.webthing.thing.Content;
 
 /**

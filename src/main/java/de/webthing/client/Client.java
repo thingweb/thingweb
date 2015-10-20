@@ -1,17 +1,16 @@
 package de.webthing.client;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonParseException;
-
 import de.webthing.desc.pojo.ActionDescription;
 import de.webthing.desc.pojo.EventDescription;
 import de.webthing.desc.pojo.PropertyDescription;
 import de.webthing.desc.pojo.Protocol;
 import de.webthing.thing.Content;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 
 public interface Client {
 	

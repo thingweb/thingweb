@@ -1,21 +1,20 @@
 package de.webthing.servient.impl;
 
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import de.webthing.binding.RESTListener;
 import de.webthing.binding.ResourceBuilder;
 import de.webthing.servient.Defines;
 import de.webthing.servient.InteractionListener;
 import de.webthing.servient.ThingServer;
 import de.webthing.thing.Action;
-import de.webthing.thing.Property;
 import de.webthing.thing.Content;
+import de.webthing.thing.Property;
 import de.webthing.thing.Thing;
+
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.logging.Logger;
 
 
 /**

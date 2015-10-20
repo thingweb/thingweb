@@ -6,15 +6,10 @@ import de.webthing.leddemo.DemoLedAdapter;
 import de.webthing.servient.ServientBuilder;
 import de.webthing.servient.ThingServer;
 import de.webthing.thing.Thing;
-import de.webthing.things.WotGreeter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Callable;
 
 
 /**

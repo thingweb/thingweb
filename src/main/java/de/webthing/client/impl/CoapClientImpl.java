@@ -1,12 +1,9 @@
 package de.webthing.client.impl;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import de.webthing.binding.coap.WotCoapResource;
+import de.webthing.client.Callback;
+import de.webthing.desc.pojo.Protocol;
+import de.webthing.thing.Content;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapObserveRelation;
@@ -14,10 +11,11 @@ import org.eclipse.californium.core.CoapResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.webthing.binding.coap.WotCoapResource;
-import de.webthing.client.Callback;
-import de.webthing.desc.pojo.Protocol;
-import de.webthing.thing.Content;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CoapClientImpl extends AbstractClientImpl {
 	

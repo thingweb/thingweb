@@ -1,17 +1,13 @@
 package de.webthing.servient.impl;
 
+import de.webthing.servient.ThingServer;
+import de.webthing.thing.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import de.webthing.servient.ThingServer;
-import de.webthing.thing.Action;
-import de.webthing.thing.Content;
-import de.webthing.thing.MediaType;
-import de.webthing.thing.Property;
-import de.webthing.thing.Thing;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**

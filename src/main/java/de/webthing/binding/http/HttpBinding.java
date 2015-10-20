@@ -1,10 +1,9 @@
 package de.webthing.binding.http;
 
-import java.io.IOException;
-
 import de.webthing.binding.Binding;
-import de.webthing.binding.RESTListener;
 import de.webthing.binding.ResourceBuilder;
+
+import java.io.IOException;
 
 
 public class HttpBinding implements Binding {

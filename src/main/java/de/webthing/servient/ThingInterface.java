@@ -3,9 +3,6 @@ package de.webthing.servient;
 import de.webthing.thing.Content;
 import de.webthing.thing.Property;
 
-import java.util.concurrent.Callable;
-import java.util.function.Function;
-
 
 /**
  * The ThingInterface provides methods for interacting with things.

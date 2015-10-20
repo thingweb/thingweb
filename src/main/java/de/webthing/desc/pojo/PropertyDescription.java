@@ -1,7 +1,5 @@
 package de.webthing.desc.pojo;
 
-import java.net.URI;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;

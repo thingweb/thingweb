@@ -6,8 +6,6 @@ import com.github.h0ru5.neopixel.NeopixelsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
-
 /**
  * Created by Johannes on 18.10.2015.
  */
