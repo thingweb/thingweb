@@ -2,8 +2,11 @@ package de.webthing.leddemo;
 
 import com.github.h0ru5.neopixel.NeoPixelColor;
 import com.github.h0ru5.neopixel.Neopixels;
+import com.github.h0ru5.neopixel.NeopixelsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
 
 /**
  * Created by Johannes on 18.10.2015.
@@ -21,11 +24,18 @@ public class DemoLedAdapter implements DemoLed {
     public DemoLedAdapter()
     {
         try {
+            log.info("loading library for LED...");
             System.loadLibrary(libname);
-        } catch (Exception e) {
-            log.warn("could not find lib {} in {}",libname,System.getProperty("java.library.path"));
+            neopixels = NeopixelsImpl.createWithDefaults(64);
+        } catch (UnsatisfiedLinkError e) {
+            log.error("could not find lib {} in {}",libname,System.getProperty("java.library.path"));
+            log.error("creating mockup");
+            neopixels = new FakeNeopixels();
         }
-        neopixels = Neopixels.createWithDefaults(64);
+
+        neopixels.init();
+        neopixels.colorWipe(NeoPixelColor.fromValue(0));
+        neopixels.setBrightness(255);
     }
 
     @Override
