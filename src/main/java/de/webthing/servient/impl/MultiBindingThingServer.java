@@ -1,14 +1,13 @@
 package de.webthing.servient.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+import de.webthing.binding.RESTListener;
 import de.webthing.binding.ResourceBuilder;
 import de.webthing.servient.Defines;
 import de.webthing.servient.InteractionListener;
@@ -141,11 +140,21 @@ public class MultiBindingThingServer implements ThingServer {
 
 		
 	private void createBinding(ResourceBuilder resources) {
+
+		resources.newResource(Defines.BASE_URL, new HypermediaIndex(
+						new HyperMediaLink("thing", Defines.BASE_THING_URL + m_thingModel.getName())
+			)
+		);
+
+		List<HyperMediaLink> actions = new LinkedList<>();
+		List<HyperMediaLink> properties = new LinkedList<>();
+
 		// System.out.println("createBinding " + resources);
 		for (Property property : m_thingModel.getProperties()) {
 			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
 					Defines.REL_PROPERTY_URL + property.getName();
 			resources.newResource(url, new PropertyListener(this, property));
+			properties.add(new HyperMediaLink("property",url));
 		}
 
 		for (Action action : m_thingModel.getActions()) {
@@ -153,7 +162,25 @@ public class MultiBindingThingServer implements ThingServer {
 			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
 					Defines.REL_ACTION_URL + action.getName();
 			resources.newResource(url, new ActionListener(m_state, action));
+			actions.add(new HyperMediaLink("action",url));
 		}
+
+		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName(), new HypermediaIndex(
+						new HyperMediaLink("actions",Defines.BASE_THING_URL + m_thingModel.getName() +
+								Defines.REL_ACTION_URL),
+						new HyperMediaLink("properties",Defines.BASE_THING_URL + m_thingModel.getName() +
+								Defines.REL_PROPERTY_URL)
+				)
+		);
+
+		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName() +
+						Defines.REL_ACTION_URL,
+				new HypermediaIndex(actions));
+
+		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName() +
+						Defines.REL_PROPERTY_URL,
+				new HypermediaIndex(properties));
+
 	}
 	
 	
