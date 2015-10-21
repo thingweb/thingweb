@@ -29,6 +29,7 @@ import de.webthing.leddemo.DemoLed;
 import de.webthing.leddemo.DemoLedAdapter;
 import de.webthing.servient.ServientBuilder;
 import de.webthing.servient.ThingServer;
+import de.webthing.thing.Content;
 import de.webthing.thing.Thing;
 import de.webthing.util.encoding.ContentHelper;
 import org.slf4j.Logger;
@@ -46,6 +47,24 @@ public class Launcher {
 
 	private static final Logger log = LoggerFactory.getLogger(Launcher.class);
 
+	private static <T> T getValue (Content c, Class<T> clazz) {
+		Map map = (Map) ContentHelper.parse(c, Map.class);
+		Object o = map.get("value");
+
+		try {
+			return clazz.cast(o);
+		} catch(ClassCastException e) {
+			String msg = String.format(
+					"expected value to be of type %s, not %s in %s",
+					clazz,
+					o.getClass(),
+					new String(c.getContent())
+					);
+			log.warn(msg);
+			throw new IllegalArgumentException(msg);
+		}
+	}
+
 	public static void main(String[] args) throws Exception {
 		ServientBuilder.initialize();
 
@@ -56,20 +75,28 @@ public class Launcher {
 
 		DemoLed realLed = new DemoLedAdapter();
 
-		server.onUpdate("rgbValueBlue", (nV) -> {
+		server.onUpdate("rgbValueBlue", (input) -> {
+			Integer value = getValue(input, Integer.class);
+			log.info("setting blue value to " + value);
+			realLed.setBlue(value.byteValue());
+		});
 
-			try {
-				Map map = (Map) ContentHelper.parse(nV, Map.class);
-				Object o = map.get("value");
-				log.info("setting blue value to {} : {}", o.getClass()  , o.toString());
-				if(o instanceof Integer) {
-					Integer blueValue = (Integer) o ;
-					realLed.setBlue(blueValue.byteValue());
-				}
-			} catch (IOException e) {
-				log.error("parse error on " + new String(nV.getContent()));
-				throw new IllegalArgumentException("parse error:",e);
-			}
+		server.onUpdate("rgbValueRed", (input) -> {
+			Integer value = getValue(input, Integer.class);
+			log.info("setting red value to " + value);
+			realLed.setRed(value.byteValue());
+		});
+
+		server.onUpdate("rgbValueGreen", (input) -> {
+			Integer value = getValue(input, Integer.class);
+			log.info("setting green value to " + value);
+			realLed.setGreen(value.byteValue());
+		});
+
+		server.onUpdate("brightness", (input) -> {
+			Integer value = getValue(input, Integer.class);
+			log.info("setting brightness to " + value);
+			realLed.setBrightness(value.byteValue());
 		});
 
 		server.onInvoke("fadeIn", (secs) -> {
