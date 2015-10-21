@@ -30,10 +30,13 @@ import de.webthing.leddemo.DemoLedAdapter;
 import de.webthing.servient.ServientBuilder;
 import de.webthing.servient.ThingServer;
 import de.webthing.thing.Thing;
+import de.webthing.util.encoding.ContentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 
 /**
@@ -46,7 +49,7 @@ public class Launcher {
 	public static void main(String[] args) throws Exception {
 		ServientBuilder.initialize();
 
-		String ledTD = "jsonld" + File.separator + "led.jsonld";
+		String ledTD = "jsonld" + File.separator + "fancy_led.jsonld";
 
 		Thing led = new Thing(DescriptionParser.fromFile(ledTD));
 		ThingServer server = ServientBuilder.newThingServer(led);
@@ -54,10 +57,19 @@ public class Launcher {
 		DemoLed realLed = new DemoLedAdapter();
 
 		server.onUpdate("rgbValueBlue", (nV) -> {
-			//byte blueValue = nV.getContent().toNumber();
-			log.info("setting blue value to {}", nV.getContent().toString());
-			byte blueValue = (byte) 255;
-			realLed.setBlue(blueValue);
+
+			try {
+				Map map = (Map) ContentHelper.parse(nV, Map.class);
+				Object o = map.get("value");
+				log.info("setting blue value to {} : {}", o.getClass()  , o.toString());
+				if(o instanceof Integer) {
+					Integer blueValue = (Integer) o ;
+					realLed.setBlue(blueValue.byteValue());
+				}
+			} catch (IOException e) {
+				log.error("parse error on " + new String(nV.getContent()));
+				throw new IllegalArgumentException("parse error:",e);
+			}
 		});
 
 		server.onInvoke("fadeIn", (secs) -> {
@@ -65,11 +77,13 @@ public class Launcher {
 			System.out.println(msg);
 			return msg;
 		});
-		server.onInvoke("fadeOut", (secs) -> {	String msg = "I am fading out over " + secs + "  s..."; System.out.println(msg); return msg;  });
+
+		server.onInvoke("fadeOut", (secs) -> {
+			String msg = "I am fading out over " + secs + "  s...";
+			System.out.println(msg); return msg;
+		});
 
 
 		ServientBuilder.start();
-		
-		System.in.read();
 	}
 }

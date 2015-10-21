@@ -79,7 +79,7 @@ public class DemoLedAdapter implements DemoLed {
     @Override
     public void setRed(byte red) {
         NeoPixelColor color = neopixels.getColor(0);
-        color.red = (byte) 255;
+        color.red = red;
         neopixels.colorWipe(color);
     }
 
@@ -92,7 +92,7 @@ public class DemoLedAdapter implements DemoLed {
     @Override
     public void setGreen(byte green) {
         NeoPixelColor color = neopixels.getColor(0);
-        color.red = (byte) 255;
+        color.green = green;
         neopixels.colorWipe(color);
     }
 
@@ -105,7 +105,7 @@ public class DemoLedAdapter implements DemoLed {
     @Override
     public void setBlue(byte blue) {
         NeoPixelColor color = neopixels.getColor(0);
-        color.red = (byte) 255;
+        color.blue = blue;
         neopixels.colorWipe(color);
     }
 
