@@ -3,14 +3,15 @@ package de.webthing.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.math.BigInteger;
-import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,6 +33,8 @@ import javax.swing.text.PlainDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import de.webthing.client.Callback;
 import de.webthing.client.Client;
 import de.webthing.desc.pojo.ActionDescription;
@@ -42,6 +45,7 @@ import de.webthing.gui.text.HintTextFieldUI;
 import de.webthing.gui.text.IntegerRangeDocumentFilter;
 import de.webthing.thing.Content;
 import de.webthing.thing.MediaType;
+import de.webthing.util.encoding.ContentHelper;
 
 public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	
@@ -131,7 +135,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		this.add(gbPanel, BorderLayout.NORTH);
 		
 		JScrollPane jsp = new JScrollPane(infoTextPane);
-		jsp.setPreferredSize(new Dimension(-1, 40));
+		jsp.setPreferredSize(new Dimension(-1, 50));
 		this.add(jsp, BorderLayout.SOUTH);
 
 		Insets ins2 = new Insets(2, 2, 2, 2);
@@ -188,7 +192,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 				JTextField textField = createTextField(p.getOutputType(), p.isWritable());
 				gbPanel.add(textField, gbcX_1);
 				propertyComponents.put(p.getName(), textField);
-				refreshProperty(p.getName()); // refresh value
+				// refreshProperty(p.getName()); // refresh value
 
 				// get button
 				GridBagConstraints gbcX_2 = new GridBagConstraints();
@@ -216,6 +220,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 				buttonObserve.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent ae) {
+						printInfo("Observe request for " + p.getName(), false);
 						clientListener.observe(p.getName(), ThingPanelUI.this);
 					}
 				});
@@ -238,7 +243,9 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 								JOptionPane.showMessageDialog(null, "No valid value of type '" + p.getOutputType() + "' given", "Value Error", JOptionPane.ERROR_MESSAGE);
 							} else {
 								// any other value handled by text field input control...
-								Content c = new Content(svalue.getBytes(), mediaType);
+								byte[] payload = getPayload(p.getName(), p.getOutputType(), svalue);
+								Content c = new Content(payload, mediaType);
+								printInfo("PUT request: " + new String(payload), false);
 								clientListener.put(p.getName(), c, ThingPanelUI.this);
 							}
 						}
@@ -304,7 +311,9 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 						if(svalue.length() == 0) {
 							JOptionPane.showMessageDialog(null, "No valid value of type '" + a.getInputType() + "' given", "Value Error", JOptionPane.ERROR_MESSAGE);
 						} else {
-							Content c = new Content(svalue.getBytes(), mediaType);
+							byte[] payload = getPayload(a.getName(), a.getInputType(), svalue);
+							Content c = new Content(payload, mediaType);
+							printInfo("Action request: " + new String(payload), false);
 							clientListener.action(a.getName(), c, ThingPanelUI.this);
 						}
 					}
@@ -358,8 +367,53 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 
 
 	}
+	
+	// https://github.com/w3c/wot/blob/master/TF-TD/Tutorial.md#coap-protocol-binding
+	protected byte[] getPayload(String name, String type, String value) {
+		assert(this.mediaType == MediaType.APPLICATION_JSON);
+		// {
+	    //	"value" : 4000
+		// }
+		StringBuilder sb = new StringBuilder();
+		sb.append("{\"");
+		sb.append(name);
+		sb.append("\":");
+		
+		switch(type) {
+		case "xsd:unsignedLong":
+		case "xsd:unsignedInt":
+		case "xsd:unsignedShort":
+		case "xsd:unsignedByte":
+		case "xsd:long":
+		case "xsd:int":
+		case "xsd:short":
+		case "xsd:byte":
+			sb.append(value);
+			break;
+		case "xsd:boolean":
+			boolean b = BooleanDocumentFilter.getBoolean(value);
+			if(b) {
+				sb.append("true");
+			} else {
+				sb.append("false");
+			}
+			break;
+		default:
+			// assume string --> add apostrophes
+			// TODO how to deal with null
+			// TODO	how to deal with complex types... nested textfields for each simple type?
+			sb.append("\"");
+			sb.append(value);
+			sb.append("\"");
+		}
+		
+		sb.append("}");
+		
+		return sb.toString().getBytes();
+	}
 
 	protected void refreshProperty(String prop) {
+		printInfo("GET request for " + prop, false);
 		clientListener.get(prop, this);
 	}
 
@@ -373,13 +427,14 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 
 	}
 	
-	///////// Thing CALLBACKS
+	
+	///////// Info Panel
 	
 	class InfoMessage {
 		final String msg;
-		final Timestamp timestamp;
+		final Date timestamp;
 		final boolean error;
-		public InfoMessage(String msg, Timestamp timestamp, boolean error) {
+		public InfoMessage(String msg, Date timestamp, boolean error) {
 			this.msg = msg;
 			this.timestamp = timestamp;
 			this.error = error;
@@ -388,14 +443,14 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	
 	LinkedList<InfoMessage> infoMessages = new LinkedList<InfoMessage>();
 	final int MAX_INFO_LINES = 10;
+	final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	
 	private void printInfo(String msg, boolean error) {
 		synchronized(this) {
 			if(infoMessages.size() > MAX_INFO_LINES) {
 				infoMessages.removeFirst();
 			}
-			Timestamp ts = new Timestamp((new Date()).getTime());
-			InfoMessage imsg = new InfoMessage(msg, ts, error);
+			InfoMessage imsg = new InfoMessage(msg, new Date(), error);
 			infoMessages.add(imsg);
 			
 			// update info panel
@@ -407,7 +462,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 					sb.append(" style=\"color:red\"");
 				}
 				sb.append(">");
-				sb.append(im.timestamp + ": " + im.msg);
+				sb.append(dateFormat.format(im.timestamp) + ": " + im.msg);
 				sb.append("</span><br />");
 			}
 			sb.append("</body></html>");
@@ -420,67 +475,70 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		}
 		
 	}
+	
+	///////// Thing CALLBACKS
 
 	@Override
 	public void onPut(String propertyName, Content response) {
-		refreshProperty(propertyName);
-		printInfo("PUT response for " + propertyName, false);
+		// refreshProperty(propertyName);
+		printInfo("PUT response success for " + propertyName, false);
 	}
 
 	@Override
 	public void onPutError(String propertyName) {
-		// JOptionPane.showMessageDialog(null, "Could not put property for " + propertyName, "Put Error", JOptionPane.ERROR_MESSAGE);
 		printInfo("PUT failure for " + propertyName, true);
+	}
+	
+	private void get(String msgPrefix, String propertyName, Content response) {
+		// TODO deal with other media-types
+		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
+		JTextComponent text = propertyComponents.get(propertyName);
+		try {
+			JsonNode n = ContentHelper.readJSON(response.getContent());
+			String t = n.get(propertyName).asText();
+			text.setText(t);
+			if(text.getText().equals(t)) {
+				printInfo(msgPrefix + " success for " + propertyName + ": " + new String(response.getContent()), false);
+			} else {
+				// Note: should not happen though
+				printInfo(msgPrefix + " error for " + propertyName + ": setting text-field value '" + t + "' failed", true);
+			}
+		} catch (IOException e) {
+			printInfo(msgPrefix + " parsing error for " + propertyName + " and value = '" + new String(response.getContent()) + "'. Invalid or empty message?", true);
+		}		
 	}
 
 	@Override
 	public void onGet(String propertyName, Content response) {
-		// TODO deal with other media-types
-		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
-		JTextComponent text = propertyComponents.get(propertyName);
-		String sresp = new String(response.getContent()); 
-		text.setText(sresp);
-		printInfo("GET response for " + propertyName + ": " + sresp, false);
+		get("GET response", propertyName, response);		
 	}
 
 	@Override
 	public void onGetError(String propertyName) {
-		// JOptionPane.showMessageDialog(null, msg, "Get Error", JOptionPane.ERROR_MESSAGE);
 		printInfo("GET failure for " + propertyName, true);
 	}
 
 	@Override
 	public void onObserve(String propertyName, Content response) {
-		// TODO deal with other media-types
-		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
-		JTextComponent text = propertyComponents.get(propertyName);
-		String sresp = new String(response.getContent()); 
-		text.setText(sresp);
-		
-		printInfo("Observe response for " + propertyName + ": " + sresp, false);
+		get("Observe response", propertyName, response);
 	}
 
 	@Override
 	public void onObserveError(String propertyName) {
-		// JOptionPane.showMessageDialog(null, "Could not register oberver " + propertyName, "Observe Error", JOptionPane.ERROR_MESSAGE);
 		printInfo("Observe failure for " + propertyName, true);
 	}
 
 	@Override
 	public void onAction(String actionName, Content response) {
+		printInfo("Action response success for " + actionName + ": '" + new String(response.getContent()) + "'", false);
 		// TODO deal with other media-types
 		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
 		// TODO how to deal with action response?
 		String sresp = new String(response.getContent());
-//		if(response != null && response.getContent().length >0) {
-//			JOptionPane.showMessageDialog(null, "Response of action: " + sresp);
-//		}
-		printInfo("Action response for " + actionName + ": " + sresp, false);
 	}
 
 	@Override
 	public void onActionError(String actionName) {
-		// JOptionPane.showMessageDialog(null, "Could not execute action " + actionName, "Action Error", JOptionPane.ERROR_MESSAGE);
 		printInfo("Action failure for " + actionName, true);
 	}
 
