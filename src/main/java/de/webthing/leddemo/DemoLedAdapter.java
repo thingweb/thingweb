@@ -35,7 +35,8 @@ import org.slf4j.LoggerFactory;
  */
 public class DemoLedAdapter {
     private int colorTemperature;
-    private int lastBrightness = (byte) 255;
+    private int lastBrightness = (byte) 20;
+    private NeoPixelColor currentColor = new NeoPixelColor(0,0,0);
 
     private Neopixels neopixels;
     private static final String libname = "rpi_ws281x";
@@ -56,12 +57,12 @@ public class DemoLedAdapter {
         }
 
         neopixels.init();
-        neopixels.colorWipe(NeoPixelColor.fromValue(0));
+        neopixels.colorWipe(currentColor);
         neopixels.setBrightness(20);
     }
 
     private static String colorToString(NeoPixelColor color) {
-        return (255+color.red) + "," + (255+color.green) + "," + (255+color.blue);
+        return color.red + "," + color.green + "," + color.blue;
     }
 
     public int getColorTemperature() {
@@ -73,39 +74,36 @@ public class DemoLedAdapter {
     }
 
     public byte getRed() {
-        NeoPixelColor color = neopixels.getColor(0);
-        return color.red;
+        return currentColor.red;
     }
 
     public void setRed(byte red) {
-        NeoPixelColor oc = neopixels.getColor(0);
-        NeoPixelColor color = NeoPixelColor.fromBytes(red, oc.green, oc.blue);
-        log.info("color set to "  + colorToString(color));
+        NeoPixelColor color = new NeoPixelColor(red, currentColor.green, currentColor.blue);
+        log.info("color set from " + colorToString(currentColor) + " to "  + colorToString(color));
         neopixels.colorWipe(color);
+        currentColor = color;
     }
 
     public byte getGreen() {
-        NeoPixelColor color = neopixels.getColor(0);
-        return color.green;
+        return currentColor.green;
     }
 
     public void setGreen(byte green) {
-        NeoPixelColor oc = neopixels.getColor(0);
-        NeoPixelColor color = NeoPixelColor.fromBytes(oc.red, green, oc.blue);
-        log.info("color set to "  + colorToString(color));
+        NeoPixelColor color = NeoPixelColor.fromBytes(currentColor.red, green, currentColor.blue);
+        log.info("color set from " + colorToString(currentColor) + " to "  + colorToString(color));
         neopixels.colorWipe(color);
+        currentColor = color;
     }
 
     public byte getBlue() {
-        NeoPixelColor color = neopixels.getColor(0);
-        return color.blue;
+        return currentColor.blue;
     }
 
     public void setBlue(byte blue) {
-        NeoPixelColor oc = neopixels.getColor(0);
-        NeoPixelColor color = NeoPixelColor.fromBytes(oc.red, oc.green, blue);
-        log.info("color set to "  + colorToString(color));
+        NeoPixelColor color = NeoPixelColor.fromBytes(currentColor.red, currentColor.green, blue);
+        log.info("color set from " + colorToString(currentColor) + " to "  + colorToString(color));
         neopixels.colorWipe(color);
+        currentColor = color;
     }
 
     public void ledOnOff(boolean target) {

@@ -78,19 +78,19 @@ public class Launcher {
 		server.onUpdate("rgbValueBlue", (input) -> {
 			Integer value = getValue(input, Integer.class);
 			log.info("setting blue value to " + value);
-			realLed.setBlue(value.byteValue());
+			realLed.setBlue((byte) value.intValue());
 		});
 
 		server.onUpdate("rgbValueRed", (input) -> {
 			Integer value = getValue(input, Integer.class);
 			log.info("setting red value to " + value);
-			realLed.setRed(value.byteValue());
+			realLed.setRed((byte) value.intValue());
 		});
 
 		server.onUpdate("rgbValueGreen", (input) -> {
 			Integer value = getValue(input, Integer.class);
 			log.info("setting green value to " + value);
-			realLed.setGreen(value.byteValue());
+			realLed.setGreen((byte) value.intValue());
 		});
 
 		server.onUpdate("brightness", (input) -> {
