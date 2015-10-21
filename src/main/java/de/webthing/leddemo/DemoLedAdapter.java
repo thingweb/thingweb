@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Johannes on 18.10.2015.
  */
-public class DemoLedAdapter implements DemoLed {
+public class DemoLedAdapter {
     private int colorTemperature;
     private int lastBrightness = (byte) 255;
 
@@ -57,59 +57,57 @@ public class DemoLedAdapter implements DemoLed {
 
         neopixels.init();
         neopixels.colorWipe(NeoPixelColor.fromValue(0));
-        neopixels.setBrightness(255);
+        neopixels.setBrightness(20);
     }
 
-    @Override
+    private static String colorToString(NeoPixelColor color) {
+        return (255+color.red) + "," + (255+color.green) + "," + (255+color.blue);
+    }
+
     public int getColorTemperature() {
         return colorTemperature;
     }
 
-    @Override
     public void setColorTemperature(int colorTemperature) {
         this.colorTemperature = colorTemperature;
     }
 
-    @Override
     public byte getRed() {
         NeoPixelColor color = neopixels.getColor(0);
         return color.red;
     }
 
-    @Override
     public void setRed(byte red) {
-        NeoPixelColor color = neopixels.getColor(0);
-        color.red = red;
+        NeoPixelColor oc = neopixels.getColor(0);
+        NeoPixelColor color = NeoPixelColor.fromBytes(red, oc.green, oc.blue);
+        log.info("color set to "  + colorToString(color));
         neopixels.colorWipe(color);
     }
 
-    @Override
     public byte getGreen() {
         NeoPixelColor color = neopixels.getColor(0);
         return color.green;
     }
 
-    @Override
     public void setGreen(byte green) {
-        NeoPixelColor color = neopixels.getColor(0);
-        color.green = green;
+        NeoPixelColor oc = neopixels.getColor(0);
+        NeoPixelColor color = NeoPixelColor.fromBytes(oc.red, green, oc.blue);
+        log.info("color set to "  + colorToString(color));
         neopixels.colorWipe(color);
     }
 
-    @Override
     public byte getBlue() {
         NeoPixelColor color = neopixels.getColor(0);
         return color.blue;
     }
 
-    @Override
     public void setBlue(byte blue) {
-        NeoPixelColor color = neopixels.getColor(0);
-        color.blue = blue;
+        NeoPixelColor oc = neopixels.getColor(0);
+        NeoPixelColor color = NeoPixelColor.fromBytes(oc.red, oc.green, blue);
+        log.info("color set to "  + colorToString(color));
         neopixels.colorWipe(color);
     }
 
-    @Override
     public void ledOnOff(boolean target) {
         if(target)
             neopixels.setBrightness(lastBrightness);
@@ -119,8 +117,7 @@ public class DemoLedAdapter implements DemoLed {
         }
     }
 
-    @Override
-    public void setBrightness(short percent) {
+    public void setBrightnessPercent(short percent) {
         byte target = (byte) (((float) percent / 100.0) * 255);
         neopixels.setBrightness(target);
     }

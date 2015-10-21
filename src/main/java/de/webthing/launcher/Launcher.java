@@ -25,18 +25,17 @@
 package de.webthing.launcher;
 
 import de.webthing.desc.DescriptionParser;
-import de.webthing.leddemo.DemoLed;
 import de.webthing.leddemo.DemoLedAdapter;
 import de.webthing.servient.ServientBuilder;
 import de.webthing.servient.ThingServer;
 import de.webthing.thing.Content;
+import de.webthing.thing.MediaType;
 import de.webthing.thing.Thing;
 import de.webthing.util.encoding.ContentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 
 
@@ -46,6 +45,7 @@ import java.util.Map;
 public class Launcher {
 
 	private static final Logger log = LoggerFactory.getLogger(Launcher.class);
+	private static final int STEPLENGTH = 100;
 
 	private static <T> T getValue (Content c, Class<T> clazz) {
 		Map map = (Map) ContentHelper.parse(c, Map.class);
@@ -73,7 +73,7 @@ public class Launcher {
 		Thing led = new Thing(DescriptionParser.fromFile(ledTD));
 		ThingServer server = ServientBuilder.newThingServer(led);
 
-		DemoLed realLed = new DemoLedAdapter();
+		DemoLedAdapter realLed = new DemoLedAdapter();
 
 		server.onUpdate("rgbValueBlue", (input) -> {
 			Integer value = getValue(input, Integer.class);
@@ -96,20 +96,50 @@ public class Launcher {
 		server.onUpdate("brightness", (input) -> {
 			Integer value = getValue(input, Integer.class);
 			log.info("setting brightness to " + value);
-			realLed.setBrightness(value.byteValue());
+			realLed.setBrightnessPercent(value.byteValue());
 		});
 
-		server.onInvoke("fadeIn", (secs) -> {
-			String msg = "I am fading out over " + secs + "  s...";
-			System.out.println(msg);
-			return msg;
+		server.onInvoke("fadeIn", (input) -> {
+			Integer duration = getValue(input, Integer.class);
+			Runnable execution = new Runnable() {
+				@Override
+				public void run() {
+					int steps = duration * 1000 / STEPLENGTH;
+					int delta = 100 / steps;
+
+					short brightness = 0;
+					realLed.setBrightnessPercent(brightness);
+					while(brightness < 100) {
+						realLed.setBrightnessPercent(brightness);
+						brightness += delta;
+					}
+				}
+			};
+
+			//TODO assign resource for thread (outside)
+			new Thread(execution).run();
+
+			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
 		});
 
-		server.onInvoke("fadeOut", (secs) -> {
-			String msg = "I am fading out over " + secs + "  s...";
-			System.out.println(msg); return msg;
-		});
+		server.onInvoke("fadeOut", (input) -> {
+			Integer duration = getValue(input, Integer.class);
+			Runnable execution = new Runnable() {
+				@Override
+				public void run() {
+					int steps = duration * 1000 / STEPLENGTH;
+					int delta = 100 / steps;
 
+					short brightness = 100;
+					realLed.setBrightnessPercent(brightness);
+					while(brightness > 0) {
+						realLed.setBrightnessPercent(brightness);
+						brightness -= delta;
+					}
+				}
+			};
+			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
+		});
 
 		ServientBuilder.start();
 	}

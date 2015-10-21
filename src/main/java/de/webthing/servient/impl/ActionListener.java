@@ -46,7 +46,7 @@ public class ActionListener extends AbstractRESTListener {
 
     @Override
 	public Content onGet() {
-    	return new Content(("Action: " + action.getName()).getBytes(), MediaType.TEXT_PLAIN);
+		return new Content(("Action: " + action.getName()).getBytes(), MediaType.TEXT_PLAIN);
 	}
 
 
