@@ -23,9 +23,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
+import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicTextUI;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
@@ -37,6 +39,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import de.webthing.client.Callback;
 import de.webthing.client.Client;
+import de.webthing.client.UnsupportedException;
 import de.webthing.desc.pojo.ActionDescription;
 import de.webthing.desc.pojo.EventDescription;
 import de.webthing.desc.pojo.PropertyDescription;
@@ -53,7 +56,8 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 
 	private static final long serialVersionUID = 2117762031555752901L;
 	
-	final Client clientListener;
+	final Client client;
+	// TODO support other media types
 	final MediaType mediaType = MediaType.APPLICATION_JSON;
 
 	JButton buttonPropertiesGET;
@@ -119,8 +123,8 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	/**
 	 * Create the panel.
 	 */
-	public ThingPanelUI(Client clientListener) {
-		this.clientListener = clientListener;
+	public ThingPanelUI(Client client) {
+		this.client = client;
 		propertyComponents = new HashMap<>();
 		
 		JPanel gbPanel = new JPanel();
@@ -129,14 +133,27 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		infoTextPane = new JTextPane();
 		infoTextPane.setEditable(false);
 		infoTextPane.setContentType("text/html");
+		// infoTextPane.setPreferredSize(new Dimension(0, 50));
 		// infoTextPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		
 		this.setLayout(new BorderLayout());
+		
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		splitPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+		// splitPane.setTopComponent(gbPanel);
+		splitPane.setTopComponent(new JPanel());
+		splitPane.setResizeWeight(1.0); // value of 1 specifies the left/top component gets all the extra space
+		splitPane.setOneTouchExpandable(true);
+		// splitPane.setDividerLocation(150);
+		
 		this.add(gbPanel, BorderLayout.NORTH);
+		
 		
 		JScrollPane jsp = new JScrollPane(infoTextPane);
 		jsp.setPreferredSize(new Dimension(-1, 50));
-		this.add(jsp, BorderLayout.SOUTH);
+		// this.add(jsp, BorderLayout.SOUTH);
+		splitPane.setBottomComponent(jsp);
+		this.add(splitPane, BorderLayout.CENTER);
 
 		Insets ins2 = new Insets(2, 2, 2, 2);
 		int yline = 0;
@@ -146,12 +163,12 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		gbc0_0.gridx = 0;
 		gbc0_0.gridy = yline;
 		gbc0_0.gridwidth = 4;
-		gbPanel.add(new JLabel("<html><h4>" + clientListener.getUsedProtocolURI() + " (" + clientListener.getUsedEncoding() + ")</h4></html>"), gbc0_0);
+		gbPanel.add(new JLabel("<html><h4>" + client.getUsedProtocolURI() + " (" + mediaType + ")</h4></html>"), gbc0_0);
 		
 		yline++;
 
 		// ###### Properties
-		List<PropertyDescription> properties = clientListener.getProperties();
+		List<PropertyDescription> properties = client.getProperties();
 		if(properties != null && properties.size() > 0) {
 			GridBagConstraints gbcP_0 = new GridBagConstraints();
 			gbcP_0.gridx = 0;
@@ -205,7 +222,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 				buttonGet.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						refreshProperty(p.getName());
+						clientGET(p.getName());
 					}
 				});
 
@@ -220,8 +237,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 				buttonObserve.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent ae) {
-						printInfo("Observe request for " + p.getName(), false);
-						clientListener.observe(p.getName(), ThingPanelUI.this);
+						clientObserve(p.getName());
 					}
 				});
 
@@ -238,16 +254,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 					buttonPut.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							String svalue = textField.getText();
-							if(svalue.length() == 0) {
-								JOptionPane.showMessageDialog(null, "No valid value of type '" + p.getOutputType() + "' given", "Value Error", JOptionPane.ERROR_MESSAGE);
-							} else {
-								// any other value handled by text field input control...
-								byte[] payload = getPayload(p.getName(), p.getOutputType(), svalue);
-								Content c = new Content(payload, mediaType);
-								printInfo("PUT request: " + new String(payload), false);
-								clientListener.put(p.getName(), c, ThingPanelUI.this);
-							}
+							clientPUT(p.getName(), p.getOutputType(), textField.getText());
 						}
 					});
 				}
@@ -258,7 +265,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 
 
 		// ###### Actions
-		List<ActionDescription> actions = clientListener.getActions();
+		List<ActionDescription> actions = client.getActions();
 		if(actions != null && actions.size() > 0) {
 			GridBagConstraints gbcA_0 = new GridBagConstraints();
 			gbcA_0.gridx = 0;
@@ -307,15 +314,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 				buttonAction.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						String svalue = textField.getText();
-						if(svalue.length() == 0) {
-							JOptionPane.showMessageDialog(null, "No valid value of type '" + a.getInputType() + "' given", "Value Error", JOptionPane.ERROR_MESSAGE);
-						} else {
-							byte[] payload = getPayload(a.getName(), a.getInputType(), svalue);
-							Content c = new Content(payload, mediaType);
-							printInfo("Action request: " + new String(payload), false);
-							clientListener.action(a.getName(), c, ThingPanelUI.this);
-						}
+						clientAction(a.getName(), a.getInputType(), textField.getText());
 					}
 				});
 
@@ -326,7 +325,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		
 
 		// ###### Events
-		List<EventDescription> events = clientListener.getEvents();
+		List<EventDescription> events = client.getEvents();
 		if(events != null && events.size() > 0) {
 			GridBagConstraints gbcE_0 = new GridBagConstraints();
 			gbcE_0.gridx = 0;
@@ -369,7 +368,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	}
 	
 	// https://github.com/w3c/wot/blob/master/TF-TD/Tutorial.md#coap-protocol-binding
-	protected byte[] getPayload(String name, String type, String value) {
+	protected byte[] getPayload(String name, String type, String value) throws IllegalArgumentException {
 		assert(this.mediaType == MediaType.APPLICATION_JSON);
 		// {
 	    //	"value" : 4000
@@ -388,7 +387,13 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		case "xsd:int":
 		case "xsd:short":
 		case "xsd:byte":
-			sb.append(value);
+			try {
+				// parse integer
+				new BigInteger(value);
+				sb.append(value);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("'" + value + "' is not a valid integer");
+			}
 			break;
 		case "xsd:boolean":
 			boolean b = BooleanDocumentFilter.getBoolean(value);
@@ -412,16 +417,12 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		return sb.toString().getBytes();
 	}
 
-	protected void refreshProperty(String prop) {
-		printInfo("GET request for " + prop, false);
-		clientListener.get(prop, this);
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getSource() == buttonPropertiesGET) {
 			for (String prop : propertyComponents.keySet()) {
-				refreshProperty(prop);
+				clientGET(prop);
 			}
 		}
 
@@ -442,7 +443,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	}
 	
 	LinkedList<InfoMessage> infoMessages = new LinkedList<InfoMessage>();
-	final int MAX_INFO_LINES = 10;
+	final int MAX_INFO_LINES = 20;
 	final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	
 	private void printInfo(String msg, boolean error) {
@@ -474,6 +475,53 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 
 		}
 		
+	}
+	
+	///////// Client calls
+	
+
+	protected void clientGET(String prop) {
+		try {
+			printInfo("GET request for " + prop, false);
+			client.get(prop, this);
+		} catch (UnsupportedException e) {
+			JOptionPane.showMessageDialog(null, "" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	protected void clientObserve(String prop) {
+		try {
+			printInfo("Observe request for " + prop, false);
+			client.observe(prop, this);
+		} catch (UnsupportedException e) {
+			JOptionPane.showMessageDialog(null, "" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	protected void clientPUT(String prop, String outputType, String svalue) {
+		try {
+			byte[] payload = getPayload(prop, outputType, svalue);
+			Content c = new Content(payload, mediaType);
+			printInfo("PUT request: " + new String(payload), false);
+			client.put(prop, c, this);
+		} catch (IllegalArgumentException e) {
+			JOptionPane.showMessageDialog(null, "No valid value of type '" + outputType + "' given", "Value Error", JOptionPane.ERROR_MESSAGE);
+		} catch (UnsupportedException e) {
+			JOptionPane.showMessageDialog(null, "" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	protected void clientAction(String prop, String inputType, String svalue) {
+		try {
+			byte[] payload = getPayload(prop, inputType, svalue);
+			Content c = new Content(payload, mediaType);
+			printInfo("Action request: " + new String(payload), false);
+			client.action(prop, c, this);
+		} catch (IllegalArgumentException e) {
+			JOptionPane.showMessageDialog(null, "No valid value of type '" + inputType + "' given", "Value Error", JOptionPane.ERROR_MESSAGE);
+		} catch (UnsupportedException e) {
+			JOptionPane.showMessageDialog(null, "" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
 	///////// Thing CALLBACKS

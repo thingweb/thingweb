@@ -22,47 +22,13 @@
  * THE SOFTWARE.
  */
 
-package de.webthing.client.impl;
+package de.webthing.client;
 
-import java.util.List;
+public class UnsupportedException extends Exception {
+	
+	private static final long serialVersionUID = -3240731499940169624L;
 
-import de.webthing.client.Client;
-import de.webthing.desc.pojo.ActionDescription;
-import de.webthing.desc.pojo.EventDescription;
-import de.webthing.desc.pojo.PropertyDescription;
-
-public abstract class AbstractClientImpl implements Client {
-	
-	// private static final Logger log = LoggerFactory.getLogger(AbstractClientImpl.class);
-	
-	final List<PropertyDescription> properties;
-	final List<ActionDescription> actions;
-	final List<EventDescription> events;
-	
-	/** e.g., http://www.example.com:80/ledlamp or coap://localhost:5683/thingsMyLED */
-	final String uri;
-
-	public AbstractClientImpl(String uri, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
-		this.uri = uri;
-		this.properties = properties;
-		this.actions = actions;
-		this.events = events;
-	}
-	
-	public String getUsedProtocolURI() {
-		return this.uri;
-	}
-	
-	public List<PropertyDescription> getProperties() {
-		return properties;
-	}
-	
-	public List<ActionDescription> getActions() {
-		return actions;
-	}
-	
-	public List<EventDescription> getEvents() {
-		return events;
-	}
-
+	public UnsupportedException(String message) {
+        super(message);
+    }
 }

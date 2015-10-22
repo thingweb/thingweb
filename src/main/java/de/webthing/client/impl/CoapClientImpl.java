@@ -24,10 +24,10 @@
 
 package de.webthing.client.impl;
 
-import de.webthing.binding.coap.WotCoapResource;
-import de.webthing.client.Callback;
-import de.webthing.desc.pojo.Protocol;
-import de.webthing.thing.Content;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapObserveRelation;
@@ -35,72 +35,32 @@ import org.eclipse.californium.core.CoapResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import de.webthing.binding.coap.WotCoapResource;
+import de.webthing.client.Callback;
+import de.webthing.desc.pojo.ActionDescription;
+import de.webthing.desc.pojo.EventDescription;
+import de.webthing.desc.pojo.PropertyDescription;
+import de.webthing.desc.pojo.Protocol;
+import de.webthing.thing.Content;
 
 public class CoapClientImpl extends AbstractClientImpl {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(CoapClientImpl.class);
 	
 	Map<String, CoapObserveRelation> observes = new HashMap<>();
 	
-	final String encoding = "JSON";
-	
-	/** e.g., http://www.example.com:80/ledlamp */
-	String coapRoot;
 	final String coapProperties = "/properties/";
 	final String coapActions = "/actions/";
 	
-	public CoapClientImpl() {
-		super();
+	public CoapClientImpl(Protocol prot, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
+		super(prot.getUri(), properties, actions, events);
 	}
-	
-	
 
-//	String sc = coapRoot + "properties/colorTemperature";
-//	String sc = "coap://localhost:5683/thingsMyLED";
-//	CoapClient coap = new CoapClient(sc);
-//
-//	// synchronous
-//	String content1 = coap.get().getResponseText();
-//	System.out.println("bla: " + content1);
-	
-	@Override
-	protected void processThingDescription() {
-		super.processThingDescription();
-		
-		boolean success = false;
-		
-		// check for right protocol&encoding
-		for(Protocol p: this.protocols) {
-			if(p.getUri().startsWith("coap:") && this.encodings.contains(encoding)) {
-				// ok, use this one
-				log.info("Use Protocol uri='" + p.uri + "' with JSON encoding");
-				coapRoot = p.getUri(); // "coap://localhost:5683/thingsMyLED";
-				success = true;
-				break;
-			}
-		}
-		
-		if(!success) {
-			// no CoAP/JSON protocol/encoding found
-			throw new UnsupportedOperationException("No CoAP/JSON protocol/encoding defined in thing description");
-		}
-	}
-	
-	public String getUsedProtocolURI() {
-		return this.coapRoot;
-	}
-	public String getUsedEncoding() {
-		return encoding;
-	}
 	
 	
 	public void put(String propertyName, Content propertyValue, Callback callback) {
-		CoapClient coap = new CoapClient(coapRoot + coapProperties + propertyName);
+		CoapClient coap = new CoapClient(uri + coapProperties + propertyName);
 		coap.put(new CoapHandler() {
 
 			@Override
@@ -117,7 +77,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	public void get(String propertyName, Callback callback) {
-		CoapClient coap = new CoapClient(coapRoot + coapProperties + propertyName);
+		CoapClient coap = new CoapClient(uri + coapProperties + propertyName);
 
 		// asynchronous
 		coap.get(new CoapHandler() {
@@ -136,7 +96,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	
 	public void observe(String propertyName, Callback callback) {
-		CoapClient coap = new CoapClient(coapRoot + coapProperties + propertyName);
+		CoapClient coap = new CoapClient(uri + coapProperties + propertyName);
 		// observing
 		CoapObserveRelation relation = coap.observe(new CoapHandler() {
 			@Override
@@ -161,7 +121,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	public void action(String actionName, Content actionValue, Callback callback) {
 		// TODO similar to PUT ?
 		
-		CoapClient coap = new CoapClient(coapRoot + coapActions + actionName);
+		CoapClient coap = new CoapClient(uri + coapActions + actionName);
 		coap.put(new CoapHandler() {
 
 			@Override
@@ -175,22 +135,6 @@ public class CoapClientImpl extends AbstractClientImpl {
 				callback.onActionError(actionName);
 			}
 		}, actionValue.getContent(), WotCoapResource.getCoapContentFormat(actionValue.getMediaType()));
-	}
-	
-	
-	// simple test
-	public static void main(String[] args) throws FileNotFoundException, IOException {
-
-//		// led (local)
-//		String jsonld = "jsonld" + File.separator + "led.jsonld";
-//		// led (URL)
-//		URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led.jsonld");
-		// door
-		 URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/door.jsonld");
-		
-		CoapClientImpl cl = new CoapClientImpl();
-		cl.parse(jsonld);
-		
 	}
 
 }

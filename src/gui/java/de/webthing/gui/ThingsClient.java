@@ -10,6 +10,7 @@ import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
 import de.webthing.client.Client;
+import de.webthing.client.ClientFactory;
 import de.webthing.client.impl.CoapClientImpl;
 
 import javax.swing.JTabbedPane;
@@ -34,6 +35,8 @@ public class ThingsClient extends JFrame {
 	private JPanel contentPane;
 	private JTabbedPane tabbedPane;
 	private JFileChooser fileChooser;
+	
+	private ClientFactory clientFactory;
 
 	/**
 	 * Launch the application.
@@ -58,11 +61,19 @@ public class ThingsClient extends JFrame {
 		return fileChooser;
 	}
 	
+	ClientFactory getClientFactory() {
+		if(this.clientFactory == null) {
+			clientFactory = new ClientFactory();
+		}
+		return clientFactory;
+	}
+	
 	void addThingPanel(String fname, String tabTitle) {
 		try {
-			CoapClientImpl cl = new CoapClientImpl();
-			cl.parse(fname);
-			addThingPanel(cl, tabTitle, fname);
+			Client client = getClientFactory().getClient(fname);
+			// CoapClientImpl cl = new CoapClientImpl();
+			// cl.parse(fname);
+			addThingPanel(client, tabTitle, fname);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, "Could not create panel for file '" + fname + "': " + e.getMessage(), "File Error", JOptionPane.ERROR_MESSAGE);
 		}
@@ -70,10 +81,12 @@ public class ThingsClient extends JFrame {
 	
 	void addThingPanel(URL url, String tabTitle) {
 		try {
-			Client cl = new CoapClientImpl();
-			cl.parse(url);
+			Client client = getClientFactory().getClient(url);
 			
-			addThingPanel(cl, tabTitle, url.toString());
+//			Client cl = new CoapClientImpl();
+//			cl.parse(url);
+			
+			addThingPanel(client, tabTitle, url.toString());
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, "Could not create panel for URL '" + url + "': " + e.getMessage(), "URL Error", JOptionPane.ERROR_MESSAGE);
 		}
