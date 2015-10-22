@@ -399,7 +399,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		// }
 		StringBuilder sb = new StringBuilder();
 		sb.append("{\"");
-		sb.append(name);
+		sb.append("value");
 		sb.append("\":");
 		
 		switch(type) {
