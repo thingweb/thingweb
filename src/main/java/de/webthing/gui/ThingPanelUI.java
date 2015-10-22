@@ -529,7 +529,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 			printInfo("PUT request: " + new String(payload), false);
 			client.put(prop, c, this);
 		} catch (IllegalArgumentException e) {
-			JOptionPane.showMessageDialog(null, "No valid value of type '" + outputType + "' given", "Value Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "No valid value of type '" + outputType + "' given: " + e.getMessage(), "Value Error", JOptionPane.ERROR_MESSAGE);
 		} catch (UnsupportedException e) {
 			JOptionPane.showMessageDialog(null, "" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
