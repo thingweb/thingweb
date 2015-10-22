@@ -582,6 +582,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		// TODO deal with other media-types
 		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
 		// TODO how to deal with action response?
+		@SuppressWarnings("unused")
 		String sresp = new String(response.getContent());
 	}
 
