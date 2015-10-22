@@ -94,10 +94,16 @@ public class Launcher {
 		});
 
 		server.onUpdate("brightness", (input) -> {
-			log.info("incoming {}", new String(input.getContent()));
 			Integer value = getValue(input, Integer.class);
 			log.info("setting brightness to " + value);
 			realLed.setBrightnessPercent(value.byteValue());
+		});
+
+		server.onUpdate("colorTemperature", (input) -> {
+			Integer value = getValue(input, Integer.class);
+			log.info("setting temperature to " + value);
+
+			realLed.setColorTemperature(value);
 		});
 
 		server.onInvoke("fadeIn", (input) -> {
@@ -140,9 +146,29 @@ public class Launcher {
 					}
 				}
 			};
+
+			new Thread(execution).run();
+
 			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
 		});
 
+		server.onInvoke("ledOnOff", (input) -> {
+			Boolean target = getValue(input, Boolean.class);
+
+			if(target) {
+				realLed.setBlue((byte) 255);
+				realLed.setGreen((byte) 255);
+				realLed.setRed((byte) 255);
+				realLed.setBrightnessPercent((short) 100);
+			} else {
+				realLed.setBrightnessPercent((short) 0);
+			}
+
+			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
+		});
+
+
+
 		ServientBuilder.start();
+		}
 	}
-}
