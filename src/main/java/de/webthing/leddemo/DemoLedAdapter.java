@@ -70,7 +70,41 @@ public class DemoLedAdapter {
     }
 
     public void setColorTemperature(int colorTemperature) {
+        byte red= (byte) 0xFF;
+        byte green = (byte) 0xFF;
+        byte blue = (byte) 0xFF;
+
+        int ct_scaled = colorTemperature / 100;
+
+        if (ct_scaled > 66) {
+            double fred = ct_scaled - 60;
+            fred = 329.698727446 * Math.pow(fred, -0.1332047592);
+            red = doubletoByte(fred);
+
+            double fgreen = ct_scaled - 60;
+            fgreen =  288.1221695283 * Math.pow(fgreen, -0.0755148492);
+            green = doubletoByte(fgreen);
+        } else {
+            double fgreen = ct_scaled;
+            fgreen = 99.4708025861 * Math.log(fgreen) - 161.1195681661;
+            green = doubletoByte(fgreen);
+
+            if(ct_scaled > 19) {
+                double fblue = ct_scaled - 10;
+                fblue = 138.5177312231 * Math.log(fblue) - 305.0447927307;
+                blue = doubletoByte(fblue);
+            }
+        }
+
+        this.neopixels.colorWipe(NeoPixelColor.fromBytes(red,green,blue));
+
         this.colorTemperature = colorTemperature;
+    }
+
+    private byte doubletoByte(double inp) {
+        if(inp < 0) inp = 0;
+        if(inp > 255) inp = 255;
+        return (byte) inp;
     }
 
     public byte getRed() {
