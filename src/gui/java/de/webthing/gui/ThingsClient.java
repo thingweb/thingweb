@@ -58,18 +58,25 @@ public class ThingsClient extends JFrame {
 		return fileChooser;
 	}
 	
-	void addThingPanel(String fname, String tabTitle) throws FileNotFoundException, IOException {
-		CoapClientImpl cl = new CoapClientImpl();
-		cl.parse(fname);
-		
-		addThingPanel(cl, tabTitle, fname);
+	void addThingPanel(String fname, String tabTitle) {
+		try {
+			CoapClientImpl cl = new CoapClientImpl();
+			cl.parse(fname);
+			addThingPanel(cl, tabTitle, fname);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Could not create panel for file '" + fname + "': " + e.getMessage(), "File Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
-	void addThingPanel(URL url, String tabTitle) throws FileNotFoundException, IOException {
-		Client cl = new CoapClientImpl();
-		cl.parse(url);
-		
-		addThingPanel(cl, tabTitle, url.toString());
+	void addThingPanel(URL url, String tabTitle) {
+		try {
+			Client cl = new CoapClientImpl();
+			cl.parse(url);
+			
+			addThingPanel(cl, tabTitle, url.toString());
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Could not create panel for URL '" + url + "': " + e.getMessage(), "URL Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
 	
@@ -88,8 +95,12 @@ public class ThingsClient extends JFrame {
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	public ThingsClient() throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException, FileNotFoundException, IOException {
-		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+	public ThingsClient() {
+		// try to use system look and feel (if possible)
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (UnsupportedLookAndFeelException | InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
+		}
 		
 		setTitle("ThingClient");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
