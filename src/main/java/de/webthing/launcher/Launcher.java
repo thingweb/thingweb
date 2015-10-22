@@ -94,6 +94,7 @@ public class Launcher {
 		});
 
 		server.onUpdate("brightness", (input) -> {
+			log.info("incoming {}", new String(input.getContent()));
 			Integer value = getValue(input, Integer.class);
 			log.info("setting brightness to " + value);
 			realLed.setBrightnessPercent(value.byteValue());
@@ -101,11 +102,12 @@ public class Launcher {
 
 		server.onInvoke("fadeIn", (input) -> {
 			Integer duration = getValue(input, Integer.class);
+			log.info("fading in over {}s",duration);
 			Runnable execution = new Runnable() {
 				@Override
 				public void run() {
 					int steps = duration * 1000 / STEPLENGTH;
-					int delta = 100 / steps;
+					int delta = Math.max(100 / steps,1);
 
 					short brightness = 0;
 					realLed.setBrightnessPercent(brightness);
@@ -128,7 +130,7 @@ public class Launcher {
 				@Override
 				public void run() {
 					int steps = duration * 1000 / STEPLENGTH;
-					int delta = 100 / steps;
+					int delta = Math.max(100 / steps,1);
 
 					short brightness = 100;
 					realLed.setBrightnessPercent(brightness);
