@@ -30,6 +30,9 @@ import de.webthing.thing.Content;
 import de.webthing.thing.MediaType;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
+import org.eclipse.californium.core.coap.CoAP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,6 +45,7 @@ import java.util.stream.Collectors;
 public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
     private final Map<String,RESTListener> resmap = new HashMap<>();
+	private Logger log = LoggerFactory.getLogger(NanoHttpServer.class);
 
 	public NanoHttpServer() throws IOException {
         super(8080);
@@ -86,8 +90,13 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 			    default:
 			        return new Response(Response.Status.METHOD_NOT_ALLOWED,MIME_PLAINTEXT,"Method not allowed");
 			}
+		} catch (UnsupportedOperationException e) {
+			return new Response(Status.METHOD_NOT_ALLOWED, MIME_PLAINTEXT, e.toString());
+		} catch (IllegalArgumentException e) {
+			return new Response(Status.BAD_REQUEST, MIME_PLAINTEXT, e.toString());
 		} catch (Exception e) {
-			return new Response(Response.Status.INTERNAL_ERROR,MIME_PLAINTEXT,e.getLocalizedMessage());
+			log.error("callback raised error", e);
+			return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, e.toString());
 		}
 
 	}

@@ -25,15 +25,18 @@
 package de.webthing.launcher;
 
 import de.webthing.desc.DescriptionParser;
-import de.webthing.leddemo.DemoLed;
 import de.webthing.leddemo.DemoLedAdapter;
 import de.webthing.servient.ServientBuilder;
 import de.webthing.servient.ThingServer;
+import de.webthing.thing.Content;
+import de.webthing.thing.MediaType;
 import de.webthing.thing.Thing;
+import de.webthing.util.encoding.ContentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Map;
 
 
 /**
@@ -42,34 +45,102 @@ import java.io.File;
 public class Launcher {
 
 	private static final Logger log = LoggerFactory.getLogger(Launcher.class);
+	private static final int STEPLENGTH = 100;
+
+	private static <T> T getValue (Content c, Class<T> clazz) {
+		Map map = (Map) ContentHelper.parse(c, Map.class);
+		Object o = map.get("value");
+
+		try {
+			return clazz.cast(o);
+		} catch(ClassCastException e) {
+			String msg = String.format(
+					"expected value to be of type %s, not %s in %s",
+					clazz,
+					o.getClass(),
+					new String(c.getContent())
+					);
+			log.warn(msg);
+			throw new IllegalArgumentException(msg);
+		}
+	}
 
 	public static void main(String[] args) throws Exception {
 		ServientBuilder.initialize();
 
-		String ledTD = "jsonld" + File.separator + "led.jsonld";
+		String ledTD = "jsonld" + File.separator + "fancy_led.jsonld";
 
 		Thing led = new Thing(DescriptionParser.fromFile(ledTD));
 		ThingServer server = ServientBuilder.newThingServer(led);
 
-		DemoLed realLed = new DemoLedAdapter();
+		DemoLedAdapter realLed = new DemoLedAdapter();
 
-		server.onUpdate("rgbValueBlue", (nV) -> {
-			//byte blueValue = nV.getContent().toNumber();
-			log.info("setting blue value to {}", nV.getContent().toString());
-			byte blueValue = (byte) 255;
-			realLed.setBlue(blueValue);
+		server.onUpdate("rgbValueBlue", (input) -> {
+			Integer value = getValue(input, Integer.class);
+			log.info("setting blue value to " + value);
+			realLed.setBlue((byte) value.intValue());
 		});
 
-		server.onInvoke("fadeIn", (secs) -> {
-			String msg = "I am fading out over " + secs + "  s...";
-			System.out.println(msg);
-			return msg;
+		server.onUpdate("rgbValueRed", (input) -> {
+			Integer value = getValue(input, Integer.class);
+			log.info("setting red value to " + value);
+			realLed.setRed((byte) value.intValue());
 		});
-		server.onInvoke("fadeOut", (secs) -> {	String msg = "I am fading out over " + secs + "  s..."; System.out.println(msg); return msg;  });
 
+		server.onUpdate("rgbValueGreen", (input) -> {
+			Integer value = getValue(input, Integer.class);
+			log.info("setting green value to " + value);
+			realLed.setGreen((byte) value.intValue());
+		});
+
+		server.onUpdate("brightness", (input) -> {
+			Integer value = getValue(input, Integer.class);
+			log.info("setting brightness to " + value);
+			realLed.setBrightnessPercent(value.byteValue());
+		});
+
+		server.onInvoke("fadeIn", (input) -> {
+			Integer duration = getValue(input, Integer.class);
+			Runnable execution = new Runnable() {
+				@Override
+				public void run() {
+					int steps = duration * 1000 / STEPLENGTH;
+					int delta = 100 / steps;
+
+					short brightness = 0;
+					realLed.setBrightnessPercent(brightness);
+					while(brightness < 100) {
+						realLed.setBrightnessPercent(brightness);
+						brightness += delta;
+					}
+				}
+			};
+
+			//TODO assign resource for thread (outside)
+			new Thread(execution).run();
+
+			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
+		});
+
+		server.onInvoke("fadeOut", (input) -> {
+			Integer duration = getValue(input, Integer.class);
+			Runnable execution = new Runnable() {
+				@Override
+				public void run() {
+					int steps = duration * 1000 / STEPLENGTH;
+					int delta = 100 / steps;
+
+					short brightness = 100;
+					realLed.setBrightnessPercent(brightness);
+					while(brightness > 0) {
+						realLed.setBrightnessPercent(brightness);
+						brightness -= delta;
+					}
+				}
+			};
+			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
+		});
 
 		ServientBuilder.start();
-		
-		System.in.read();
 	}
 }

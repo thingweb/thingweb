@@ -144,7 +144,7 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 
 	@Override
-	public void onInvoke(String actionName, Function<Object, Object> callback) {
+	public void onInvoke(String actionName, Function<Content, Content> callback) {
 		Action action = m_thingModel.getAction(actionName);
 		m_state.addHandler(action, callback);
 	}

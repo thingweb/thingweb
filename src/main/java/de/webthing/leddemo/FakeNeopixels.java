@@ -35,14 +35,16 @@ import org.slf4j.LoggerFactory;
 public class FakeNeopixels implements Neopixels {
 
     private static Logger log = LoggerFactory.getLogger(FakeNeopixels.class);
+    private NeoPixelColor myColor = NeoPixelColor.fromValue(0);
+    private int brightness =0;
 
     private static String colorToString(NeoPixelColor color) {
-        return color.red + "," + color.green + "," + color.blue;
+        return (255+color.red) + "," + (255+color.green) + "," + (255+color.blue);
     }
 
     @Override
     public int getBrightness() {
-        return 0;
+        return brightness;
     }
 
     @Override
@@ -57,31 +59,36 @@ public class FakeNeopixels implements Neopixels {
 
     @Override
     public void setBrightness(int i) {
+        brightness = i;
         log.info("brightness set to "  + i);
     }
 
     @Override
     public void setColor(int i, NeoPixelColor neoPixelColor) {
-
+        myColor = neoPixelColor;
+        log.info("color of LED " + i + " set to "  + colorToString(myColor));
     }
 
     @Override
-    public void setColor(int i, byte b, byte b1, byte b2) {
-
+    public void setColor(int i, byte r, byte g, byte b) {
+        myColor = NeoPixelColor.fromBytes(r,g,b);
+        log.info("color of LED " + i + " set to "  + colorToString(myColor));
     }
 
     @Override
     public void setColor(int i, long l) {
-
+        myColor = NeoPixelColor.fromValue(l);
+        log.info("color of LED " + i + " set to "  + colorToString(myColor));
     }
 
     @Override
     public void colorWipe(NeoPixelColor neoPixelColor) {
-
+        myColor = neoPixelColor;
+        log.info("color set to "  + colorToString(neoPixelColor));
     }
 
     @Override
     public NeoPixelColor getColor(int i) {
-        return null;
+        return myColor;
     }
 }

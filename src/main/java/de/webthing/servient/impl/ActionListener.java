@@ -46,7 +46,7 @@ public class ActionListener extends AbstractRESTListener {
 
     @Override
 	public Content onGet() {
-    	return new Content(("Action: " + action.getName()).getBytes(), MediaType.TEXT_PLAIN);
+		return new Content(("Action: " + action.getName()).getBytes(), MediaType.TEXT_PLAIN);
 	}
 
 
@@ -58,8 +58,8 @@ public class ActionListener extends AbstractRESTListener {
 
 			//TODO parsing and smart cast
 
-			Function<Content, Content> bytehandler = (Function<Content, Content>) handler;
-			bytehandler.apply(data);
+			Function<Content, Content> contentHandler = (Function<Content, Content>) handler;
+			contentHandler.apply(data);
 
 	}
 
@@ -71,9 +71,9 @@ public class ActionListener extends AbstractRESTListener {
 
 		//TODO parsing and smart cast
 
-		Function<Content, Content> bytehandler = (Function<Content, Content>) handler;
-		bytehandler.apply(data);
+		Function<Content, Content> ContentHandler = (Function<Content, Content>) handler;
+		Content response = ContentHandler.apply(data);
 
-		return new Content("OK".getBytes(), MediaType.TEXT_PLAIN);
+		return response;
 	}
 }

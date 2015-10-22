@@ -41,7 +41,7 @@ public interface ThingServer extends ThingInterface {
 	 */
 	void addInteractionListener(InteractionListener listener);
 
-	void onInvoke(String actionName, Function<Object, Object> callback);
+	void onInvoke(String actionName, Function<Content, Content> callback);
 
 	void onUpdate(String propertyName, Consumer<Content> callback);
 }

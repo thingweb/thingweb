@@ -56,7 +56,7 @@ public class PropertyListener extends AbstractRESTListener {
     @Override
 	public void onPut(Content data) {
 		if (!property.isWriteable()) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException(property.getName() + " is not writable");
 		}
 
 		multiBindingThingServer.writeProperty(property, data);

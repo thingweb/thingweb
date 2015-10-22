@@ -40,17 +40,21 @@ public class ContentHelper {
 
     public static final ObjectMapper mapper = new ObjectMapper();
 
-    public static Object parse(Content c, Class<?> expected) throws IOException {
-        switch (c.getMediaType()) {
-            case TEXT_PLAIN:
-                return new String(c.getContent());
-            case APPLICATION_JSON:
-                return parseJSON(c.getContent(), expected);
-            case APPLICATION_XML:
-            case APPLICATION_EXI:
-            case UNDEFINED:
-            default:
-                throw new InputMismatchException("406 Not-Acceptable");
+    public static Object parse(Content c, Class<?> expected) {
+        try {
+            switch (c.getMediaType()) {
+                case TEXT_PLAIN:
+                    return new String(c.getContent());
+                case APPLICATION_JSON:
+                    return parseJSON(c.getContent(), expected);
+                case APPLICATION_XML:
+                case APPLICATION_EXI:
+                case UNDEFINED:
+                default:
+                    throw new IllegalArgumentException("406 Not-Acceptable");
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("parsing failed",e);
         }
     }
 
