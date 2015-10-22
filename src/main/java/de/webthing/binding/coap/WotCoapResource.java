@@ -84,7 +84,6 @@ public class WotCoapResource extends CoapResource {
             Content response = m_restListener.onGet();
         	int contentFormat = getCoapContentFormat(response.getMediaType());
         	exchange.respond(CoAP.ResponseCode.CONTENT, response.getContent(), contentFormat);
-            
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
         } catch (Exception e) {
@@ -114,14 +113,13 @@ public class WotCoapResource extends CoapResource {
         try {
         	byte[] reqPayload = exchange.getRequestPayload();
         	System.out.println("RequestOptions: " + exchange.getRequestOptions());
-        	Content request = new Content(reqPayload, MediaType.TEXT_PLAIN);
+            MediaType mt = getMediaType(exchange.getRequestOptions());
+            Content request = new Content(reqPayload, mt);
         	Content response = m_restListener.onPost(request);
         	int contentFormat = getCoapContentFormat(response.getMediaType());
-        	exchange.respond(CoAP.ResponseCode.CREATED, response.getContent(), contentFormat);
-        	 
-            // byte[] resp = m_restListener.onPost(exchange.getRequestText().getBytes());
+
             //TODO: add Location Option to response
-            // exchange.respond(CoAP.ResponseCode.CREATED, resp, TEXT_PLAIN);
+        	exchange.respond(CoAP.ResponseCode.CREATED, response.getContent(), contentFormat);
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
         } catch (IllegalArgumentException e) {
