@@ -45,3 +45,21 @@ uploadArchives {
     }
 }
 
+def createScript(project, mainClass, name) {
+    project.tasks.create(name: name, type: CreateStartScripts) {
+        outputDir       = new File(project.buildDir, 'scripts')
+        mainClassName   = mainClass
+        applicationName = name
+        classpath       = project.tasks[JavaPlugin.JAR_TASK_NAME].outputs.files + project.configurations.runtime
+    }
+    project.tasks[name].dependsOn(project.jar)
+
+    project.applicationDistribution.with {
+        into("bin") {
+            from(project.tasks[name])
+            fileMode = 0755
+        }
+    }
+}
+
+createScript(project, 'de.webthing.gui.ThingsClient', 'wot-client')
