@@ -146,7 +146,11 @@ public class MultiBindingThingServer implements ThingServer {
 	@Override
 	public void onInvoke(String actionName, Function<Content, Content> callback) {
 		Action action = m_thingModel.getAction(actionName);
-		m_state.addHandler(action, callback);
+		if(action == null) {
+			log.warning("onInvoke for actionName '" + actionName + "' not found in thing model");
+		} else {
+			m_state.addHandler(action, callback);
+		}
 	}
 
 	@Override
