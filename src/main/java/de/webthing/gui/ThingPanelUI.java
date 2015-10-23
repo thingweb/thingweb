@@ -534,7 +534,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		try {
 			byte[] payload = getPayload(prop, outputType, svalue);
 			Content c = new Content(payload, mediaType);
-			printInfo("PUT request: " + new String(payload), false);
+			printInfo("PUT request for " + prop + ": " + new String(payload), false);
 			client.put(prop, c, this);
 		} catch (IllegalArgumentException e) {
 			JOptionPane.showMessageDialog(null, "No valid value of type '" + outputType + "' given: " + e.getMessage(), "Value Error", JOptionPane.ERROR_MESSAGE);
@@ -547,7 +547,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		try {
 			byte[] payload = getPayload(prop, inputType, svalue);
 			Content c = new Content(payload, mediaType);
-			printInfo("Action request: " + new String(payload), false);
+			printInfo("Action request for " + prop + ": " + new String(payload), false);
 			client.action(prop, c, this);
 		} catch (IllegalArgumentException e) {
 			JOptionPane.showMessageDialog(null, "No valid value of type '" + inputType + "' given", "Value Error", JOptionPane.ERROR_MESSAGE);
