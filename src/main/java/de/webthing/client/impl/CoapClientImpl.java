@@ -50,34 +50,46 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	Map<String, CoapObserveRelation> observes = new HashMap<>();
 	
-	final String coapProperties = "/properties/";
-	final String coapActions = "/actions/";
-	
 	public CoapClientImpl(Protocol prot, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
 		super(prot.getUri(), properties, actions, events);
 	}
-
 	
 	
 	public void put(String propertyName, Content propertyValue, Callback callback) {
-		CoapClient coap = new CoapClient(uri + coapProperties + propertyName);
+		doCoapPut(propertyName, propertyValue, callback, true);
+	}
+	
+	
+	protected void doCoapPut(String name, Content value, Callback callback, boolean isPut) {
+		String uriPart = isPut ? URI_PART_PROPERTIES : URI_PART_ACTIONS;
+		CoapClient coap = new CoapClient(uri + uriPart + name);
 		coap.put(new CoapHandler() {
 
 			@Override
 			public void onLoad(CoapResponse response) {
 				Content content = new Content(response.getPayload(), WotCoapResource.getMediaType(response.getOptions()));
-				callback.onPut(propertyName, content);
+				if(isPut) {
+					callback.onPut(name, content);
+				} else {
+					// action
+					callback.onAction(name, content);
+				}
 			}
 
 			@Override
 			public void onError() {
-				callback.onPutError(propertyName);
+				if(isPut) {
+					callback.onPutError(name);
+				} else {
+					// action
+					callback.onActionError(name);
+				}
 			}
-		}, propertyValue.getContent(), WotCoapResource.getCoapContentFormat(propertyValue.getMediaType()));
+		}, value.getContent(), WotCoapResource.getCoapContentFormat(value.getMediaType()));
 	}
 	
 	public void get(String propertyName, Callback callback) {
-		CoapClient coap = new CoapClient(uri + coapProperties + propertyName);
+		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName);
 
 		// asynchronous
 		coap.get(new CoapHandler() {
@@ -96,7 +108,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	
 	public void observe(String propertyName, Callback callback) {
-		CoapClient coap = new CoapClient(uri + coapProperties + propertyName);
+		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName);
 		// observing
 		CoapObserveRelation relation = coap.observe(new CoapHandler() {
 			@Override
@@ -117,24 +129,11 @@ public class CoapClientImpl extends AbstractClientImpl {
 	public void observeRelease(String propertyName) {
 		observes.remove(propertyName).proactiveCancel();
 	}
+
 	
 	public void action(String actionName, Content actionValue, Callback callback) {
-		// TODO similar to PUT ?
-		
-		CoapClient coap = new CoapClient(uri + coapActions + actionName);
-		coap.put(new CoapHandler() {
-
-			@Override
-			public void onLoad(CoapResponse response) {
-				Content content = new Content(response.getPayload(), WotCoapResource.getMediaType(response.getOptions()));
-				callback.onAction(actionName, content);
-			}
-
-			@Override
-			public void onError() {
-				callback.onActionError(actionName);
-			}
-		}, actionValue.getContent(), WotCoapResource.getCoapContentFormat(actionValue.getMediaType()));
+		// similar to PUT
+		doCoapPut(actionName, actionValue, callback, false);
 	}
 
 }

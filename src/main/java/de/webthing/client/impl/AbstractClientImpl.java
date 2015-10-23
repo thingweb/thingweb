@@ -42,6 +42,9 @@ public abstract class AbstractClientImpl implements Client {
 	/** e.g., http://www.example.com:80/ledlamp or coap://localhost:5683/thingsMyLED */
 	final String uri;
 
+	final String URI_PART_PROPERTIES = "/properties/";
+	final String URI_PART_ACTIONS = "/actions/";
+	
 	public AbstractClientImpl(String uri, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
 		this.uri = uri;
 		this.properties = properties;

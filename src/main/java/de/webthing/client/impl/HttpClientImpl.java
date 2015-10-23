@@ -52,14 +52,11 @@ public class HttpClientImpl extends AbstractClientImpl {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpClientImpl.class);
 
+	private static final int NTHREDS = 5;
+	private static final ExecutorService executorService = Executors.newFixedThreadPool(NTHREDS);
+
 	Map<String, CoapObserveRelation> observes = new HashMap<>();
-
-	final String httpProperties = "/properties/";
-	final String httpActions = "/actions/";
-
-	private final int NTHREDS = 10;
-	private final ExecutorService executorService = Executors.newFixedThreadPool(NTHREDS);
-
+	
 	public HttpClientImpl(Protocol prot, List<PropertyDescription> properties, List<ActionDescription> actions,
 			List<EventDescription> events) {
 		super(prot.getUri(), properties, actions, events);
@@ -67,11 +64,11 @@ public class HttpClientImpl extends AbstractClientImpl {
 
 	public void put(String propertyName, Content propertyValue, Callback callback) throws UnsupportedException {
 		try {
-			CallbackPutTask cgt = new CallbackPutTask(propertyName, propertyValue, callback);
+			CallbackPutActionTask cgt = new CallbackPutActionTask(propertyName, propertyValue, callback, true);
 			executorService.submit(cgt);
 		} catch (Exception e) {
 			log.warn(e.getMessage());
-			callback.onGetError(propertyName);
+			callback.onPutError(propertyName);
 		}
 	}
 
@@ -95,8 +92,13 @@ public class HttpClientImpl extends AbstractClientImpl {
 	}
 
 	public void action(String actionName, Content actionValue, Callback callback) throws UnsupportedException {
-		callback.onActionError(actionName);
-		// throw new UnsupportedException("Not implemented yet");
+		try {
+			CallbackPutActionTask cgt = new CallbackPutActionTask(actionName, actionValue, callback, false);
+			executorService.submit(cgt);
+		} catch (Exception e) {
+			log.warn(e.getMessage());
+			callback.onActionError(actionName);
+		}
 	}
 
 	class CallbackGetTask implements Runnable {
@@ -110,7 +112,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 
 		public void run() {
 			try {
-				URL url = new URL(uri + httpProperties + propertyName);
+				URL url = new URL(uri + URI_PART_PROPERTIES + propertyName);
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setRequestMethod("GET");
 
@@ -136,20 +138,23 @@ public class HttpClientImpl extends AbstractClientImpl {
 		}
 	}
 
-	class CallbackPutTask implements Runnable {
-		private final String propertyName;
+	class CallbackPutActionTask implements Runnable {
+		private final String name;
 		private final Callback callback;
 		private final Content propertyValue;
+		private final boolean isPut;
 
-		CallbackPutTask(String propertyName, Content propertyValue, Callback callback) {
-			this.propertyName = propertyName;
+		CallbackPutActionTask(String name, Content propertyValue, Callback callback, boolean isPut) {
+			this.name = name;
 			this.propertyValue = propertyValue;
 			this.callback = callback;
+			this.isPut = isPut;
 		}
 
 		public void run() {
 			try {
-				URL url = new URL(uri + httpProperties + propertyName);
+				String uriPart = isPut ? URI_PART_PROPERTIES : URI_PART_ACTIONS;
+				URL url = new URL(uri + uriPart + name);
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setDoOutput(true);
 				httpCon.setRequestProperty("content-type", propertyValue.getMediaType().mediaType);
@@ -173,10 +178,14 @@ public class HttpClientImpl extends AbstractClientImpl {
 				
 				Content c = new Content(baos.toByteArray(), mediaType);
 
-				callback.onPut(propertyName,  c);
+				if(isPut) {
+					callback.onPut(name,  c);
+				} else {
+					callback.onAction(name, c);
+				}
 			} catch (Exception e) {
 				log.warn(e.getMessage());
-				callback.onPutError(propertyName);
+				callback.onPutError(name);
 			}
 		}
 	}
