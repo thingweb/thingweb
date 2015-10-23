@@ -30,13 +30,26 @@ import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
-import de.webthing.desc.pojo.ThingDescription;
-import org.json.JSONObject;
+import com.siemens.ct.exi.exceptions.EXIException;
 
+import de.webthing.desc.pojo.ThingDescription;
+import de.webthing.encoding.json.exi.EXI4JSONParser;
+
+import org.json.JSONObject;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 public class DescriptionParser {
@@ -81,14 +94,48 @@ public class DescriptionParser {
 
     public static ThingDescription fromURL(URL url) throws JsonParseException,
             IOException {
-        Object jsonld = JsonUtils.fromURL(url);
-        return mapJson(jsonld);
+    	
+    	InputStream is = new BufferedInputStream(url.openStream());
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	int b;
+    	while((b = is.read()) != -1) {
+    		baos.write(b);
+    	}
+    	return fromBytes(baos.toByteArray());
+    	
+//        Object jsonld = JsonUtils.fromURL(url);
+//        return mapJson(jsonld);
+    }
+    
+    static ThingDescription fromBytes(byte[] data) throws JsonParseException, IOException {
+    	ByteArrayInputStream bais = new ByteArrayInputStream(data);
+    	bais.mark(5); // latest after 4 byte cookie and 2 distinguishing bits it is clear whether we deal with an EXI file
+    	try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			
+			EXI4JSONParser e4j = new EXI4JSONParser(new PrintStream(baos));
+			e4j.parse(new InputSource(bais));
+			
+			// adapt to new input stream
+			bais = new ByteArrayInputStream(baos.toByteArray());
+			
+		} catch (EXIException | SAXException e) {
+			// something went wrong with EXI --> reset & try json
+			bais.reset();
+		}
+    	
+    	Object jsonld = JsonUtils.fromInputStream(bais);
+    	return mapJson(jsonld);
     }
 
     public static ThingDescription fromFile(String fname)
             throws FileNotFoundException, IOException {
-        Object jsonld = JsonUtils.fromReader(new FileReader(fname));
-        return mapJson(jsonld);
+    	Path path = Paths.get(fname);
+    	byte[] data = Files.readAllBytes(path);
+    	return fromBytes(data);
+    	
+//    	Object jsonld = JsonUtils.fromReader(new FileReader(fname));
+//        return mapJson(jsonld);
     }
 
 }

@@ -1,0 +1,35 @@
+<map xmlns="http://www.w3.org/2013/XSL/json">
+    <map key="metadata">
+        <array key="encodings">
+            <string>JSON</string>
+        </array>
+        <string key="name">Traffic Light Thing</string>
+        <map key="protocols">
+            <map key="CoAP">
+                <number key="priority">1</number>
+                <string key="uri">coap://192.168.4.1:5683/</string>
+            </map>
+        </map>
+    </map>
+    <string key="@context">http://w3c.github.io/wot/w3c-wot-td-context.jsonld</string>
+    <array key="interactions">
+        <map>
+            <string key="outputData">xsd:string</string>
+            <string key="@type">Property</string>
+            <string key="name">lightStatus</string>
+            <boolean key="writable">false</boolean>
+        </map>
+        <map>
+            <string key="outputData"/>
+            <string key="inputData"/>
+            <string key="@type">Action</string>
+            <string key="name">turnGreen</string>
+        </map>
+        <map>
+            <string key="outputData"/>
+            <string key="inputData"/>
+            <string key="@type">Action</string>
+            <string key="name">turnRed</string>
+        </map>
+    </array>
+</map>

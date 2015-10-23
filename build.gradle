@@ -25,7 +25,7 @@ dependencies {
     compile 'com.github.jsonld-java:jsonld-java:0.6.0'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
     compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
-
+	compile group: 'com.siemens.ct.exi', name: 'exificient', version: '0.9.4'
 
     compile files("lib/neopixel-java-1.0-SNAPSHOT.jar")
     runtime files("lib/jsonld-context.jar")
