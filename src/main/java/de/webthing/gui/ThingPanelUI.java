@@ -83,6 +83,10 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 	final Client client;
 	// TODO support other media types
 	final MediaType mediaType = MediaType.APPLICATION_JSON;
+	
+	// TODO remove if settled
+	final boolean useValueInJsonInsteadOfName = true;
+	final String JSON_VALUE = "value";
 
 	JButton buttonPropertiesGET;
 	
@@ -399,7 +403,11 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		// }
 		StringBuilder sb = new StringBuilder();
 		sb.append("{\"");
-		sb.append("value");
+		if(useValueInJsonInsteadOfName) {
+			sb.append(JSON_VALUE);
+		} else {
+			sb.append(name);
+		}
 		sb.append("\":");
 		
 		switch(type) {
@@ -561,13 +569,19 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 		printInfo("PUT failure for " + propertyName, true);
 	}
 	
+	
 	private void get(String msgPrefix, String propertyName, Content response) {
 		// TODO deal with other media-types
 		assert(response.getMediaType() == MediaType.TEXT_PLAIN || response.getMediaType() == MediaType.APPLICATION_JSON);
 		JTextComponent text = propertyComponents.get(propertyName);
 		try {
 			JsonNode n = ContentHelper.readJSON(response.getContent());
-			String t = n.get(propertyName).asText();
+			String t;
+			if(useValueInJsonInsteadOfName) {
+				t = n.get(JSON_VALUE).asText();
+			} else {
+				t = n.get(propertyName).asText();
+			}
 			text.setText(t);
 			if(text.getText().equals(t)) {
 				printInfo(msgPrefix + " success for " + propertyName + ": " + new String(response.getContent()), false);
@@ -575,7 +589,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 				// Note: should not happen though
 				printInfo(msgPrefix + " error for " + propertyName + ": setting text-field value '" + t + "' failed", true);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			printInfo(msgPrefix + " parsing error for " + propertyName + " and value = '" + new String(response.getContent()) + "'. Invalid or empty message?", true);
 		}		
 	}
