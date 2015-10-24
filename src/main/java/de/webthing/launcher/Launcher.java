@@ -110,10 +110,12 @@ public class Launcher {
 					int steps = duration * 1000 / STEPLENGTH;
 					int delta = Math.max(100 / steps,1);
 
-					short brightness = 0;
-					realLed.setBrightnessPercent(brightness);
+					int brightness = 0;
+					//realLed.setBrightnessPercent(brightness);
+					server.setProperty("brightness",brightness);
 					while(brightness < 100) {
-						realLed.setBrightnessPercent(brightness);
+						//realLed.setBrightnessPercent(brightness);
+						server.setProperty("brightness", brightness);
 						brightness += delta;
 					}
 				}
@@ -133,10 +135,10 @@ public class Launcher {
 					int steps = duration * 1000 / STEPLENGTH;
 					int delta = Math.max(100 / steps,1);
 
-					short brightness = 100;
-					realLed.setBrightnessPercent(brightness);
+					int brightness = 100;
+					realLed.setBrightnessPercent((short) brightness);
 					while(brightness > 0) {
-						realLed.setBrightnessPercent(brightness);
+						realLed.setBrightnessPercent((short) brightness);
 						brightness -= delta;
 					}
 				}

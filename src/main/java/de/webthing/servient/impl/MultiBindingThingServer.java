@@ -81,6 +81,9 @@ public class MultiBindingThingServer implements ThingServer {
 		
 		synchronized (m_stateSync) {
 			m_state.setProperty(property, value);
+			for (InteractionListener listener : m_listeners) {
+				listener.onWriteProperty(property.getName(), value, this);
+			}
 		}
 	}
 
@@ -107,10 +110,15 @@ public class MultiBindingThingServer implements ThingServer {
 			throw new IllegalArgumentException(
 					"property does not belong to served thing");
 		}
-		
+
+		for (InteractionListener listener : m_listeners) {
+			listener.onReadProperty(property.getName(), this);
+		}
+
 		synchronized (m_stateSync) {
 			return m_state.getProperty(property);
 		}
+
 	}
 
 
@@ -230,24 +238,6 @@ public class MultiBindingThingServer implements ThingServer {
 		interactionListeners.entrySet().stream().forEachOrdered(
 				entry -> resources.newResource(entry.getKey(), entry.getValue())
 		);
-	}
-	
-	
-	Object readProperty(Property property) {
-		for (InteractionListener listener : m_listeners) {
-			listener.onReadProperty(property.getName(), this);
-		}
-		
-		return getProperty(property);
-	}
-	
-	
-	void writeProperty(Property property, Object value) {
-		setProperty(property, value);
-		
-		for (InteractionListener listener : m_listeners) {
-			listener.onWriteProperty(property.getName(), value, this);
-		}
 	}
 
 	/**

@@ -50,7 +50,7 @@ public class PropertyListener extends AbstractRESTListener {
 			throw new UnsupportedOperationException();
 		}
 
-		Object res = multiBindingThingServer.readProperty(property);
+		Object res = multiBindingThingServer.getProperty(property);
 		return ContentHelper.makeJsonValue(res);
 
 	}
@@ -62,7 +62,7 @@ public class PropertyListener extends AbstractRESTListener {
 		}
 
 		Object o = ContentHelper.getValueFromJson(data);
-		multiBindingThingServer.writeProperty(property, o);
+		multiBindingThingServer.setProperty(property, o);
 	}
 
 }
