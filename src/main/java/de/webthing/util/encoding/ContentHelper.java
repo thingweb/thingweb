@@ -27,11 +27,12 @@ package de.webthing.util.encoding;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.webthing.servient.impl.ValueType;
 import de.webthing.thing.Content;
 import de.webthing.thing.MediaType;
 
 import java.io.IOException;
-import java.util.InputMismatchException;
+import java.util.Map;
 
 /**
  * Created by Johannes on 20.10.2015.
@@ -98,4 +99,14 @@ public class ContentHelper {
         }
         return json;
     }
+
+    public static Object getValueFromJson(Content data) {
+        Map map = (Map) parse(data, Map.class);
+        return map.get("value");
+    }
+
+    public static Content makeJsonValue(Object data) {
+        return wrap(new ValueType(data),MediaType.APPLICATION_JSON);
+    }
+
 }

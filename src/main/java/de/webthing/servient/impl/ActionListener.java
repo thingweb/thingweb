@@ -28,7 +28,9 @@ import de.webthing.binding.AbstractRESTListener;
 import de.webthing.thing.Action;
 import de.webthing.thing.Content;
 import de.webthing.thing.MediaType;
+import de.webthing.util.encoding.ContentHelper;
 
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -45,7 +47,7 @@ public class ActionListener extends AbstractRESTListener {
     }
 
     @Override
-	public Content onGet() {
+	public Content onGet()	{
 		return new Content(("Action: " + action.getName()).getBytes(), MediaType.TEXT_PLAIN);
 	}
 
@@ -54,26 +56,27 @@ public class ActionListener extends AbstractRESTListener {
 	public void onPut(Content data) {
 		Function<?, ?> handler = m_state.getHandler(action);
 
-			System.out.println("invoking " + action.getName());
+		System.out.println("invoking " + action.getName());
 
-			//TODO parsing and smart cast
+		Map map = (Map) ContentHelper.parse(data, Map.class);
+		Object o = map.get("value");
 
-			Function<Content, Content> contentHandler = (Function<Content, Content>) handler;
-			contentHandler.apply(data);
-
+		Function<Object, Object> objectHandler = (Function<Object, Object>) handler;
+		objectHandler.apply(o);
 	}
 
     @Override
 	public Content onPost(Content data) {
-
 		Function<?, ?> handler = m_state.getHandler(action);
+
 		System.out.println("invoking " + action.getName());
 
-		//TODO parsing and smart cast
+		Map map = (Map) ContentHelper.parse(data, Map.class);
+		Object o = map.get("value");
 
-		Function<Content, Content> ContentHandler = (Function<Content, Content>) handler;
-		Content response = ContentHandler.apply(data);
+		Function<Object, Object> objectHandler = (Function<Object, Object>) handler;
+		Object response = objectHandler.apply(o);
 
-		return response;
+		return ContentHelper.wrap(response,MediaType.APPLICATION_JSON);
 	}
 }

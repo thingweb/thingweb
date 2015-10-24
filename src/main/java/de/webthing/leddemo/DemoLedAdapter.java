@@ -97,7 +97,7 @@ public class DemoLedAdapter {
         }
 
         this.neopixels.colorWipe(NeoPixelColor.fromBytes(red,green,blue));
-
+        this.currentColor = NeoPixelColor.fromBytes(red,green,blue);
         this.colorTemperature = colorTemperature;
     }
 

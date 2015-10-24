@@ -70,7 +70,7 @@ public class MultiBindingThingServer implements ThingServer {
 	
 
 	@Override
-	public void setProperty(Property property, Content value) {
+	public void setProperty(Property property, Object value) {
 		if (null == property) {
 			throw new IllegalArgumentException("property must not be null");
 		}
@@ -86,7 +86,7 @@ public class MultiBindingThingServer implements ThingServer {
 
 
 	@Override
-	public void setProperty(String propertyName, Content value) {
+	public void setProperty(String propertyName, Object value) {
 		Property prop = m_thingModel.getProperty(propertyName);
 		
 		if (null == prop) {
@@ -99,7 +99,7 @@ public class MultiBindingThingServer implements ThingServer {
 	
 	
 	@Override
-	public Content getProperty(Property property) {
+	public Object getProperty(Property property) {
 		if (null == property) {
 			throw new IllegalArgumentException("property must not be null");
 		}
@@ -115,7 +115,7 @@ public class MultiBindingThingServer implements ThingServer {
 
 
 	@Override
-	public Content getProperty(String propertyName) {
+	public Object getProperty(String propertyName) {
 		Property prop = m_thingModel.getProperty(propertyName);
 		
 		if (null == prop) {
@@ -127,7 +127,7 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 
 	@Override
-	public void onUpdate(String propertyName, Consumer<Content> callback) {
+	public void onUpdate(String propertyName, Consumer<Object> callback) {
 		this.addInteractionListener(new InteractionListener() {
 			@Override
 			public void onReadProperty(String propertyName, ThingServer thingServer) {
@@ -135,7 +135,7 @@ public class MultiBindingThingServer implements ThingServer {
 			}
 
 			@Override
-			public void onWriteProperty(String changedPropertyName, Content newValue, ThingServer thingServer) {
+			public void onWriteProperty(String changedPropertyName, Object newValue, ThingServer thingServer) {
 				if(changedPropertyName.equals(propertyName)) {
 					callback.accept(newValue);
 				}
@@ -144,7 +144,7 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 
 	@Override
-	public void onInvoke(String actionName, Function<Content, Content> callback) {
+	public void onInvoke(String actionName, Function<Object, Object> callback) {
 		Action action = m_thingModel.getAction(actionName);
 		if(action == null) {
 			log.warning("onInvoke for actionName '" + actionName + "' not found in thing model");
@@ -233,7 +233,7 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 	
 	
-	Content readProperty(Property property) {
+	Object readProperty(Property property) {
 		for (InteractionListener listener : m_listeners) {
 			listener.onReadProperty(property.getName(), this);
 		}
@@ -242,7 +242,7 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 	
 	
-	void writeProperty(Property property, Content value) {
+	void writeProperty(Property property, Object value) {
 		setProperty(property, value);
 		
 		for (InteractionListener listener : m_listeners) {

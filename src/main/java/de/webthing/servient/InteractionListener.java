@@ -51,5 +51,5 @@ public interface InteractionListener {
 	 */
 	void onReadProperty(String propertyName, ThingServer thingServer);
 
-	void onWriteProperty(String propertyName, Content newValue, ThingServer thingServer);
+	void onWriteProperty(String propertyName, Object newValue, ThingServer thingServer);
 }

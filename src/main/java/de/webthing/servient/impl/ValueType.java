@@ -24,45 +24,28 @@
 
 package de.webthing.servient.impl;
 
-import de.webthing.binding.AbstractRESTListener;
-import de.webthing.thing.Content;
-import de.webthing.thing.Property;
-import de.webthing.util.encoding.ContentHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Created by Johannes on 07.10.2015.
+ * Created by mchn1210 on 20.10.2015.
  */
-public class PropertyListener extends AbstractRESTListener {
-    private final Property property;
-    private MultiBindingThingServer multiBindingThingServer;
-	private static final Logger log = LoggerFactory.getLogger(PropertyListener.class);
 
-	public PropertyListener(MultiBindingThingServer multiBindingThingServer, Property property) {
-        this.property = property;
-        this.multiBindingThingServer = multiBindingThingServer;
+public class ValueType {
+
+    @JsonProperty("value")
+    private Object value;
+
+    public Object getValue() {
+        return value;
     }
 
-    @Override
-	public Content onGet() {
-		if (!property.isReadable()) {
-			throw new UnsupportedOperationException();
-		}
+    public void setValue(Object value) {
+        this.value = value;
+    }
 
-		Object res = multiBindingThingServer.readProperty(property);
-		return ContentHelper.makeJsonValue(res);
+    public ValueType(Object value) {
 
-	}
-
-    @Override
-	public void onPut(Content data) {
-		if (!property.isWriteable()) {
-			throw new UnsupportedOperationException(property.getName() + " is not writable");
-		}
-
-		Object o = ContentHelper.getValueFromJson(data);
-		multiBindingThingServer.writeProperty(property, o);
-	}
-
+        this.value = value;
+    }
 }
