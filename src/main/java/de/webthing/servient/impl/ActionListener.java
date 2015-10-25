@@ -29,6 +29,8 @@ import de.webthing.thing.Action;
 import de.webthing.thing.Content;
 import de.webthing.thing.MediaType;
 import de.webthing.util.encoding.ContentHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -38,6 +40,7 @@ import java.util.function.Function;
  */
 public class ActionListener extends AbstractRESTListener {
 
+	private static final Logger log = LoggerFactory.getLogger(ActionListener.class);
     private final Action action;
     private StateContainer m_state;
 
@@ -54,6 +57,7 @@ public class ActionListener extends AbstractRESTListener {
 
     @Override
 	public void onPut(Content data) {
+		log.warn("Action was called by PUT, which is a violation of the spec");
 		Function<?, ?> handler = m_state.getHandler(action);
 
 		System.out.println("invoking " + action.getName());

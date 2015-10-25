@@ -142,23 +142,23 @@ public class HttpClientImpl extends AbstractClientImpl {
 		private final String name;
 		private final Callback callback;
 		private final Content propertyValue;
-		private final boolean isPut;
+		private final boolean isAction;
 
-		CallbackPutActionTask(String name, Content propertyValue, Callback callback, boolean isPut) {
+		CallbackPutActionTask(String name, Content propertyValue, Callback callback, boolean isAction) {
 			this.name = name;
 			this.propertyValue = propertyValue;
 			this.callback = callback;
-			this.isPut = isPut;
+			this.isAction = isAction;
 		}
 
 		public void run() {
 			try {
-				String uriPart = isPut ? URI_PART_PROPERTIES : URI_PART_ACTIONS;
+				String uriPart = isAction ? URI_PART_PROPERTIES : URI_PART_ACTIONS;
 				URL url = new URL(uri + uriPart + name);
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setDoOutput(true);
 				httpCon.setRequestProperty("content-type", propertyValue.getMediaType().mediaType);
-				httpCon.setRequestMethod("PUT");
+				httpCon.setRequestMethod(isAction ? "Post" : "PUT");
 
 				OutputStream out = httpCon.getOutputStream();
 				out.write(propertyValue.getContent());
@@ -178,7 +178,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 				
 				Content c = new Content(baos.toByteArray(), mediaType);
 
-				if(isPut) {
+				if(isAction) {
 					callback.onPut(name,  c);
 				} else {
 					callback.onAction(name, c);

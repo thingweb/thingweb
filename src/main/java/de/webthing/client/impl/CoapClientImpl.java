@@ -61,33 +61,42 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	
 	protected void doCoapPut(String name, Content value, Callback callback, boolean isPut) {
-		String uriPart = isPut ? URI_PART_PROPERTIES : URI_PART_ACTIONS;
+		String uriPart = URI_PART_PROPERTIES;
 		CoapClient coap = new CoapClient(uri + uriPart + name);
 		coap.put(new CoapHandler() {
 
 			@Override
 			public void onLoad(CoapResponse response) {
 				Content content = new Content(response.getPayload(), WotCoapResource.getMediaType(response.getOptions()));
-				if(isPut) {
 					callback.onPut(name, content);
-				} else {
-					// action
-					callback.onAction(name, content);
-				}
 			}
 
 			@Override
 			public void onError() {
-				if(isPut) {
 					callback.onPutError(name);
-				} else {
-					// action
-					callback.onActionError(name);
-				}
 			}
 		}, value.getContent(), WotCoapResource.getCoapContentFormat(value.getMediaType()));
 	}
-	
+
+	protected void doCoapPost(String name, Content value, Callback callback) {
+		final String uriPart = URI_PART_ACTIONS;
+		CoapClient coap = new CoapClient(uri + uriPart + name);
+		coap.post(new CoapHandler() {
+
+			@Override
+			public void onLoad(CoapResponse response) {
+				Content content = new Content(response.getPayload(), WotCoapResource.getMediaType(response.getOptions()));
+				callback.onAction(name, content);
+			}
+
+			@Override
+			public void onError() {
+				callback.onActionError(name);
+			}
+		}, value.getContent(), WotCoapResource.getCoapContentFormat(value.getMediaType()));
+	}
+
+
 	public void get(String propertyName, Callback callback) {
 		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName);
 
@@ -132,8 +141,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 
 	
 	public void action(String actionName, Content actionValue, Callback callback) {
-		// similar to PUT
-		doCoapPut(actionName, actionValue, callback, false);
+		doCoapPost(actionName, actionValue, callback);
 	}
 
 }
