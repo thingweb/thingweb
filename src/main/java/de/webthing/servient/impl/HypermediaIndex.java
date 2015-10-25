@@ -33,6 +33,7 @@ import de.webthing.thing.MediaType;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Observer;
 
 /**
  * Created by mchn1210 on 20.10.2015.
@@ -80,5 +81,10 @@ public class HypermediaIndex implements RESTListener {
     @Override
     public void onDelete() throws UnsupportedOperationException, RuntimeException {
         throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public void addObserver(Observer o) {
+        //ignored
     }
 }

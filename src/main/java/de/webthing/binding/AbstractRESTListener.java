@@ -26,7 +26,9 @@ package de.webthing.binding;
 
 import de.webthing.thing.Content;
 
-public class AbstractRESTListener implements RESTListener {
+import java.util.Observable;
+
+public class AbstractRESTListener extends Observable implements RESTListener {
 
 	@Override
 	public Content onGet() {
