@@ -5,7 +5,7 @@ apply plugin: 'application'
 mainClassName = "de.webthing.launcher.Launcher"
 def guiClassName = "de.webthing.gui.ThingsClient"
 sourceCompatibility = 1.8
-version = '1.0'
+version = '1.1-ALPHA'
 
 jar {
     manifest {
