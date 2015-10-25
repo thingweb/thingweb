@@ -101,7 +101,7 @@ public class DemoLedAdapter {
         this.colorTemperature = colorTemperature;
     }
 
-    private byte doubletoByte(double inp) {
+    public static byte doubletoByte(double inp) {
         if(inp < 0) inp = 0;
         if(inp > 255) inp = 255;
         return (byte) inp;

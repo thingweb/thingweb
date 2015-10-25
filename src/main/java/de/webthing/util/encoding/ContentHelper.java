@@ -27,12 +27,15 @@ package de.webthing.util.encoding;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.webthing.launcher.Launcher;
 import de.webthing.servient.impl.ValueType;
 import de.webthing.thing.Content;
 import de.webthing.thing.MediaType;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by Johannes on 20.10.2015.
@@ -40,6 +43,7 @@ import java.util.Map;
 public class ContentHelper {
 
     public static final ObjectMapper mapper = new ObjectMapper();
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(ContentHelper.class);
 
     public static Object parse(Content c, Class<?> expected) {
         try {
@@ -109,4 +113,18 @@ public class ContentHelper {
         return wrap(new ValueType(data),MediaType.APPLICATION_JSON);
     }
 
+    public static <T> T ensureClass(Object o, Class<T> clazz) {
+        try {
+            return clazz.cast(o);
+        } catch(ClassCastException e) {
+            String msg = String.format(
+                    "expected value to be of type %s, not %s in %s",
+                    clazz,
+                    o.getClass(),
+                    o.toString()
+                    );
+            log.warn(msg);
+            throw new IllegalArgumentException(msg);
+        }
+    }
 }

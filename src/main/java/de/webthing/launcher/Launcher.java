@@ -31,6 +31,7 @@ import de.webthing.servient.ThingServer;
 import de.webthing.thing.Content;
 import de.webthing.thing.MediaType;
 import de.webthing.thing.Thing;
+import de.webthing.util.encoding.ContentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,21 +46,6 @@ public class Launcher {
 	private static final Logger log = LoggerFactory.getLogger(Launcher.class);
 	private static final int STEPLENGTH = 100;
 
-	private static <T> T ensureClass(Object o, Class<T> clazz) {
-		try {
-			return clazz.cast(o);
-		} catch(ClassCastException e) {
-			String msg = String.format(
-					"expected value to be of type %s, not %s in %s",
-					clazz,
-					o.getClass(),
-					o.toString()
-					);
-			log.warn(msg);
-			throw new IllegalArgumentException(msg);
-		}
-	}
-
 	public static void main(String[] args) throws Exception {
 		ServientBuilder.initialize();
 
@@ -68,41 +54,77 @@ public class Launcher {
 		Thing led = new Thing(DescriptionParser.fromFile(ledTD));
 		ThingServer server = ServientBuilder.newThingServer(led);
 
+		attachHandlers(server);
+
+		ServientBuilder.start();
+		}
+
+	public static void attachHandlers(final ThingServer server) {
 		DemoLedAdapter realLed = new DemoLedAdapter();
 
 		server.onUpdate("rgbValueBlue", (input) -> {
-			Integer value = ensureClass(input, Integer.class);
+			Integer value = ContentHelper.ensureClass(input, Integer.class);
 			log.info("setting blue value to " + value);
 			realLed.setBlue((byte) value.intValue());
 		});
 
 		server.onUpdate("rgbValueRed", (input) -> {
-			Integer value = ensureClass(input, Integer.class);
+			Integer value = ContentHelper.ensureClass(input, Integer.class);
 			log.info("setting red value to " + value);
 			realLed.setRed((byte) value.intValue());
 		});
 
 		server.onUpdate("rgbValueGreen", (input) -> {
-			Integer value = ensureClass(input, Integer.class);
+			Integer value = ContentHelper.ensureClass(input, Integer.class);
 			log.info("setting green value to " + value);
 			realLed.setGreen((byte) value.intValue());
 		});
 
 		server.onUpdate("brightness", (input) -> {
-			Integer value = ensureClass(input, Integer.class);
+			Integer value = ContentHelper.ensureClass(input, Integer.class);
 			log.info("setting brightness to " + value);
 			realLed.setBrightnessPercent(value.byteValue());
 		});
 
 		server.onUpdate("colorTemperature", (input) -> {
-			Integer value = ensureClass(input, Integer.class);
-			log.info("setting temperature to " + value);
+			Integer colorTemperature = ContentHelper.ensureClass(input, Integer.class);
+			log.info("setting color temperature to " + colorTemperature +  " K");
 
-			realLed.setColorTemperature(value);
+			int red=  255;
+			int green =  255;
+			int blue =  255;
+
+			int ct_scaled = colorTemperature / 100;
+
+			if (ct_scaled > 66) {
+				double fred = ct_scaled - 60;
+				fred = 329.698727446 * Math.pow(fred, -0.1332047592);
+				red = DemoLedAdapter.doubletoByte(fred);
+
+				double fgreen = ct_scaled - 60;
+				fgreen =  288.1221695283 * Math.pow(fgreen, -0.0755148492);
+				green = DemoLedAdapter.doubletoByte(fgreen);
+			} else {
+				double fgreen = ct_scaled;
+				fgreen = 99.4708025861 * Math.log(fgreen) - 161.1195681661;
+				green = DemoLedAdapter.doubletoByte(fgreen);
+
+				if(ct_scaled > 19) {
+					double fblue = ct_scaled - 10;
+					fblue = 138.5177312231 * Math.log(fblue) - 305.0447927307;
+					blue = DemoLedAdapter.doubletoByte(fblue);
+				}
+			}
+
+			log.info("color temperature equals (" + red + "," + green + "," + blue +")");
+			server.setProperty("rgbValueGreen",green);
+			server.setProperty("rgbValueRed",red);
+			server.setProperty("rgbValueBlue", blue);
+
 		});
 
 		server.onInvoke("fadeIn", (input) -> {
-			Integer duration = ensureClass(input, Integer.class);
+			Integer duration = ContentHelper.ensureClass(input, Integer.class);
 			log.info("fading in over {}s",duration);
 			Runnable execution = new Runnable() {
 				@Override
@@ -111,11 +133,14 @@ public class Launcher {
 					int delta = Math.max(100 / steps,1);
 
 					int brightness = 0;
-					//realLed.setBrightnessPercent(brightness);
 					server.setProperty("brightness",brightness);
 					while(brightness < 100) {
-						//realLed.setBrightnessPercent(brightness);
 						server.setProperty("brightness", brightness);
+						try {
+							Thread.sleep(STEPLENGTH);
+						} catch (InterruptedException e) {
+							break;
+						}
 						brightness += delta;
 					}
 				}
@@ -128,7 +153,7 @@ public class Launcher {
 		});
 
 		server.onInvoke("fadeOut", (input) -> {
-			Integer duration = ensureClass(input, Integer.class);
+			Integer duration = ContentHelper.ensureClass(input, Integer.class);
 			Runnable execution = new Runnable() {
 				@Override
 				public void run() {
@@ -136,9 +161,14 @@ public class Launcher {
 					int delta = Math.max(100 / steps,1);
 
 					int brightness = 100;
-					realLed.setBrightnessPercent((short) brightness);
+					server.setProperty("brightness", brightness);
 					while(brightness > 0) {
-						realLed.setBrightnessPercent((short) brightness);
+						server.setProperty("brightness", brightness);
+						try {
+							Thread.sleep(STEPLENGTH);
+						} catch (InterruptedException e) {
+							break;
+						}
 						brightness -= delta;
 					}
 				}
@@ -150,22 +180,23 @@ public class Launcher {
 		});
 
 		server.onInvoke("ledOnOff", (input) -> {
-			Boolean target = ensureClass(input, Boolean.class);
+			Boolean target = ContentHelper.ensureClass(input, Boolean.class);
 
 			if(target) {
-				realLed.setBlue((byte) 255);
-				realLed.setGreen((byte) 255);
-				realLed.setRed((byte) 255);
-				realLed.setBrightnessPercent((short) 100);
+				server.setProperty("rgbValueGreen",255);
+				server.setProperty("rgbValueRed",255);
+				server.setProperty("rgbValueBlue", 255);
+
+				server.setProperty("brightness", 100);
 			} else {
-				realLed.setBrightnessPercent((short) 0);
+				server.setProperty("brightness", 0);
+
+				server.setProperty("rgbValueGreen",0);
+				server.setProperty("rgbValueRed",0);
+				server.setProperty("rgbValueBlue", 0);
 			}
 
 			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
 		});
-
-
-
-		ServientBuilder.start();
-		}
 	}
+}
