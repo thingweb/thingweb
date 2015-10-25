@@ -42,6 +42,7 @@ public class WotCoapResource extends CoapResource {
     public WotCoapResource(String name, RESTListener restListener) {
         super(name);
         this.m_restListener = restListener;
+        this.setObservable(true);
     }
 
     public static int getCoapContentFormat(MediaType mediaType) {

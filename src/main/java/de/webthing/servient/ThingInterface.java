@@ -42,7 +42,7 @@ public interface ThingInterface {
 	 * @param property the property, must not be null
 	 * @param value the new value must not be null
 	 */
-	void setProperty(Property property, Content value);
+	void setProperty(Property property, Object value);
 	
 	
 	/**
@@ -58,13 +58,12 @@ public interface ThingInterface {
 	 * @param propertyName name of the property to set, must not be null
 	 * @param value the new value must not be null
 	 */
-	void setProperty(String propertyName, Content value);
+	void setProperty(String propertyName, Object value);
 	
 	
-	Content getProperty(Property property);
+	Object getProperty(Property property);
 	
 	
-	Content getProperty(String propertyName);
-
+	Object getProperty(String propertyName);
 
 }

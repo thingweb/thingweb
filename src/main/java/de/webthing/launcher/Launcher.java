@@ -31,12 +31,10 @@ import de.webthing.servient.ThingServer;
 import de.webthing.thing.Content;
 import de.webthing.thing.MediaType;
 import de.webthing.thing.Thing;
-import de.webthing.util.encoding.ContentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Map;
 
 
 /**
@@ -47,10 +45,7 @@ public class Launcher {
 	private static final Logger log = LoggerFactory.getLogger(Launcher.class);
 	private static final int STEPLENGTH = 100;
 
-	private static <T> T getValue (Content c, Class<T> clazz) {
-		Map map = (Map) ContentHelper.parse(c, Map.class);
-		Object o = map.get("value");
-
+	private static <T> T ensureClass(Object o, Class<T> clazz) {
 		try {
 			return clazz.cast(o);
 		} catch(ClassCastException e) {
@@ -58,7 +53,7 @@ public class Launcher {
 					"expected value to be of type %s, not %s in %s",
 					clazz,
 					o.getClass(),
-					new String(c.getContent())
+					o.toString()
 					);
 			log.warn(msg);
 			throw new IllegalArgumentException(msg);
@@ -76,38 +71,38 @@ public class Launcher {
 		DemoLedAdapter realLed = new DemoLedAdapter();
 
 		server.onUpdate("rgbValueBlue", (input) -> {
-			Integer value = getValue(input, Integer.class);
+			Integer value = ensureClass(input, Integer.class);
 			log.info("setting blue value to " + value);
 			realLed.setBlue((byte) value.intValue());
 		});
 
 		server.onUpdate("rgbValueRed", (input) -> {
-			Integer value = getValue(input, Integer.class);
+			Integer value = ensureClass(input, Integer.class);
 			log.info("setting red value to " + value);
 			realLed.setRed((byte) value.intValue());
 		});
 
 		server.onUpdate("rgbValueGreen", (input) -> {
-			Integer value = getValue(input, Integer.class);
+			Integer value = ensureClass(input, Integer.class);
 			log.info("setting green value to " + value);
 			realLed.setGreen((byte) value.intValue());
 		});
 
 		server.onUpdate("brightness", (input) -> {
-			Integer value = getValue(input, Integer.class);
+			Integer value = ensureClass(input, Integer.class);
 			log.info("setting brightness to " + value);
 			realLed.setBrightnessPercent(value.byteValue());
 		});
 
 		server.onUpdate("colorTemperature", (input) -> {
-			Integer value = getValue(input, Integer.class);
+			Integer value = ensureClass(input, Integer.class);
 			log.info("setting temperature to " + value);
 
 			realLed.setColorTemperature(value);
 		});
 
 		server.onInvoke("fadeIn", (input) -> {
-			Integer duration = getValue(input, Integer.class);
+			Integer duration = ensureClass(input, Integer.class);
 			log.info("fading in over {}s",duration);
 			Runnable execution = new Runnable() {
 				@Override
@@ -115,10 +110,12 @@ public class Launcher {
 					int steps = duration * 1000 / STEPLENGTH;
 					int delta = Math.max(100 / steps,1);
 
-					short brightness = 0;
-					realLed.setBrightnessPercent(brightness);
+					int brightness = 0;
+					//realLed.setBrightnessPercent(brightness);
+					server.setProperty("brightness",brightness);
 					while(brightness < 100) {
-						realLed.setBrightnessPercent(brightness);
+						//realLed.setBrightnessPercent(brightness);
+						server.setProperty("brightness", brightness);
 						brightness += delta;
 					}
 				}
@@ -131,17 +128,17 @@ public class Launcher {
 		});
 
 		server.onInvoke("fadeOut", (input) -> {
-			Integer duration = getValue(input, Integer.class);
+			Integer duration = ensureClass(input, Integer.class);
 			Runnable execution = new Runnable() {
 				@Override
 				public void run() {
 					int steps = duration * 1000 / STEPLENGTH;
 					int delta = Math.max(100 / steps,1);
 
-					short brightness = 100;
-					realLed.setBrightnessPercent(brightness);
+					int brightness = 100;
+					realLed.setBrightnessPercent((short) brightness);
 					while(brightness > 0) {
-						realLed.setBrightnessPercent(brightness);
+						realLed.setBrightnessPercent((short) brightness);
 						brightness -= delta;
 					}
 				}
@@ -153,7 +150,7 @@ public class Launcher {
 		});
 
 		server.onInvoke("ledOnOff", (input) -> {
-			Boolean target = getValue(input, Boolean.class);
+			Boolean target = ensureClass(input, Boolean.class);
 
 			if(target) {
 				realLed.setBlue((byte) 255);

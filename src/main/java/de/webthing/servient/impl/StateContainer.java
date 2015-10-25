@@ -53,7 +53,7 @@ public class StateContainer {
 	}
 	
 
-	public void setProperty(Property property, Content value) {
+	public void setProperty(Property property, Object value) {
 		if (null == property) {
 			throw new IllegalArgumentException("property must not be null");
 		}
@@ -71,7 +71,7 @@ public class StateContainer {
 	}
 	
 	
-	public Content getProperty(Property property) {
+	public Object getProperty(Property property) {
 		if (null == property) {
 			throw new IllegalArgumentException("property must not be null");
 		}
@@ -112,7 +112,7 @@ public class StateContainer {
 	}
 	
 	
-	private final Map<Property,Content> m_values = new HashMap<>();
+	private final Map<Property,Object> m_values = new HashMap<>();
 //	private final Map<Action, List<Callable<Object>>> m_callbacks = new HashMap<>();
 	private final Map<Action, Function<?, ?>> m_handlers = new HashMap<>();
 }
