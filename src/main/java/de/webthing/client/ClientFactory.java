@@ -62,6 +62,8 @@ public class ClientFactory {
 	List<Protocol> protocols;
 	
 	public Client getClient(URL jsonld) throws JsonParseException, IOException, UnsupportedException {
+		//TODO if coap-uri, use coapclient to download and feed received bytes to TD-parser
+
 		td = DescriptionParser.fromURL(jsonld);
 		processThingDescription();
 		

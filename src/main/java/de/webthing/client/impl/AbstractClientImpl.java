@@ -39,7 +39,7 @@ public abstract class AbstractClientImpl implements Client {
 	final List<ActionDescription> actions;
 	final List<EventDescription> events;
 	
-	/** e.g., http://www.example.com:80/ledlamp or coap://localhost:5683/thingsMyLED */
+	/** e.g., http://www.example.com:80/ledlamp or coap://localhost:5683/things/MyLED */
 	final String uri;
 
 	final String URI_PART_PROPERTIES = "/";
