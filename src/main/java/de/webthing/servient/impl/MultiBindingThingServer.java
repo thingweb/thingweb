@@ -188,51 +188,32 @@ public class MultiBindingThingServer implements ThingServer {
 				)
 		);
 
-		// thing root
-		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName(), new HypermediaIndex(
-						new HyperMediaLink("actions",Defines.BASE_THING_URL + m_thingModel.getName() +
-								Defines.REL_ACTION_URL),
-						new HyperMediaLink("properties",Defines.BASE_THING_URL + m_thingModel.getName() +
-								Defines.REL_PROPERTY_URL)
-				)
-		);
-
-
-
 		Collection<Property> properties = m_thingModel.getProperties();
 		Collection<Action> actions = m_thingModel.getActions();
 
-		List<HyperMediaLink> actionLinks = new LinkedList<>();
-		List<HyperMediaLink> propertyLinks = new LinkedList<>();
+		List<HyperMediaLink> interactionLinks = new LinkedList<>();
 
 		Map<String,RESTListener> interactionListeners = new HashMap<>();
 
 		// collect properties
 		for (Property property : properties) {
-			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
-					Defines.REL_PROPERTY_URL + property.getName();
+			String url = Defines.BASE_THING_URL + m_thingModel.getName() + "/" + property.getName();
 			interactionListeners.put(url, new PropertyListener(this, property));
-			propertyLinks.add(new HyperMediaLink("property", url));
+			interactionLinks.add(new HyperMediaLink("property", url));
 		}
 
 		// collect actions
 		for (Action action : actions) {
 			//TODO optimize by preconstructing strings and using format
-			String url = Defines.BASE_THING_URL + m_thingModel.getName() +
-					Defines.REL_ACTION_URL + action.getName();
+			String url = Defines.BASE_THING_URL + m_thingModel.getName() + "/" + action.getName();
 			interactionListeners.put(url, new ActionListener(m_state, action));
-			actionLinks.add(new HyperMediaLink("action", url));
+			interactionLinks.add(new HyperMediaLink("action", url));
 		}
 
-		// actions
-		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName() +
-						Defines.REL_ACTION_URL,
-				new HypermediaIndex(actionLinks));
-
-		// properties
-		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName() +
-						Defines.REL_PROPERTY_URL,
-				new HypermediaIndex(propertyLinks));
+		// thing root
+		resources.newResource(Defines.BASE_THING_URL + m_thingModel.getName(),
+				new HypermediaIndex(interactionLinks)
+		);
 
 		// leaves last (side-effect of coap-binding)
 		interactionListeners.entrySet().stream().forEachOrdered(
