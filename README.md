@@ -2,14 +2,20 @@
 
 Thingweb is an open source implementation of the WoT servient model of W3C's interest group on the web of things (W3C WoT IG).
 
+For information about what it does, see also:
+
+* [the tutorial on thing description](https://github.com/w3c/wot/blob/master/TF-TD/Tutorial.md)
+* [the bindings specs fornhe WoT IG plugfest](https://github.com/w3c/wot/tree/master/plugfest)
+
 ### Building ###
 
 * we are using [Gradle](https://gradle.org/) as build tool
 * the application is built using the [Gradle Application Plugin](https://docs.gradle.org/current/userguide/application_plugin.html)
 
-There is a also build setup on [drone.io](https://drone.io/bitbucket.org/ascholz/thingweb/latest). 
+There is a also build setup on [drone.io](https://drone.io/bitbucket.org/ascholz/thingweb/latest).
 [![Build Status](https://drone.io/bitbucket.org/ascholz/thingweb/status.png)](https://drone.io/bitbucket.org/ascholz/thingweb/latest)
 
+**The latest artifacts can be downloaded [here](https://drone.io/bitbucket.org/ascholz/thingweb/files)**
 
 ### Contribution guidelines ###
 
@@ -20,15 +26,15 @@ There is a also build setup on [drone.io](https://drone.io/bitbucket.org/ascholz
 
 ### TODO List (adopt a topic by PR-ing your name) ###
 
-- [ ] code for LED example
-- [ ] client UI
 - [ ] interface for token checking
-- [ ] client-side code
 - [ ] API documentation
-- [ ] serialization-agnostic data types
 - [ ] further protocol bindings for XMPP and WS
 - [ ] test framework
 - [ ] tests
+
+### License ###
+
+MIT License
 
 ### Who do I talk to? ###
 
