@@ -3,6 +3,7 @@ apply plugin: 'eclipse'
 apply plugin: 'application'
 
 mainClassName = "de.webthing.launcher.Launcher"
+def guiClassName = "de.webthing.gui.ThingsClient"
 sourceCompatibility = 1.8
 version = '1.0'
 
@@ -30,7 +31,7 @@ dependencies {
     compile files("lib/neopixel-java-1.0-SNAPSHOT.jar")
     runtime files("lib/jsonld-context.jar")
 
-    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile group: 'junit', name: 'junit', version: '4.8'
 }
 
 test {
@@ -43,6 +44,23 @@ uploadArchives {
            dirs 'repos'
        }
     }
+}
+
+task runServer(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = mainClassName
+
+    workingDir = "./src/dist"
+}
+
+
+task runGui(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = guiClassName
+
+    workingDir = "./src/dist"
 }
 
 def createScript(project, mainClass, name) {
@@ -62,4 +80,4 @@ def createScript(project, mainClass, name) {
     }
 }
 
-createScript(project, 'de.webthing.gui.ThingsClient', 'wot-client')
+createScript(project, guiClassName, 'wot-client')
