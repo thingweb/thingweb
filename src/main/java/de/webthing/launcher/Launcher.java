@@ -147,7 +147,7 @@ public class Launcher {
 			};
 
 			//TODO assign resource for thread (outside)
-			new Thread(execution).run();
+			new Thread(execution).start();
 
 			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
 		});
@@ -174,7 +174,7 @@ public class Launcher {
 				}
 			};
 
-			new Thread(execution).run();
+			new Thread(execution).start();
 
 			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
 		});
