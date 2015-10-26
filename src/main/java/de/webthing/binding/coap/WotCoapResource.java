@@ -71,7 +71,7 @@ public class WotCoapResource extends CoapResource {
         MediaType mt;
         if(os.getContentFormat() == -1) {
         	// undefined
-        	mt = MediaType.UNDEFINED;
+        	mt = MediaType.APPLICATION_JSON;
         } else {
         	String mediaType = MediaTypeRegistry.toString(os.getContentFormat());
         	mt = MediaType.getMediaType(mediaType);
@@ -97,12 +97,13 @@ public class WotCoapResource extends CoapResource {
         try {
         	// e.g., "Content-Format":"application/exi", "Accept":"application/xml"
             MediaType mt = getMediaType(exchange.getRequestOptions());
+
             m_restListener.onPut(new Content(exchange.getRequestPayload(), mt));
             exchange.respond(CoAP.ResponseCode.CHANGED);
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
         } catch (IllegalArgumentException e) {
-            exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+            exchange.respond(CoAP.ResponseCode.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -124,7 +125,7 @@ public class WotCoapResource extends CoapResource {
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
         } catch (IllegalArgumentException e) {
-            exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+            exchange.respond(CoAP.ResponseCode.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
