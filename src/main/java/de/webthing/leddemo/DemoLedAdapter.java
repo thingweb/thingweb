@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class DemoLedAdapter {
     private int colorTemperature;
     private int lastBrightness = (byte) 20;
-    private NeoPixelColor currentColor = new NeoPixelColor(0,0,0);
+    private NeoPixelColor currentColor = new NeoPixelColor(255,255,255);
 
     private Neopixels neopixels;
     private static final String libname = "rpi_ws281x";
