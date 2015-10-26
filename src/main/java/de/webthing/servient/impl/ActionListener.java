@@ -75,8 +75,7 @@ public class ActionListener extends AbstractRESTListener {
 
 		System.out.println("invoking " + action.getName());
 
-		Map map = (Map) ContentHelper.parse(data, Map.class);
-		Object o = map.get("value");
+		Object o = ContentHelper.getValueFromJson(data);
 
 		Function<Object, Object> objectHandler = (Function<Object, Object>) handler;
 		Object response = objectHandler.apply(o);

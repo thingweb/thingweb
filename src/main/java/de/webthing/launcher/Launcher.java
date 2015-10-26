@@ -118,23 +118,23 @@ public class Launcher {
 
 			log.info("color temperature equals (" + red + "," + green + "," + blue +")");
 			server.setProperty("rgbValueGreen",green);
-			server.setProperty("rgbValueRed",red);
+			server.setProperty("rgbValueRed", red);
 			server.setProperty("rgbValueBlue", blue);
 
 		});
 
 		server.onInvoke("fadeIn", (input) -> {
 			Integer duration = ContentHelper.ensureClass(input, Integer.class);
-			log.info("fading in over {}s",duration);
+			log.info("fading in over {}s", duration);
 			Runnable execution = new Runnable() {
 				@Override
 				public void run() {
 					int steps = duration * 1000 / STEPLENGTH;
-					int delta = Math.max(100 / steps,1);
+					int delta = Math.max(100 / steps, 1);
 
 					int brightness = 0;
-					server.setProperty("brightness",brightness);
-					while(brightness < 100) {
+					server.setProperty("brightness", brightness);
+					while (brightness < 100) {
 						server.setProperty("brightness", brightness);
 						try {
 							Thread.sleep(STEPLENGTH);
@@ -198,5 +198,10 @@ public class Launcher {
 
 			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
 		});
+
+		server.onInvoke("trafficLight", (input) -> {
+			log.info("trafic light chaning state");
+			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
+		} );
 	}
 }

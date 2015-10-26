@@ -105,6 +105,7 @@ public class ContentHelper {
     }
 
     public static Object getValueFromJson(Content data) {
+        if (data.getContent().length == 0) return null;
         Map map = (Map) parse(data, Map.class);
         return map.get("value");
     }

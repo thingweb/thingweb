@@ -57,6 +57,11 @@
       "name": "fadeOut",
       "inputData": "xsd:unsignedByte",
       "outputData": ""
+    },  {
+      "@type": "Action",
+      "name": "trafficLight",
+      "inputData": "",
+      "outputData": ""
     }, {
       "@type": "Event",
       "outputData": "xsd:unsignedShort",
