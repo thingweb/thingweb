@@ -26,6 +26,8 @@ package de.webthing.binding;
 
 import de.webthing.thing.Content;
 
+import java.util.Observer;
+
 public interface RESTListener {
 
 	Content onGet() throws UnsupportedOperationException, RuntimeException;
@@ -35,4 +37,6 @@ public interface RESTListener {
 	Content onPost(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
 	
 	void onDelete() throws UnsupportedOperationException,  RuntimeException;
+
+	void addObserver(Observer o);
 }

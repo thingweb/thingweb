@@ -31,10 +31,13 @@ import de.webthing.util.encoding.ContentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
  * Created by Johannes on 07.10.2015.
  */
-public class PropertyListener extends AbstractRESTListener {
+public class PropertyListener extends AbstractRESTListener implements Observer {
     private final Property property;
     private MultiBindingThingServer multiBindingThingServer;
 	private static final Logger log = LoggerFactory.getLogger(PropertyListener.class);
@@ -42,6 +45,7 @@ public class PropertyListener extends AbstractRESTListener {
 	public PropertyListener(MultiBindingThingServer multiBindingThingServer, Property property) {
         this.property = property;
         this.multiBindingThingServer = multiBindingThingServer;
+		property.addObserver(this);
     }
 
     @Override
@@ -65,4 +69,9 @@ public class PropertyListener extends AbstractRESTListener {
 		multiBindingThingServer.setProperty(property, o);
 	}
 
+
+	@Override
+	public void update(Observable o, Object arg) {
+		setChanged();
+	}
 }

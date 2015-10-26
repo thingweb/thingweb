@@ -84,6 +84,7 @@ public class MultiBindingThingServer implements ThingServer {
 			for (InteractionListener listener : m_listeners) {
 				listener.onWriteProperty(property.getName(), value, this);
 			}
+			property.setChanged();
 		}
 	}
 

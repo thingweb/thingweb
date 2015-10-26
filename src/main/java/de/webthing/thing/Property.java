@@ -25,10 +25,12 @@
 package de.webthing.thing;
 
 
+import java.util.Observable;
+
 /**
  * This class is immutable.
  */
-public class Property {
+public class Property extends Observable {
 	/*
 	 * Implementation Note:
 	 * Thing relies on this class to be immutable for synchronization purposes!
@@ -43,8 +45,13 @@ public class Property {
 		m_isReadable = isReadable;
 		m_isWriteable = isWriteable;
 	}
-	
-	
+
+
+	@Override
+	public synchronized void setChanged() {
+		super.setChanged();
+	}
+
 	public String getName() {
 		return m_name;
 	}

@@ -33,10 +33,13 @@ import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.OptionSet;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
  * Created by Johannes on 05.10.2015.
  */
-public class WotCoapResource extends CoapResource {
+public class WotCoapResource extends CoapResource implements  Observer{
     private final RESTListener m_restListener;
 
     public WotCoapResource(String name, RESTListener restListener) {
@@ -142,5 +145,10 @@ public class WotCoapResource extends CoapResource {
         } catch (Exception e) {
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        this.changed();
     }
 }
