@@ -138,11 +138,14 @@ public class ClientFactory {
 		
 		
 		for(Protocol p : protocols) {
-			if(p.getUri().startsWith("coap:")) {
+			String uri = p.getUri().trim();
+			if(uri == null) {
+				// mhhh
+			} else if(uri.startsWith("coap:") || uri.startsWith("coaps:")) {
 				Client c = new CoapClientImpl(p, properties, actions, events);
 				tm.put(p.priority, c);
 				log.info("Found matching client '" + CoapClientImpl.class.getName() + "' with priority " + p.priority);
-			} else if(p.getUri().startsWith("http:")) {
+			} else if(uri.startsWith("http:") || uri.startsWith("https:")) {
 				Client c = new HttpClientImpl(p, properties, actions, events);
 				tm.put(p.priority, c);
 				log.info("Found matching client '" + HttpClientImpl.class.getName() + "' with priority " + p.priority);
