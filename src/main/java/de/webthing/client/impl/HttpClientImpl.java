@@ -158,7 +158,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setDoOutput(true);
 				httpCon.setRequestProperty("content-type", propertyValue.getMediaType().mediaType);
-				httpCon.setRequestMethod(isAction ? "Post" : "PUT");
+				httpCon.setRequestMethod(isAction ? "POST" : "PUT");
 
 				OutputStream out = httpCon.getOutputStream();
 				out.write(propertyValue.getContent());
