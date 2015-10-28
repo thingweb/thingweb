@@ -112,7 +112,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 
 		public void run() {
 			try {
-				URL url = new URL(uri + URI_PART_PROPERTIES + propertyName);
+				URL url = new URL(uri + URI_PART_PROPERTIES + propertyName + (useValueStringInGetAndPutUrl ? "" : "/value"));
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setRequestMethod("GET");
 
@@ -155,10 +155,11 @@ public class HttpClientImpl extends AbstractClientImpl {
 			try {
 				String uriPart = isAction ? URI_PART_PROPERTIES : URI_PART_ACTIONS;
 				URL url;
-				if(!isAction)
-					url = new URL(uri + uriPart + name + "/value");
-				else
+				if(!isAction) {
+					url = new URL(uri + uriPart + name + (useValueStringInGetAndPutUrl ? "" : "/value"));
+				} else {
 					url = new URL(uri + uriPart + name);
+				}
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setDoOutput(true);
 				httpCon.setRequestProperty("content-type", propertyValue.getMediaType().mediaType);

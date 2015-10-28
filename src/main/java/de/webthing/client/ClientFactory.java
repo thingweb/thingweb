@@ -157,6 +157,13 @@ public class ClientFactory {
 			Protocol p = prots.get(ps);
 			protocols.add(p);
 			log.debug("\t" + p.getUri());
+			// clean-up URI (remove appended URI slash if any)
+			String uri = p.getUri();
+			if(uri.endsWith("/")) {
+				uri = uri.substring(0, uri.length()-1);
+				p.uri = uri;
+				log.debug("\t\t" + "clean-up URI by removing trailing '/'");
+			}
 		}
 	}
 

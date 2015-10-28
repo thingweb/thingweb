@@ -62,7 +62,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	protected void doCoapPut(String name, Content value, Callback callback, boolean isPut) {
 		String uriPart = URI_PART_PROPERTIES;
-		CoapClient coap = new CoapClient(uri + uriPart + name);
+		CoapClient coap = new CoapClient(uri + uriPart + name + (useValueStringInGetAndPutUrl ? "" : "/value"));
 		coap.put(new CoapHandler() {
 
 			@Override
@@ -98,7 +98,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 
 
 	public void get(String propertyName, Callback callback) {
-		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName);
+		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
 
 		// asynchronous
 		coap.get(new CoapHandler() {
@@ -117,7 +117,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	
 	public void observe(String propertyName, Callback callback) {
-		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName);
+		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
 		// observing
 		CoapObserveRelation relation = coap.observe(new CoapHandler() {
 			@Override
