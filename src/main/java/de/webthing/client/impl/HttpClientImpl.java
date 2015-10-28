@@ -154,7 +154,11 @@ public class HttpClientImpl extends AbstractClientImpl {
 		public void run() {
 			try {
 				String uriPart = isAction ? URI_PART_PROPERTIES : URI_PART_ACTIONS;
-				URL url = new URL(uri + uriPart + name);
+				URL url;
+				if(!isAction)
+					url = new URL(uri + uriPart + name + "/value");
+				else
+					url = new URL(uri + uriPart + name);
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setDoOutput(true);
 				httpCon.setRequestProperty("content-type", propertyValue.getMediaType().mediaType);
