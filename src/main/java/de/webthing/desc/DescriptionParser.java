@@ -107,7 +107,7 @@ public class DescriptionParser {
 //        return mapJson(jsonld);
     }
     
-    static ThingDescription fromBytes(byte[] data) throws JsonParseException, IOException {
+    public static ThingDescription fromBytes(byte[] data) throws JsonParseException, IOException {
     	ByteArrayInputStream bais = new ByteArrayInputStream(data);
     	bais.mark(5); // latest after 4 byte cookie and 2 distinguishing bits it is clear whether we deal with an EXI file
     	try {

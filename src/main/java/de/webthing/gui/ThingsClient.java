@@ -26,31 +26,28 @@ package de.webthing.gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URI;
 
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
-
-import de.webthing.client.Client;
-import de.webthing.client.ClientFactory;
-
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-
-import java.awt.FlowLayout;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+
+import de.webthing.client.Client;
+import de.webthing.client.ClientFactory;
 
 public class ThingsClient extends JFrame {
 
@@ -91,9 +88,9 @@ public class ThingsClient extends JFrame {
 		return clientFactory;
 	}
 	
-	void addThingPanel(String fname, String tabTitle) {
+	void addThingPanelFile(String fname, String tabTitle) {
 		try {
-			Client client = getClientFactory().getClient(fname);
+			Client client = getClientFactory().getClientFile(fname);
 			// CoapClientImpl cl = new CoapClientImpl();
 			// cl.parse(fname);
 			addThingPanel(client, tabTitle, fname);
@@ -102,12 +99,12 @@ public class ThingsClient extends JFrame {
 		}
 	}
 	
-	void addThingPanel(URL url, String tabTitle) {
+	void addThingPanelUrl(String uri, String tabTitle) {
 		try {
-			Client client = getClientFactory().getClient(url);
-			addThingPanel(client, tabTitle, url.toString());
+			Client client = getClientFactory().getClientUrl(new URI(uri));
+			addThingPanel(client, tabTitle, uri.toString());
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Could not create panel for URL '" + url + "': " + e.getMessage(), "URL Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Could not create panel for URI '" + uri + "': " + e.getMessage(), "URI Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	
@@ -147,7 +144,7 @@ public class ThingsClient extends JFrame {
 		
 		// load led example (local)
 		String jsonld = "jsonld" + File.separator + "led.jsonld";
-		this.addThingPanel(jsonld, "LED (local)");
+		this.addThingPanelFile(jsonld, "LED (local)");
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Add more \"Things\" ... ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -161,7 +158,7 @@ public class ThingsClient extends JFrame {
 				if (JFileChooser.APPROVE_OPTION  == getJFileChooser().showOpenDialog(null) ) {
 					File f = getJFileChooser().getSelectedFile();
 					try {
-						addThingPanel(f.getAbsolutePath(), f.getName());
+						addThingPanelFile(f.getAbsolutePath(), f.getName());
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -170,20 +167,18 @@ public class ThingsClient extends JFrame {
 		});
 		panel.add(btnNewButton);
 		
-		JButton btnNewButton_1 = new JButton("Add JSON-LD URL");
+		JButton btnNewButton_1 = new JButton("Add JSON-LD URI");
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				//Create the JOptionPane.
-				String msg = JOptionPane.showInputDialog("URL");
-				if(msg != null) {
-					try {
-						URL url = new URL(msg);
-						int ip = url.getPath().lastIndexOf("/");
-						String tabTitle = ip > 0 ? url.getPath().substring(ip) : "msg";
-						addThingPanel(url, tabTitle);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+				String url = JOptionPane.showInputDialog("URI");
+				if(url != null) {
+					// javas URL class can't yet handle coap
+					// see java.net.MalformedURLException: unknown protocol: coap
+					// URL url = new URL(msg);
+					int ip = url.lastIndexOf("/");
+					String tabTitle = ip > 0 ? url.substring(ip) : "msg";
+					addThingPanelUrl(url, tabTitle);
 				}
 			}
 		});

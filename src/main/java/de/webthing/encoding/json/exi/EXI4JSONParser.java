@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 
 import javax.xml.transform.TransformerException;
 
@@ -196,7 +197,7 @@ public class EXI4JSONParser extends DefaultHandler {
 	}
 	
 	
-	public static void main(String[] args) throws EXIException, IOException, SAXException, TransformerException, UnsupportedException {
+	public static void main(String[] args) throws EXIException, IOException, SAXException, TransformerException, UnsupportedException, URISyntaxException {
 
 		boolean inFile = true;
 		
@@ -211,7 +212,7 @@ public class EXI4JSONParser extends DefaultHandler {
 			output.close();
 			
 			ClientFactory cf = new ClientFactory();
-			Client c = cf.getClient(f.getAbsolutePath());
+			Client c = cf.getClientFile(f.getAbsolutePath());
 			System.out.println(c);
 			
 		} else {

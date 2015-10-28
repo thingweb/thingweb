@@ -26,6 +26,8 @@ package de.webthing.client;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.eclipse.californium.core.CoapClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,22 +64,47 @@ public class ClientFactory {
 	List<String> encodings;
 	List<Protocol> protocols;
 	
-	public Client getClient(URL jsonld) throws JsonParseException, IOException, UnsupportedException {
-		//TODO if coap-uri, use coapclient to download and feed received bytes to TD-parser
+	boolean isCoapScheme(String scheme) {
+		return("coap".equals(scheme) || "coaps".equals(scheme));
+	}
+	
+	boolean isHttpScheme(String scheme) {
+		return("http".equals(scheme) || "https".equals(scheme));
+	}
 
-		td = DescriptionParser.fromURL(jsonld);
+	public Client getClientUrl(URI jsonld) throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
+		// URL can't handle coap uris --> use URI only
+		if(isCoapScheme(jsonld.getScheme())) {
+			CoapClient coap = new CoapClient(jsonld);
+			
+			// synchronous coap
+			byte[] content = coap.get().getPayload();
+			td = DescriptionParser.fromBytes(content);
+			
+			return getClient();
+		} else {
+			return getClientUrl(jsonld.toURL());
+		}	
+	}
+	
+	protected Client getClient() throws UnsupportedException, URISyntaxException {
+		assert(td != null);
+		
 		processThingDescription();
 		
 		// pick the right client
 		return pickClient();
 	}
 	
-	public Client getClient(String jsonld) throws FileNotFoundException, IOException, UnsupportedException {
+	public Client getClientUrl(URL jsonld) throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
+		// Note: URL can't handle coap --> needs to be done before
+		td = DescriptionParser.fromURL(jsonld);
+		return getClient();
+	}
+	
+	public Client getClientFile(String jsonld) throws FileNotFoundException, IOException, UnsupportedException, URISyntaxException {
 		td = DescriptionParser.fromFile(jsonld);
-		processThingDescription();
-		
-		// pick the right client
-		return pickClient();
+		return getClient();
 	}
 	
 	
@@ -132,20 +160,24 @@ public class ClientFactory {
 		}
 	}
 
-	protected Client pickClient() throws UnsupportedException {
+	protected Client pickClient() throws UnsupportedException, URISyntaxException {
 		// check for right protocol&encoding
 		TreeMap<Integer, Client> tm = new TreeMap<>(); // sorted according priority
 		
 		
 		for(Protocol p : protocols) {
-			if(p.getUri().startsWith("coap:")) {
-				Client c = new CoapClientImpl(p, properties, actions, events);
-				tm.put(p.priority, c);
-				log.info("Found matching client '" + CoapClientImpl.class.getName() + "' with priority " + p.priority);
-			} else if(p.getUri().startsWith("http:")) {
-				Client c = new HttpClientImpl(p, properties, actions, events);
-				tm.put(p.priority, c);
-				log.info("Found matching client '" + HttpClientImpl.class.getName() + "' with priority " + p.priority);
+			String suri = p.getUri();
+			if(suri != null && suri.length()>0){
+				URI uri = new URI(suri);
+				if(isCoapScheme(uri.getScheme())) {
+					Client c = new CoapClientImpl(p, properties, actions, events);
+					tm.put(p.priority, c);
+					log.info("Found matching client '" + CoapClientImpl.class.getName() + "' with priority " + p.priority);
+				} else if(isHttpScheme(uri.getScheme())) {
+					Client c = new HttpClientImpl(p, properties, actions, events);
+					tm.put(p.priority, c);
+					log.info("Found matching client '" + HttpClientImpl.class.getName() + "' with priority " + p.priority);
+				}				
 			}
 		}
 		
@@ -165,7 +197,7 @@ public class ClientFactory {
 
 	}
 	
-	public static void main(String[] args) throws FileNotFoundException, IOException, UnsupportedException {
+	public static void main(String[] args) throws FileNotFoundException, IOException, UnsupportedException, URISyntaxException {
 
 //		// led (local)
 //		String jsonld = "jsonld" + File.separator + "led.jsonld";
@@ -176,7 +208,7 @@ public class ClientFactory {
 		
 		ClientFactory cf = new ClientFactory();
 		@SuppressWarnings("unused")
-		Client client = cf.getClient(jsonld);
+		Client client = cf.getClientUrl(jsonld);
 		
 	}
 }
