@@ -200,6 +200,7 @@ public class MultiBindingThingServer implements ThingServer {
 		for (Property property : properties) {
 			String url = Defines.BASE_THING_URL + m_thingModel.getName() + "/" + property.getName();
 			interactionListeners.put(url, new PropertyListener(this, property));
+			interactionListeners.put(url + "/value", new PropertyListener(this, property));
 			interactionLinks.add(new HyperMediaLink("property", url));
 		}
 
