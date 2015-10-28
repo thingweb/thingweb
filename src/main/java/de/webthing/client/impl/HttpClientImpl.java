@@ -64,7 +64,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 
 	public void put(String propertyName, Content propertyValue, Callback callback) throws UnsupportedException {
 		try {
-			CallbackPutActionTask cgt = new CallbackPutActionTask(propertyName, propertyValue, callback, true);
+			CallbackPutActionTask cgt = new CallbackPutActionTask(propertyName, propertyValue, callback, false);
 			executorService.submit(cgt);
 		} catch (Exception e) {
 			log.warn(e.getMessage());
@@ -93,7 +93,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 
 	public void action(String actionName, Content actionValue, Callback callback) throws UnsupportedException {
 		try {
-			CallbackPutActionTask cgt = new CallbackPutActionTask(actionName, actionValue, callback, false);
+			CallbackPutActionTask cgt = new CallbackPutActionTask(actionName, actionValue, callback, true);
 			executorService.submit(cgt);
 		} catch (Exception e) {
 			log.warn(e.getMessage());
