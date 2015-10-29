@@ -33,6 +33,8 @@ import org.eclipse.californium.core.server.resources.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 
 public class CoapBinding implements Binding {
 
@@ -70,9 +72,15 @@ public class CoapBinding implements Binding {
                 }
 
                 String lastPart = parts[parts.length - 1];
-                // TODO this has a side-effect: replacing the resource makes the children unreachable
-                // a clean tree-replace would require to store the children and append them to the new resource
-                current.add(new WotCoapResource(lastPart, restListener));
+                Resource existing = current.getChild(lastPart);
+                WotCoapResource newRes = new WotCoapResource(lastPart, restListener);
+
+                if(existing != null) {
+                    Collection<Resource> children = existing.getChildren();
+                    children.forEach((child) -> newRes.add(child));
+                }
+
+                current.add(newRes);
             }
 		};
 	}

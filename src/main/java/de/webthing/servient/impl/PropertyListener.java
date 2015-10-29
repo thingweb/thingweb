@@ -72,6 +72,7 @@ public class PropertyListener extends AbstractRESTListener implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
+		log.info("change detected: " + o + " to " + arg);
 		setChanged();
 	}
 }
