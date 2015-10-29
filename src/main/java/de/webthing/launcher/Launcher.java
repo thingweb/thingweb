@@ -200,7 +200,19 @@ public class Launcher {
 		});
 
 		server.onInvoke("trafficLight", (input) -> {
-			log.info("trafic light chaning state");
+			Boolean go = ContentHelper.ensureClass(input, Boolean.class);
+			log.info("trafic light changing state to {}",(go)? "green": "red" );
+
+			if(go) {
+				server.setProperty("rgbValueGreen",255);
+				server.setProperty("rgbValueRed", 0);
+				server.setProperty("rgbValueBlue", 0);
+			} else {
+				server.setProperty("rgbValueGreen",0);
+				server.setProperty("rgbValueRed",255);
+				server.setProperty("rgbValueBlue", 0);
+			}
+
 			return new Content("".getBytes(), MediaType.APPLICATION_JSON);
 		} );
 	}
