@@ -153,4 +153,8 @@ public class DemoLedAdapter {
         byte target = (byte) (((float) percent / 100.0) * 255);
         neopixels.setBrightness(target);
     }
+
+    public int getBrightnessPercent() {
+        return (int) ((neopixels.getBrightness() / 255) * 100.0);
+    }
 }

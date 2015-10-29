@@ -62,6 +62,12 @@ public class Launcher {
 	public static void attachHandlers(final ThingServer server) {
 		DemoLedAdapter realLed = new DemoLedAdapter();
 
+		//init block
+		server.setProperty("rgbValueRed",realLed.getRed() & 0xFF);
+		server.setProperty("rgbValueGreen",realLed.getGreen() & 0xFF);
+		server.setProperty("rgbValueBlue",realLed.getBlue() & 0xFF);
+		server.setProperty("brightness",realLed.getBrightnessPercent());
+
 		server.onUpdate("rgbValueBlue", (input) -> {
 			Integer value = ContentHelper.ensureClass(input, Integer.class);
 			log.info("setting blue value to " + value);
