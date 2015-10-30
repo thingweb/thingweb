@@ -45,6 +45,7 @@ public class WotCoapResource extends CoapResource implements  Observer{
     public WotCoapResource(String name, RESTListener restListener) {
         super(name);
         this.m_restListener = restListener;
+        restListener.addObserver(this);
         this.setObservable(true);
     }
 
@@ -149,6 +150,7 @@ public class WotCoapResource extends CoapResource implements  Observer{
 
     @Override
     public void update(Observable o, Object arg) {
+        LOGGER.info("change detected: " + o + " to " + arg);
         this.changed();
     }
 }
