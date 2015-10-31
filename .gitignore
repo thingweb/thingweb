@@ -2,4 +2,4 @@
 /bin
 /.idea
 /.gradle
-thingweb.iml
+*.iml
