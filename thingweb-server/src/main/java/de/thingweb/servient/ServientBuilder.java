@@ -22,55 +22,48 @@
  * THE SOFTWARE.
  */
 
+package de.thingweb.servient;
 
-version = '1.1'
+import de.thingweb.binding.coap.CoapBinding;
+import de.thingweb.binding.http.HttpBinding;
+import de.thingweb.servient.impl.MultiBindingThingServer;
+import de.thingweb.thing.Thing;
 
-apply plugin: 'java-library-distribution'
 
-dependencies {
-    // let root project depend on all subprojects that have the
-    // application plugin enabled
-    project.subprojects.each { p ->
-        p.plugins.withType(ApplicationPlugin) {
-            compile p
-        }
-    }
-}
-
-distributions {
-    main {
-        contents {
-            // exclude unnecessary files from archive
-            //exclude ".gitkeep"
-
-            // add start scripts of all plugins that have the
-            // application plugin enabled to the archive
-            project.subprojects.each { p ->
-                p.plugins.withType(ApplicationPlugin) {
-                    into('bin') {
-                        from { p.startScripts.outputs.files }
-                        fileMode = 0755
-                    }
-                }
-            }
-        }
-    }
-}
-
-allprojects {
-    repositories {
-        mavenCentral()
-    }
-}
-
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'eclipse'
-
-    sourceCompatibility = 1.8
-
-    dependencies {
-        compile 'org.slf4j:slf4j-api:1.7.12'
-        testCompile group: 'junit', name: 'junit', version: '4.8'
-    }
+public final class ServientBuilder {
+	/**
+	 * Creates a new ThingServer for the specified thing model.
+	 * 
+	 * @param thing the thing model, must not be null
+	 * @return the server, never null
+	 */
+	public static ThingServer newThingServer(Thing thing) {
+		return new MultiBindingThingServer(thing, 
+				m_coapBinding.getResourceBuilder(),
+				m_httpBinding.getResourceBuilder()
+				);
+	}
+	
+	
+	public static void initialize() throws Exception {
+		m_coapBinding.initialize();
+		m_httpBinding.initialize();
+	}
+	
+	
+	public static void start() throws Exception {
+		m_coapBinding.start();
+		m_httpBinding.start();
+	}
+	
+	
+	private ServientBuilder() {
+		/* pure static class */
+	}
+	
+	
+	private static final CoapBinding m_coapBinding = new CoapBinding();
+	
+	
+	private static final HttpBinding m_httpBinding = new HttpBinding();
 }

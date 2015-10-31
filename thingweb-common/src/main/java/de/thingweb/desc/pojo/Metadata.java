@@ -22,55 +22,42 @@
  * THE SOFTWARE.
  */
 
+package de.thingweb.desc.pojo;
 
-version = '1.1'
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-apply plugin: 'java-library-distribution'
+import java.util.List;
+import java.util.Map;
 
-dependencies {
-    // let root project depend on all subprojects that have the
-    // application plugin enabled
-    project.subprojects.each { p ->
-        p.plugins.withType(ApplicationPlugin) {
-            compile p
-        }
+public class Metadata {
+    
+    @JsonProperty
+    private String name;
+    
+    @JsonProperty
+    private Map<String, Protocol> protocols;
+    
+    @JsonProperty
+    private List<String> encodings;
+    
+    @JsonCreator
+    public Metadata(@JsonProperty("name") String name, @JsonProperty("protocols") Map<String, Protocol> protocols, @JsonProperty("encodings") List<String> encodings) {
+	this.name = name;
+	this.encodings = encodings;
+	this.protocols = protocols;
     }
-}
-
-distributions {
-    main {
-        contents {
-            // exclude unnecessary files from archive
-            //exclude ".gitkeep"
-
-            // add start scripts of all plugins that have the
-            // application plugin enabled to the archive
-            project.subprojects.each { p ->
-                p.plugins.withType(ApplicationPlugin) {
-                    into('bin') {
-                        from { p.startScripts.outputs.files }
-                        fileMode = 0755
-                    }
-                }
-            }
-        }
+    
+    public String getName() {
+	return name;
     }
-}
-
-allprojects {
-    repositories {
-        mavenCentral()
+    
+    public Map<String, Protocol> getProtocols() {
+	return protocols;
     }
-}
-
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'eclipse'
-
-    sourceCompatibility = 1.8
-
-    dependencies {
-        compile 'org.slf4j:slf4j-api:1.7.12'
-        testCompile group: 'junit', name: 'junit', version: '4.8'
+    
+    public List<String> getEncodings() {
+	return encodings;
     }
+    
 }

@@ -22,55 +22,29 @@
  * THE SOFTWARE.
  */
 
+package de.thingweb.util.encoding;
 
-version = '1.1'
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-apply plugin: 'java-library-distribution'
+/**
+ * Created by mchn1210 on 20.10.2015.
+ */
 
-dependencies {
-    // let root project depend on all subprojects that have the
-    // application plugin enabled
-    project.subprojects.each { p ->
-        p.plugins.withType(ApplicationPlugin) {
-            compile p
-        }
+public class ValueType {
+
+    @JsonProperty("value")
+    private Object value;
+
+    public Object getValue() {
+        return value;
     }
-}
 
-distributions {
-    main {
-        contents {
-            // exclude unnecessary files from archive
-            //exclude ".gitkeep"
-
-            // add start scripts of all plugins that have the
-            // application plugin enabled to the archive
-            project.subprojects.each { p ->
-                p.plugins.withType(ApplicationPlugin) {
-                    into('bin') {
-                        from { p.startScripts.outputs.files }
-                        fileMode = 0755
-                    }
-                }
-            }
-        }
+    public void setValue(Object value) {
+        this.value = value;
     }
-}
 
-allprojects {
-    repositories {
-        mavenCentral()
-    }
-}
+    public ValueType(Object value) {
 
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'eclipse'
-
-    sourceCompatibility = 1.8
-
-    dependencies {
-        compile 'org.slf4j:slf4j-api:1.7.12'
-        testCompile group: 'junit', name: 'junit', version: '4.8'
+        this.value = value;
     }
 }

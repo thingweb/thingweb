@@ -22,55 +22,34 @@
  * THE SOFTWARE.
  */
 
+package de.thingweb.desc.pojo;
 
-version = '1.1'
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
-apply plugin: 'java-library-distribution'
+@JsonTypeName("Property")
+public class PropertyDescription extends InteractionDescription {
 
-dependencies {
-    // let root project depend on all subprojects that have the
-    // application plugin enabled
-    project.subprojects.each { p ->
-        p.plugins.withType(ApplicationPlugin) {
-            compile p
-        }
+    @JsonProperty
+    private boolean writable;
+    
+    @JsonProperty("outputData")
+    private String outputType;
+    
+    @JsonCreator
+    public PropertyDescription(@JsonProperty("name") String name, @JsonProperty("writable") Boolean writable, @JsonProperty("outputData") String outputType) {
+	this.name = name;
+	this.writable = writable;
+	this.outputType = outputType;
     }
-}
-
-distributions {
-    main {
-        contents {
-            // exclude unnecessary files from archive
-            //exclude ".gitkeep"
-
-            // add start scripts of all plugins that have the
-            // application plugin enabled to the archive
-            project.subprojects.each { p ->
-                p.plugins.withType(ApplicationPlugin) {
-                    into('bin') {
-                        from { p.startScripts.outputs.files }
-                        fileMode = 0755
-                    }
-                }
-            }
-        }
+    
+    public String getOutputType() {
+	return outputType;
     }
-}
-
-allprojects {
-    repositories {
-        mavenCentral()
+    
+    public boolean isWritable() {
+	return writable;
     }
-}
 
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'eclipse'
-
-    sourceCompatibility = 1.8
-
-    dependencies {
-        compile 'org.slf4j:slf4j-api:1.7.12'
-        testCompile group: 'junit', name: 'junit', version: '4.8'
-    }
 }

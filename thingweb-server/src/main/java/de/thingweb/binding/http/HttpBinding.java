@@ -22,55 +22,31 @@
  * THE SOFTWARE.
  */
 
+package de.thingweb.binding.http;
 
-version = '1.1'
+import de.thingweb.binding.Binding;
+import de.thingweb.binding.ResourceBuilder;
 
-apply plugin: 'java-library-distribution'
+import java.io.IOException;
 
-dependencies {
-    // let root project depend on all subprojects that have the
-    // application plugin enabled
-    project.subprojects.each { p ->
-        p.plugins.withType(ApplicationPlugin) {
-            compile p
-        }
-    }
-}
 
-distributions {
-    main {
-        contents {
-            // exclude unnecessary files from archive
-            //exclude ".gitkeep"
+public class HttpBinding implements Binding {
 
-            // add start scripts of all plugins that have the
-            // application plugin enabled to the archive
-            project.subprojects.each { p ->
-                p.plugins.withType(ApplicationPlugin) {
-                    into('bin') {
-                        from { p.startScripts.outputs.files }
-                        fileMode = 0755
-                    }
-                }
-            }
-        }
-    }
-}
+	@Override
+	public void initialize() throws IOException {
+			m_server = new NanoHttpServer();
+	}
+	
+	@Override
+	public ResourceBuilder getResourceBuilder() {
+		return m_server;
+	}
 
-allprojects {
-    repositories {
-        mavenCentral()
-    }
-}
-
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'eclipse'
-
-    sourceCompatibility = 1.8
-
-    dependencies {
-        compile 'org.slf4j:slf4j-api:1.7.12'
-        testCompile group: 'junit', name: 'junit', version: '4.8'
-    }
+	@Override
+	public void start() throws IOException {
+		m_server.start();
+	}
+	
+	
+	private NanoHttpServer m_server;
 }
