@@ -1,38 +1,33 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Siemens AG and the thingweb community
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 apply plugin: 'application'
 
-mainClassName = "de.webthing.launcher.Launcher"
-def guiClassName = "de.webthing.gui.ThingsClient"
+mainClassName = "de.thingweb.launcher.Launcher"
+def guiClassName = "de.thingweb.gui.ThingsClient"
 sourceCompatibility = 1.8
-version = '1.1-ALPHA'
-
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'thingweb',
-                   'Implementation-Version': '0.1'
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
-    compile 'com.nanohttpd:nanohttpd:2.1.1'
-    compile 'org.eclipse.californium:californium-core:1.0.0-M3'
-    compile 'org.json:json:20141113'
-    compile 'com.github.jsonld-java:jsonld-java:0.6.0'
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
-    compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
-	compile group: 'com.siemens.ct.exi', name: 'exificient', version: '0.9.4'
-
-    compile files("lib/neopixel-java-1.0-SNAPSHOT.jar")
-    runtime files("lib/jsonld-context.jar")
-
-    testCompile group: 'junit', name: 'junit', version: '4.8'
-}
+version = '1.1'
 
 test {
     systemProperties 'property': 'value'
@@ -40,9 +35,9 @@ test {
 
 uploadArchives {
     repositories {
-       flatDir {
-           dirs 'repos'
-       }
+        flatDir {
+            dirs 'repos'
+        }
     }
 }
 
@@ -65,10 +60,10 @@ task runGui(type: JavaExec) {
 
 def createScript(project, mainClass, name) {
     project.tasks.create(name: name, type: CreateStartScripts) {
-        outputDir       = new File(project.buildDir, 'scripts')
-        mainClassName   = mainClass
+        outputDir = new File(project.buildDir, 'scripts')
+        mainClassName = mainClass
         applicationName = name
-        classpath       = project.tasks[JavaPlugin.JAR_TASK_NAME].outputs.files + project.configurations.runtime
+        classpath = project.tasks[JavaPlugin.JAR_TASK_NAME].outputs.files + project.configurations.runtime
     }
     project.tasks[name].dependsOn(project.jar)
 
@@ -81,3 +76,31 @@ def createScript(project, mainClass, name) {
 }
 
 createScript(project, guiClassName, 'wot-client')
+
+allprojects {
+}
+
+subprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+
+    repositories {
+        mavenCentral()
+    }
+
+
+    dependencies {
+        compile 'org.slf4j:slf4j-api:1.7.12'
+        compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
+        testCompile group: 'junit', name: 'junit', version: '4.8'
+    }
+
+    dependencies {
+        //compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+        //compile 'org.json:json:20141113'
+
+        compile files("lib/neopixel-java-1.0-SNAPSHOT.jar")
+        runtime files("lib/jsonld-context.jar")
+    }
+}
