@@ -22,6 +22,11 @@
  * THE SOFTWARE.
  */
 
+apply plugin: 'application'
+
+mainClassName = "de.thingweb.gui.ThingsClient"
+
 dependencies {
     compile project(":thingweb-client")
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
 }

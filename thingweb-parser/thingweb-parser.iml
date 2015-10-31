@@ -38,37 +38,10 @@
     <orderEntry type="module" module-name="thingweb-common" />
     <orderEntry type="library" name="Gradle: org.slf4j:slf4j-api:1.7.12" level="project" />
     <orderEntry type="library" name="Gradle: org.json:json:20141113" level="project" />
-    <orderEntry type="module-library">
-      <library name="Gradle: D__Git_thingweb_thingweb_parser_lib_neopixel_java_1_0_SNAPSHOT_jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/neopixel-java-1.0-SNAPSHOT.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Gradle: D__Git_thingweb_thingweb_common_lib_jsonld_context_jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../thingweb-common/lib/jsonld-context.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Gradle: D__Git_thingweb_thingweb_common_lib_neopixel_java_1_0_SNAPSHOT_jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../thingweb-common/lib/neopixel-java-1.0-SNAPSHOT.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="module-library" scope="RUNTIME">
-      <library name="Gradle: D__Git_thingweb_thingweb_parser_lib_jsonld_context_jar">
+      <library name="Gradle: jsonld-context">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/jsonld-context.jar!/" />
+          <root url="jar://$MODULE_DIR$/../lib/jsonld-context.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

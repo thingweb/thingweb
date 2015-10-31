@@ -22,85 +22,55 @@
  * THE SOFTWARE.
  */
 
-apply plugin: 'application'
 
-mainClassName = "de.thingweb.launcher.Launcher"
-def guiClassName = "de.thingweb.gui.ThingsClient"
-sourceCompatibility = 1.8
 version = '1.1'
 
-test {
-    systemProperties 'property': 'value'
-}
+apply plugin: 'java-library-distribution'
 
-uploadArchives {
-    repositories {
-        flatDir {
-            dirs 'repos'
+dependencies {
+    // let root project depend on all subprojects that have the
+    // application plugin enabled
+    project.subprojects.each { p ->
+        p.plugins.withType(ApplicationPlugin) {
+            compile p
         }
     }
 }
 
-task runServer(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
+distributions {
+    main {
+        contents {
+            // exclude unnecessary files from archive
+            //exclude ".gitkeep"
 
-    main = mainClassName
-
-    workingDir = "./src/dist"
-}
-
-
-task runGui(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-
-    main = guiClassName
-
-    workingDir = "./src/dist"
-}
-
-def createScript(project, mainClass, name) {
-    project.tasks.create(name: name, type: CreateStartScripts) {
-        outputDir = new File(project.buildDir, 'scripts')
-        mainClassName = mainClass
-        applicationName = name
-        classpath = project.tasks[JavaPlugin.JAR_TASK_NAME].outputs.files + project.configurations.runtime
-    }
-    project.tasks[name].dependsOn(project.jar)
-
-    project.applicationDistribution.with {
-        into("bin") {
-            from(project.tasks[name])
-            fileMode = 0755
+            // add start scripts of all plugins that have the
+            // application plugin enabled to the archive
+            project.subprojects.each { p ->
+                p.plugins.withType(ApplicationPlugin) {
+                    into('bin') {
+                        from { p.startScripts.outputs.files }
+                        fileMode = 0755
+                    }
+                }
+            }
         }
     }
 }
-
-createScript(project, guiClassName, 'wot-client')
 
 allprojects {
-}
-
-subprojects {
-
-    apply plugin: 'java'
-    apply plugin: 'eclipse'
-
     repositories {
         mavenCentral()
     }
+}
 
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+
+    sourceCompatibility = 1.8
 
     dependencies {
         compile 'org.slf4j:slf4j-api:1.7.12'
-        compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
         testCompile group: 'junit', name: 'junit', version: '4.8'
-    }
-
-    dependencies {
-        //compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
-        //compile 'org.json:json:20141113'
-
-        compile files("lib/neopixel-java-1.0-SNAPSHOT.jar")
-        runtime files("lib/jsonld-context.jar")
     }
 }

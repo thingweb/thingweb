@@ -22,11 +22,16 @@
  * THE SOFTWARE.
  */
 
+apply plugin: 'application'
+
+mainClassName = "de.thingweb.launcher.Launcher"
+
 dependencies {
     compile project(":thingweb-server")
     compile project(":thingweb-parser")
 
     compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.1.0'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
 
     compile files("../lib/neopixel-java-1.0-SNAPSHOT.jar")
 }

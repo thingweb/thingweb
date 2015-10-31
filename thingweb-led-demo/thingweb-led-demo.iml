@@ -55,72 +55,9 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library name="Gradle: D__Git_thingweb_thingweb_led_demo_lib_neopixel_java_1_0_SNAPSHOT_jar">
+      <library name="Gradle: jsonld-context">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/neopixel-java-1.0-SNAPSHOT.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Gradle: D__Git_thingweb_thingweb_server_lib_jsonld_context_jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../thingweb-server/lib/jsonld-context.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Gradle: D__Git_thingweb_thingweb_server_lib_neopixel_java_1_0_SNAPSHOT_jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../thingweb-server/lib/neopixel-java-1.0-SNAPSHOT.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Gradle: D__Git_thingweb_thingweb_common_lib_jsonld_context_jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../thingweb-common/lib/jsonld-context.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Gradle: D__Git_thingweb_thingweb_common_lib_neopixel_java_1_0_SNAPSHOT_jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../thingweb-common/lib/neopixel-java-1.0-SNAPSHOT.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Gradle: D__Git_thingweb_thingweb_parser_lib_jsonld_context_jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../thingweb-parser/lib/jsonld-context.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Gradle: D__Git_thingweb_thingweb_parser_lib_neopixel_java_1_0_SNAPSHOT_jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../thingweb-parser/lib/neopixel-java-1.0-SNAPSHOT.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" scope="RUNTIME">
-      <library name="Gradle: D__Git_thingweb_thingweb_led_demo_lib_jsonld_context_jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/jsonld-context.jar!/" />
+          <root url="jar://$MODULE_DIR$/../lib/jsonld-context.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
