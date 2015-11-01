@@ -12,10 +12,10 @@ For information about what it does, see also:
 * we are using [Gradle](https://gradle.org/) as build tool
 * the application is built using the [Gradle Application Plugin](https://docs.gradle.org/current/userguide/application_plugin.html)
 
-There is a also build setup on [drone.io](https://drone.io/bitbucket.org/ascholz/thingweb/latest).
-[![Build Status](https://drone.io/bitbucket.org/ascholz/thingweb/status.png)](https://drone.io/bitbucket.org/ascholz/thingweb/latest)
+There is a also build setup on [drone.io](https://drone.io/github.com/thingweb/thingweb/latest).
+[![Build Status](https://drone.io/github.com/thingweb/thingweb/status.png)](https://drone.io/github.com/thingweb/thingweb/latest)
 
-**The latest artifacts can be downloaded [here](https://drone.io/bitbucket.org/ascholz/thingweb/files)**
+**The latest artifacts can be downloaded [here](https://drone.io/github.com/thingweb/thingweb/files)**
 
 ### Contribution guidelines ###
 
