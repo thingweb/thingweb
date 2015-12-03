@@ -31,13 +31,22 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -163,6 +172,57 @@ public class ThingsClient extends JFrame {
 		tabbedPane.addTab(tabTitle, null, new JScrollPane(panelLed), tip);
 		tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
 	}
+	
+	@SuppressWarnings("unchecked")
+	protected void doDragAndDropFile(final JButton button) {
+		button.setDropTarget(new DropTarget() {
+			private static final long serialVersionUID = 1L;
+
+			public synchronized void drop(DropTargetDropEvent evt) {
+				try {
+					evt.acceptDrop(DnDConstants.ACTION_COPY);
+					List<File> droppedFiles = (List<File>) evt.getTransferable().getTransferData(
+							DataFlavor.javaFileListFlavor);
+					
+					for (File f : droppedFiles) {
+						// process file(s)
+						addThingPanelFile(f.getAbsolutePath(), f.getName());
+					}
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(null,
+							"Errors while creating panels for dropped files: " + ex.getMessage(), "Drop Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+	}
+	
+//	protected void doDragAndDropText(final JButton button) {
+//		button.setDropTarget(new DropTarget() {
+//			private static final long serialVersionUID = 1L;
+//
+//			public synchronized void drop(DropTargetDropEvent evt) {
+//				try {
+//					evt.acceptDrop(DnDConstants.ACTION_COPY);
+//					InputStream is = (InputStream) evt.getTransferable().getTransferData(
+//							DataFlavor.getTextPlainUnicodeFlavor());
+//					
+//					
+//					BufferedReader br = new BufferedReader(new InputStreamReader(is));
+//					String line;
+//					StringBuilder sb = new StringBuilder();
+//					while ((line = br.readLine()) != null) {
+//						sb.append(line);
+//					}
+//					System.out.println(sb);
+//				} catch (Exception ex) {
+//					JOptionPane.showMessageDialog(null,
+//							"Errors while creating panels for dropped content: " + ex.getMessage(), "Drop Error",
+//							JOptionPane.ERROR_MESSAGE);
+//				}
+//			}
+//		});
+//	}
 
 	/**
 	 * Create the frame.
@@ -207,8 +267,8 @@ public class ThingsClient extends JFrame {
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		contentPane.add(panel, BorderLayout.SOUTH);
 
-		JButton btnNewButton = new JButton("Add JSON-LD File");
-		btnNewButton.addActionListener(new ActionListener() {
+		JButton btnAddJSONLDFile = new JButton("Add JSON-LD File");
+		btnAddJSONLDFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (JFileChooser.APPROVE_OPTION == getJFileChooser().showOpenDialog(null)) {
 					File f = getJFileChooser().getSelectedFile();
@@ -220,10 +280,11 @@ public class ThingsClient extends JFrame {
 				}
 			}
 		});
-		panel.add(btnNewButton);
+		doDragAndDropFile(btnAddJSONLDFile);
+		panel.add(btnAddJSONLDFile);
 
-		JButton btnNewButton_1 = new JButton("Add JSON-LD URI");
-		btnNewButton_1.addActionListener(new ActionListener() {
+		JButton btnAddJSONLDURI = new JButton("Add JSON-LD URI");
+		btnAddJSONLDURI.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				// Create the JOptionPane.
 				String url = JOptionPane.showInputDialog("URI");
@@ -238,7 +299,8 @@ public class ThingsClient extends JFrame {
 				}
 			}
 		});
-		panel.add(btnNewButton_1);
+		// doDragAndDropText(btnAddJSONLDURI);
+		panel.add(btnAddJSONLDURI);
 	}
 
 }
