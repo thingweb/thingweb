@@ -33,10 +33,13 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public class ThingsClient extends JFrame {
 
@@ -44,7 +47,7 @@ public class ThingsClient extends JFrame {
 	private JPanel contentPane;
 	private JTabbedPane tabbedPane;
 	private JFileChooser fileChooser;
-	
+
 	private ClientFactory clientFactory;
 
 	/**
@@ -62,21 +65,21 @@ public class ThingsClient extends JFrame {
 			}
 		});
 	}
-	
+
 	JFileChooser getJFileChooser() {
-		if(this.fileChooser == null) {
+		if (this.fileChooser == null) {
 			fileChooser = new JFileChooser();
 		}
 		return fileChooser;
 	}
-	
+
 	ClientFactory getClientFactory() {
-		if(this.clientFactory == null) {
+		if (this.clientFactory == null) {
 			clientFactory = new ClientFactory();
 		}
 		return clientFactory;
 	}
-	
+
 	void addThingPanelFile(String fname, String tabTitle) {
 		try {
 			Client client = getClientFactory().getClientFile(fname);
@@ -84,67 +87,130 @@ public class ThingsClient extends JFrame {
 			// cl.parse(fname);
 			addThingPanel(client, tabTitle, fname);
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Could not create panel for file '" + fname + "': " + e.getMessage(), "File Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Could not create panel for file '" + fname + "': " + e.getMessage(),
+					"File Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
-	
+
 	void addThingPanelUrl(String uri, String tabTitle) {
 		try {
 			Client client = getClientFactory().getClientUrl(new URI(uri));
 			addThingPanel(client, tabTitle, uri.toString());
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Could not create panel for URI '" + uri + "': " + e.getMessage(), "URI Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Could not create panel for URI '" + uri + "': " + e.getMessage(),
+					"URI Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
-	
-	
+
+	@SuppressWarnings("serial")
+	class URILabel extends JLabel {
+		public URILabel(String sURI) {
+			this.setText("<html><a href=\"" + sURI + "\">" + sURI + "</a></html>");
+			this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+			this.addMouseListener(new MouseListener() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if (e.getClickCount() > 0) {
+						if (Desktop.isDesktopSupported()) {
+							Desktop desktop = Desktop.getDesktop();
+							try {
+								URI uri = new URI(sURI);
+								desktop.browse(uri);
+							} catch (IOException ex) {
+								ex.printStackTrace();
+							} catch (URISyntaxException ex) {
+								ex.printStackTrace();
+							}
+						}
+					}
+				}
+				@Override
+				public void mouseEntered(MouseEvent e) {
+				}
+				@Override
+				public void mouseExited(MouseEvent e) {
+				}
+				@Override
+				public void mousePressed(MouseEvent e) {
+				}
+				@Override
+				public void mouseReleased(MouseEvent e) {
+				}
+
+			});
+		}
+	}
+
+	void addThingPanelInfo() {
+		JPanel p = new JPanel();
+		p.add(new JLabel(
+				"<html>This <i>things client</i> allows to load thing descriptions following the rules specified in</html>"));
+		final String sURITutorial = "https://github.com/w3c/wot/blob/master/TF-TD/Tutorial.md";
+		
+		p.add(new URILabel(sURITutorial));
+		p.add(new JLabel(
+				"<html>. Examples can be found here: </html>"));
+		final String sURIExamples = "https://github.com/w3c/wot/tree/master/TF-TD/TD%20Samples";
+		p.add(new URILabel(sURIExamples));
+		p.add(new JLabel("<html>.</html>"));
+
+		tabbedPane.addTab("How to use", null, p);
+	}
+
 	void addThingPanel(Client cl, String tabTitle, String tip) throws FileNotFoundException, IOException {
 		JPanel panelLed = new ThingPanelUI(cl);
 		tabbedPane.addTab(tabTitle, null, new JScrollPane(panelLed), tip);
-		tabbedPane.setSelectedIndex(tabbedPane.getTabCount()-1);
+		tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
 	}
 
 	/**
 	 * Create the frame.
-	 * @throws UnsupportedLookAndFeelException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
-	 * @throws ClassNotFoundException 
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
+	 * 
+	 * @throws UnsupportedLookAndFeelException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 * @throws FileNotFoundException
 	 */
 	public ThingsClient() {
 		// try to use system look and feel (if possible)
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (UnsupportedLookAndFeelException | InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
+		} catch (UnsupportedLookAndFeelException | InstantiationException | IllegalAccessException
+				| ClassNotFoundException e1) {
 		}
-		
-		setTitle("ThingClient");
+
+		setTitle("ThingsClient");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 650, 600);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
-		
+
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
-		
-		// load led example (local)
-		String jsonld = "jsonld" + File.separator + "led.jsonld";
-		this.addThingPanelFile(jsonld, "LED (local)");
-		
+
+		// for now do not load any example instead load info panel
+		addThingPanelInfo();
+
+		// // load led example (local)
+		// String jsonld = "jsonld" + File.separator + "led.jsonld";
+		// this.addThingPanelFile(jsonld, "LED (local)");
+
 		JPanel panel = new JPanel();
-		panel.setBorder(new TitledBorder(null, "Add more \"Things\" ... ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel.setBorder(
+				new TitledBorder(null, "Add more \"Things\" ... ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		contentPane.add(panel, BorderLayout.SOUTH);
-		
+
 		JButton btnNewButton = new JButton("Add JSON-LD File");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if (JFileChooser.APPROVE_OPTION  == getJFileChooser().showOpenDialog(null) ) {
+				if (JFileChooser.APPROVE_OPTION == getJFileChooser().showOpenDialog(null)) {
 					File f = getJFileChooser().getSelectedFile();
 					try {
 						addThingPanelFile(f.getAbsolutePath(), f.getName());
@@ -155,15 +221,16 @@ public class ThingsClient extends JFrame {
 			}
 		});
 		panel.add(btnNewButton);
-		
+
 		JButton btnNewButton_1 = new JButton("Add JSON-LD URI");
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//Create the JOptionPane.
+				// Create the JOptionPane.
 				String url = JOptionPane.showInputDialog("URI");
-				if(url != null) {
+				if (url != null) {
 					// javas URL class can't yet handle coap
-					// see java.net.MalformedURLException: unknown protocol: coap
+					// see java.net.MalformedURLException: unknown protocol:
+					// coap
 					// URL url = new URL(msg);
 					int ip = url.lastIndexOf("/");
 					String tabTitle = ip > 0 ? url.substring(ip) : "msg";
