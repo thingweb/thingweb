@@ -50,6 +50,9 @@ import java.util.stream.Collectors;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+/**
+ *
+ */
 public class ThingsClient extends JFrame {
 
 	private static final long serialVersionUID = 479681876826299109L;
@@ -226,13 +229,6 @@ public class ThingsClient extends JFrame {
 
 	/**
 	 * Create the frame.
-	 * 
-	 * @throws UnsupportedLookAndFeelException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @throws ClassNotFoundException
-	 * @throws IOException
-	 * @throws FileNotFoundException
 	 */
 	public ThingsClient() {
 		// try to use system look and feel (if possible)
