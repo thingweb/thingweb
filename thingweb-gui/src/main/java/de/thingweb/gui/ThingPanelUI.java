@@ -130,6 +130,7 @@ public class ThingPanelUI extends JPanel implements ActionListener, Callback {
 
 	/**
 	 * Create the panel.
+	 * @param client the client used in this panel
 	 */
 	public ThingPanelUI(Client client) {
 		this.client = client;
