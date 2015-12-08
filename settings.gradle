@@ -24,7 +24,5 @@
 
 include 'thingweb-client'
 include 'thingweb-common'
-include 'thingweb-gui'
-include 'thingweb-led-demo'
 include 'thingweb-parser'
 include 'thingweb-server'
