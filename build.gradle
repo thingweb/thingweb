@@ -58,8 +58,27 @@ distributions {
 }
 
 allprojects {
+  	apply plugin: 'maven'
+
     repositories {
+	      jcenter()
         mavenCentral()
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+      classifier = 'javadoc'
+      from 'build/docs/javadoc'
+    }
+
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    artifacts {
+      archives jar
+      archives javadocJar
+      archives sourcesJar
     }
 }
 
