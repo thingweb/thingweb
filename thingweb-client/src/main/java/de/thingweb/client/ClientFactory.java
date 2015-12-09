@@ -95,7 +95,11 @@ public class ClientFactory {
 		return getClient();
 	}
 	
-	
+	public Client getClientFromTD(ThingDescription thingDescription) throws UnsupportedException, URISyntaxException {
+		td = thingDescription;
+		return getClient();
+	}
+
 	protected void processThingDescription() {
 		assert(td != null);
 		

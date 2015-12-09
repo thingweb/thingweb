@@ -4,10 +4,5 @@ var callback = function(param) {
     print('js callback was called with ' + param);
 }
 
-print('WoT API is ' + wot + ':\nversion ' + wot.getVersion());
+print('WoT API is ' + WoT + ':\nversion ' + WoT.getVersion());
 
-wot.callJava();
-
-wot.toJava(callback);
-
-wot.callMe(callback);
