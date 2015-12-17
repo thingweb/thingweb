@@ -46,6 +46,7 @@ public interface InteractionListener {
 	 * fresh as the value acquired by this callback.
 	 * 
 	 * @param thingServer the server affected by the interaction, never null
+	 * @param propertyName name of the property to attach
 	 */
 	void onReadProperty(String propertyName, ThingServer thingServer);
 

@@ -22,9 +22,6 @@
  * THE SOFTWARE.
  */
 
-include 'thingweb-client'
-include 'thingweb-common'
-include 'thingweb-parser'
-include 'thingweb-server'
-include 'thingweb-javascript'
-/*include 'thingweb-discovery'*/
+dependencies {
+
+}

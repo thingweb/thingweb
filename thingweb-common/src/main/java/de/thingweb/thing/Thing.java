@@ -36,7 +36,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The Thing class provides the "model" of a thing, the components and
- * capabilities of a thing.<p>
+ * capabilities of a thing.
  */
 public final class Thing {
 	/*
@@ -52,7 +52,7 @@ public final class Thing {
 	
 	
 	/**
-	 * Creates a new thing model.<p>
+	 * Creates a new thing model.
 	 * 
 	 * The thing's name is used to create unique URLs for different things, 
 	 * i.e., URLs formed like <code>/things/&lt;name&gt;/...</code>. Names must 
@@ -129,7 +129,7 @@ public final class Thing {
 	
 	/**
 	 * Returns a property by name and raises an exception if the property does
-	 * not exist.<p>
+	 * not exist.
 	 * 
 	 * Behaves similarly to {@link #getProperty(String)} but throws an 
 	 * exception instead of returning null if the property does not exist

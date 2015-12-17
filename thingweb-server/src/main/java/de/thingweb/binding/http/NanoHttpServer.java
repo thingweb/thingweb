@@ -66,7 +66,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
         }
 
         if(!authorize(session)) {
-			return new Response(Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "Unauthorízed");
+			return new Response(Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "Unauthorized");
 		}
 
         //get result
