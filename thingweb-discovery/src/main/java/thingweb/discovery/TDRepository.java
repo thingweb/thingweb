@@ -40,6 +40,7 @@ import java.net.URL;
 
 import org.json.JSONArray;
 
+/** Class to interact with a TD repository */
 public class TDRepository {
 
 	private String repository_uri;
