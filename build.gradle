@@ -64,6 +64,12 @@ allprojects {
 	      jcenter()
         mavenCentral()
     }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'maven'
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
       classifier = 'javadoc'
@@ -80,11 +86,6 @@ allprojects {
       archives javadocJar
       archives sourcesJar
     }
-}
-
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'eclipse'
 
     sourceCompatibility = 1.8
 
