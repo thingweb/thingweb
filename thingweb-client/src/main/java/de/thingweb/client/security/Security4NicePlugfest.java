@@ -109,8 +109,8 @@ public class Security4NicePlugfest {
 			String jsonResponseRegistration = new String(bisR);
 			log.info(jsonResponseRegistration);
 
-			// extract the value of “client_id” (this value is called <c_id>in
-			// the following) and the value of “client_secret” (called
+			// extract the value of client_id (this value is called <c_id>in
+			// the following) and the value of client_secret (called
 			// <c_secret> in the following) from the JSON response
 
 			ObjectMapper mapper = new ObjectMapper();
@@ -140,7 +140,7 @@ public class Security4NicePlugfest {
 			InputStream error = httpConRegistration.getErrorStream();
 			byte[] berror = getBytesFromInputStream(error);
 			log.error(new String(berror));
-		}
+	}
 		httpConRegistration.disconnect();
 
 		return registration;
