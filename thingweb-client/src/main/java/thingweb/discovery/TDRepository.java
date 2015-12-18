@@ -54,7 +54,7 @@ public class TDRepository {
 	}
 	
 	/**  This method takes a properties which you are looking for or a SPARQL query  
-	 * @search properties or a SPARQL query
+	 * @param search properties or a SPARQL query
 	 * @return JSON array of relevant TD files (=empty array means no match)
 	 * */
 	public JSONArray tdSearch(String search) throws Exception  {
