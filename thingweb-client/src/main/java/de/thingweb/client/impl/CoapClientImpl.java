@@ -37,6 +37,7 @@ import org.eclipse.californium.core.CoapObserveRelation;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.OptionSet;
+import org.eclipse.californium.core.coap.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +101,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 
 	public void get(String propertyName, Callback callback) {
 		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
-
+		
 		// asynchronous
 		coap.get(new CoapHandler() {
 			@Override
