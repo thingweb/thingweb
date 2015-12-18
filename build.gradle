@@ -31,28 +31,14 @@ dependencies {
     // let root project depend on all subprojects that have the
     // application plugin enabled
     project.subprojects.each { p ->
-        p.plugins.withType(ApplicationPlugin) {
             compile p
-        }
     }
 }
 
 distributions {
     main {
         contents {
-            // exclude unnecessary files from archive
-            //exclude ".gitkeep"
-
-            // add start scripts of all plugins that have the
-            // application plugin enabled to the archive
-            project.subprojects.each { p ->
-                p.plugins.withType(ApplicationPlugin) {
-                    into('bin') {
-                        from { p.startScripts.outputs.files }
-                        fileMode = 0755
-                    }
-                }
-            }
+            from subprojects.collect { it.tasks.withType(Jar) }
         }
     }
 }
