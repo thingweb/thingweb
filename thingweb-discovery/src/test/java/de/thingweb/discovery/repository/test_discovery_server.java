@@ -1,4 +1,4 @@
-package thingweb.discovery;
+package de.thingweb.discovery.repository;
 
 import de.thingweb.discovery.repository.RepositoryClient;
 
