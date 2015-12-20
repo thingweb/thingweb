@@ -55,7 +55,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
          String uri = session.getUri();
 
         //compare uri against resmap
-        RESTListener listener = resmap.get(uri);
+        RESTListener listener = resmap.get(uri.toLowerCase());
 
         //if not found return 404
         if(listener== null) {
@@ -136,6 +136,6 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
     @Override
     public void newResource(String url, RESTListener restListener) {
-        resmap.put(url,restListener);
+        resmap.put(url.toLowerCase(),restListener);
     }
 }
