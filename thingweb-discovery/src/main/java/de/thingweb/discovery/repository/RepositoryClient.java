@@ -28,7 +28,7 @@
 
 // UNIRES, Jetty
 
-package thingweb.discovery;
+package de.thingweb.discovery.repository;
 
 
 import java.io.BufferedReader;
@@ -41,20 +41,20 @@ import java.net.URL;
 import org.json.JSONArray;
 
 /** Class to interact with a TD repository */
-public class TDRepository {
+public class RepositoryClient {
 
 	private String repository_uri;
 	private int repository_port;
 
 	/** Constructer set up the endpoint address of the TD repository */
-	public  TDRepository(String  repository_uri, int repository_port) {
+	public  RepositoryClient(String  repository_uri, int repository_port) {
 	 
 		this.repository_uri = repository_uri;
 		this.repository_port =repository_port;
 	}
 	
 	/**  This method takes a properties which you are looking for or a SPARQL query  
-	 * @search properties or a SPARQL query
+	 * @param search properties or a SPARQL query
 	 * @return JSON array of relevant TD files (=empty array means no match)
 	 * */
 	public JSONArray tdSearch(String search) throws Exception  {
