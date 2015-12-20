@@ -33,17 +33,9 @@ import java.util.function.Function;
 /**
  * The ThingServer is thread safe.
  */
-public interface ThingServer extends ThingInterface {
-	/**
-	 * Adds an InteractionListener to this server.
-	 * 
-	 * @param listener the listener to add, must not be null
-	 */
-	void addInteractionListener(InteractionListener listener);
-
-	void onInvoke(String actionName, Function<Object, Object> callback);
+public interface ThingServer {
 
 	void addThing(Thing thing);
 
-	void onUpdate(String propertyName, Consumer<Object> callback);
+	ThingInterface getThing(String thingName);
 }

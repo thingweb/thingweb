@@ -26,6 +26,9 @@ package de.thingweb.servient;
 
 import de.thingweb.thing.Property;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 
 /**
  * The ThingInterface provides methods for interacting with things.
@@ -65,4 +68,9 @@ public interface ThingInterface {
 	
 	Object getProperty(String propertyName);
 
+	Object invokeAction(String actionName, Object parameter);
+
+	void onInvoke(String actionName, Function<Object, Object> callback);
+
+	void onUpdate(String propertyName, Consumer<Object> callback);
 }

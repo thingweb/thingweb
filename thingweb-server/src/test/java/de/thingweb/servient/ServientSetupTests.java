@@ -8,16 +8,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static de.thingweb.servient.TestTools.readResource;
-import static org.junit.Assert.*;
-import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Created by Johannes on 20.12.2015.
