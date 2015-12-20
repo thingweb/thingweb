@@ -1,11 +1,13 @@
-package thingweb.discovery;
+package de.thingweb.discovery.repository;
+
+import de.thingweb.discovery.repository.RepositoryClient;
 
 public class test_discovery_server {
 
 	
 	public static void main(String args[]) {
 		
-		TDRepository tdr = new TDRepository("localhost", 3030);
+		RepositoryClient tdr = new RepositoryClient("localhost", 3030);
 		
 		try {
 			tdr.tdSearch("Lamp");
