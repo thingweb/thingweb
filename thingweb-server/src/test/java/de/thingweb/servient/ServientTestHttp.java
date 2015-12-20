@@ -6,22 +6,20 @@ import de.thingweb.thing.Content;
 import de.thingweb.thing.MediaType;
 import de.thingweb.thing.Thing;
 import de.thingweb.util.encoding.ContentHelper;
-import de.thingweb.util.encoding.ValueType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
-import java.util.stream.StreamSupport;
+import java.util.concurrent.CompletableFuture;
 
+import static de.thingweb.servient.TestTools.fromUrl;
+import static de.thingweb.servient.TestTools.readResource;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -63,6 +61,7 @@ public class ServientTestHttp {
         Content resp = new Content(json.getBytes(), MediaType.APPLICATION_JSON);
         Object number = ContentHelper.getValueFromJson(resp);
 
+        assertThat("may not be null",number,is(notNullValue()));
         assertThat("should be Integer",number.getClass(),equalTo(Integer.class));
         assertThat("value is 42", number,is(42));
     }
@@ -80,22 +79,25 @@ public class ServientTestHttp {
         assertThat("value is 42", number,is(42));
     }
 
+    @Test
+    public void attachListenerAndsetDirectly() throws Exception {
+        CompletableFuture<Integer> future = new CompletableFuture<>();
+        server.onInvoke("testaction", (nv) -> {
+            Integer newVal = ContentHelper.ensureClass(nv,Integer.class);
+            future.complete(newVal);
+            return null;
+        });
+
+        TestTools.postHttpJson("http://localhost:8080/things/simplething/testaction","42");
+
+        assertThat("value is 42", future.get() ,is(42));
+    }
+
 
     @After
     public void tearDown() throws IOException {
         ServientBuilder.stop();
     }
 
-    private String readResource(String path) throws URISyntaxException, IOException {
-        URI uri = this.getClass().getClassLoader().getResource(path).toURI();
-        return new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("UTF-8"));
-    }
-
-    private String fromUrl(String url) throws Exception {
-        Scanner scanner = new Scanner(new URL(url).openStream(), "UTF-8").useDelimiter("\\A");
-        String res = scanner.hasNext() ? scanner.next() : "";
-        scanner.close();
-        return res;
-    }
 
 }

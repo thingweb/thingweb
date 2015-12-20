@@ -14,6 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static de.thingweb.servient.TestTools.readResource;
 import static org.junit.Assert.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -89,13 +90,5 @@ public class ServientSetupTests {
     public void tearDown() throws IOException {
         ServientBuilder.stop();
     }
-
-
-
-    private String readResource(String path) throws URISyntaxException, IOException {
-        URI uri = this.getClass().getClassLoader().getResource(path).toURI();
-        return new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("UTF-8"));
-    }
-
 
 }
