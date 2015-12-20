@@ -27,4 +27,7 @@ dependencies {
 
     compile 'com.nanohttpd:nanohttpd:2.1.1'
     compile 'org.eclipse.californium:californium-core:1.0.0-M3'
+
+    testCompile project(":thingweb-parser")
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
 }

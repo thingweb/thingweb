@@ -29,6 +29,8 @@ import de.thingweb.binding.http.HttpBinding;
 import de.thingweb.servient.impl.MultiBindingThingServer;
 import de.thingweb.thing.Thing;
 
+import java.io.IOException;
+
 
 public final class ServientBuilder {
 	/**
@@ -66,4 +68,16 @@ public final class ServientBuilder {
 	
 	
 	private static final HttpBinding m_httpBinding = new HttpBinding();
+
+	public static void stop() throws IOException {
+		m_coapBinding.stop();
+		m_httpBinding.stop();
+	}
+
+	public static ThingServer newThingServer() {
+		return new MultiBindingThingServer(
+				m_coapBinding.getResourceBuilder(),
+				m_httpBinding.getResourceBuilder()
+		);
+	}
 }

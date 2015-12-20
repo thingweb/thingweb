@@ -25,6 +25,8 @@
 package de.thingweb.servient;
 
 
+import de.thingweb.thing.Thing;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -40,6 +42,8 @@ public interface ThingServer extends ThingInterface {
 	void addInteractionListener(InteractionListener listener);
 
 	void onInvoke(String actionName, Function<Object, Object> callback);
+
+	void addThing(Thing thing);
 
 	void onUpdate(String propertyName, Consumer<Object> callback);
 }

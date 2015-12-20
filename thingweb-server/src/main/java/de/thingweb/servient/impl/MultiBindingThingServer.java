@@ -34,6 +34,7 @@ import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -51,22 +52,28 @@ public class MultiBindingThingServer implements ThingServer {
 	
 	public MultiBindingThingServer(Thing thingModel, 
 			ResourceBuilder ... bindings) {
-		
-		if (null == thingModel) {
-			throw new IllegalArgumentException("thingModel must not be null");
-		}
-		
+
 		for (ResourceBuilder b : bindings) {
 			m_bindings.add(b);
 		}
-		
-		m_thingModel = thingModel;
-		m_state = new StateContainer(m_thingModel);
 
-		createBindings();
-
+        addThing(thingModel);
 	}
-	
+
+    public MultiBindingThingServer(ResourceBuilder ... bindings) {
+        Collections.addAll(m_bindings, bindings);
+    }
+
+    @Override
+    public void addThing(Thing thing) {
+        if (null == thing) {
+            throw new IllegalArgumentException("thingModel must not be null");
+        }
+        m_thingModel = thing;
+        m_state = new StateContainer(m_thingModel);
+
+        createBindings(thing);
+	}
 
 	@Override
 	public void setProperty(Property property, Object value) {
@@ -167,7 +174,7 @@ public class MultiBindingThingServer implements ThingServer {
 	}
 	
 	
-	private void createBindings() {
+	private void createBindings(Thing thingModel) {
 		for (ResourceBuilder binding : m_bindings) {
 			createBinding(binding);
 		}
@@ -226,16 +233,15 @@ public class MultiBindingThingServer implements ThingServer {
 	 * Sync object for {@link #m_stateSync}.
 	 */
 	private final Object m_stateSync = new Object();
-	
-	
-	private final StateContainer m_state;
-	
+    private StateContainer m_state;
+    private Thing m_thingModel;
 
 	private final Collection<InteractionListener> m_listeners = 
 			new CopyOnWriteArrayList<>();
 
 	private final Collection<ResourceBuilder> m_bindings = new ArrayList<>(); 
 
-	private final Thing m_thingModel;
+	private final Map<String,Thing> m_thingModels = new HashMap<>();
+    private Map<String,StateContainer> m_states = new ConcurrentSkipListMap<>();
 
 }
