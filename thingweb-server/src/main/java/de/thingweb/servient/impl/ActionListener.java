@@ -51,26 +51,26 @@ public class ActionListener extends AbstractRESTListener {
 
     @Override
     public Content onGet() {
-        return new Content(("Action: " + action.getName()).getBytes(), MediaType.TEXT_PLAIN);
+        //TODO manage executions in statecontainer and add links to executions
+        return HypermediaIndex.createContent(
+                new HyperMediaLink("invoke","_self","POST","TBD"),
+                new HyperMediaLink("parent","../")
+        );
     }
-
 
     @Override
     public void onPut(Content data) {
         log.warn("Action was called by PUT, which is a violation of the spec");
-        Object o = ContentHelper.getValueFromJson(data);
+        Object param = ContentHelper.getValueFromJson(data);
         log.debug("invoking {}", action.getName());
-
-        Object response = servedThing.invokeAction(action, o);
+        servedThing.invokeAction(action, param);
     }
 
     @Override
     public Content onPost(Content data) {
-        Object o = ContentHelper.getValueFromJson(data);
+        Object param = ContentHelper.getValueFromJson(data);
         log.debug("invoking {}", action.getName());
-
-        Object response = servedThing.invokeAction(action, o);
-
+        Object response = servedThing.invokeAction(action, param);
         return ContentHelper.wrap(response, MediaType.APPLICATION_JSON);
     }
 }

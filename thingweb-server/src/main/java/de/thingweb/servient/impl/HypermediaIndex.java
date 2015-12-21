@@ -49,11 +49,15 @@ public class HypermediaIndex implements RESTListener {
         myContent = createContent(links);
     }
 
-    public HypermediaIndex(HyperMediaLink... link) {
-        myContent = createContent(Arrays.asList(link));
+    public HypermediaIndex(HyperMediaLink... links) {
+        myContent = createContent(Arrays.asList(links));
     }
 
-    private Content createContent(List<HyperMediaLink> links) {
+    public static Content createContent(HyperMediaLink... links) {
+        return createContent(Arrays.asList(links));
+    }
+
+    public static Content createContent(List<HyperMediaLink> links) {
         String json = null;
         try {
             json = ow.writeValueAsString(links);

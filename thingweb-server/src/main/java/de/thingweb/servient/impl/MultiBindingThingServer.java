@@ -107,13 +107,20 @@ public class MultiBindingThingServer implements ThingServer {
         Collection<Action> actions = thingModel.getActions();
 
         List<HyperMediaLink> interactionLinks = new LinkedList<>();
-
         Map<String, RESTListener> interactionListeners = new HashMap<>();
 
         // collect properties
         for (Property property : properties) {
             String url = Defines.BASE_THING_URL + thingModel.getName() + "/" + property.getName();
+
             interactionListeners.put(url, new PropertyListener(servedThing, property));
+
+//            TODO I'll comment this out until we have /value on the microcontroller
+//            interactionListeners.put(url, new HypermediaIndex(
+//                    new HyperMediaLink("value","value"),
+//                    new HyperMediaLink("update","value","PUT","TBD")
+//            ));
+
             interactionListeners.put(url + "/value", new PropertyListener(servedThing, property));
             interactionLinks.add(new HyperMediaLink("property", url));
         }
