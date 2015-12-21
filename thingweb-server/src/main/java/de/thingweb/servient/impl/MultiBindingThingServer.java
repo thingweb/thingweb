@@ -26,6 +26,7 @@ package de.thingweb.servient.impl;
 
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
+import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.servient.Defines;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
@@ -75,6 +76,11 @@ public class MultiBindingThingServer implements ThingServer {
         things.put(thing.getName().toLowerCase(), servedThing);
         createBindings(servedThing);
         return servedThing;
+    }
+
+    @Override
+    public ThingInterface addThing(ThingDescription thingDescription) {
+        return addThing(new Thing(thingDescription));
     }
 
     @Override

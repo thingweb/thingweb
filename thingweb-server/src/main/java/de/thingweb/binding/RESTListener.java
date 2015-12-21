@@ -34,9 +34,10 @@ public interface RESTListener {
 
 	void onPut(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
 	
-	Content onPost(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
+	Content onPost(Content data) throws SecurityException,UnsupportedOperationException, IllegalArgumentException, RuntimeException;
 	
-	void onDelete() throws UnsupportedOperationException,  RuntimeException;
+	void onDelete() throws SecurityException ,UnsupportedOperationException,  RuntimeException;
 
 	void addObserver(Observer o);
+
 }

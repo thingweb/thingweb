@@ -36,6 +36,7 @@ public final class ServientBuilder {
     private static final CoapBinding m_coapBinding = new CoapBinding();
     private static final HttpBinding m_httpBinding = new HttpBinding();
 
+    private static boolean initialized = false;
 
     private ServientBuilder() {
         /* pure static class */
@@ -55,11 +56,16 @@ public final class ServientBuilder {
     }
 
     public static void initialize() throws Exception {
+        //am already initialized
+        if(initialized) return;
+
         m_coapBinding.initialize();
         m_httpBinding.initialize();
+        initialized = true;
     }
 
     public static void start() throws Exception {
+        if(!initialized) initialize();
         m_coapBinding.start();
         m_httpBinding.start();
     }
@@ -69,7 +75,8 @@ public final class ServientBuilder {
         m_httpBinding.stop();
     }
 
-    public static ThingServer newThingServer() {
+    public static ThingServer newThingServer() throws Exception {
+        if(!initialized) initialize();
         return new MultiBindingThingServer(
                 m_coapBinding.getResourceBuilder(),
                 m_httpBinding.getResourceBuilder()

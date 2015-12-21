@@ -25,6 +25,7 @@
 package de.thingweb.servient;
 
 
+import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.thing.Thing;
 
 /**
@@ -33,6 +34,8 @@ import de.thingweb.thing.Thing;
 public interface ThingServer {
 
     ThingInterface addThing(Thing thing);
+
+    ThingInterface addThing(ThingDescription thingDescription);
 
     ThingInterface getThing(String thingName);
 }

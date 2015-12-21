@@ -78,7 +78,7 @@ public class CoapBinding implements Binding {
 
                 if(existing != null) {
                     Collection<Resource> children = existing.getChildren();
-                    children.forEach((child) -> newRes.add(child));
+                    children.forEach(newRes::add);
                 }
 
                 current.add(newRes);
