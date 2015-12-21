@@ -32,6 +32,7 @@ public class ServientTestHttp {
 
     private ThingServer server;
     private Thread serverThread;
+    private ThingInterface thing;
 
     @Before
     public void setUp() throws Exception {
@@ -39,14 +40,21 @@ public class ServientTestHttp {
         String json = readResource("simplething.jsonld");
         ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
         Thing simpleThing = new Thing(thingDescription);
-        server = ServientBuilder.newThingServer(simpleThing);
+        server = ServientBuilder.newThingServer();
+        thing = server.addThing(simpleThing);
         ServientBuilder.start();
     }
 
     @Test
+    public void ensureThingIsReturned() {
+        ThingInterface simpleThing = server.getThing("SimpleThing");
+        assertThat("should be the same instance",simpleThing,is(thing));
+    }
+
+    @Test
     public void setAndReadPropertyDirectly() throws Exception {
-        server.setProperty("number",42);
-        Integer number = (Integer) server.getProperty("number");
+        thing.setProperty("number",42);
+        Integer number = (Integer) server.getThing("SimpleThing").getProperty("number");
         assertThat("should be Integer",number.getClass(),equalTo(Integer.class));
         assertThat("value is 42", number,is(42));
     }
@@ -54,7 +62,7 @@ public class ServientTestHttp {
 
     @Test
     public void setDirectlyAndReadHttp() throws Exception {
-        server.setProperty("number",42);
+        thing.setProperty("number",42);
 
         String json = fromUrl("http://localhost:8080/things/SimpleThing/number");
 
@@ -68,7 +76,7 @@ public class ServientTestHttp {
 
     @Test
     public void setDirectlyAndReadHttp_lowercese() throws Exception {
-        server.setProperty("number",42);
+        thing.setProperty("number",42);
 
         String json = fromUrl("http://localhost:8080/things/simplething/number");
 
@@ -82,7 +90,7 @@ public class ServientTestHttp {
     @Test
     public void attachListenerAndsetDirectly() throws Exception {
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        server.onInvoke("testaction", (nv) -> {
+        thing.onInvoke("testaction", (nv) -> {
             Integer newVal = ContentHelper.ensureClass(nv,Integer.class);
             future.complete(newVal);
             return null;

@@ -27,7 +27,7 @@ public class TestTools {
         ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
         Thing simpleThing = new Thing(thingDescription);
         ThingServer server = ServientBuilder.newThingServer(simpleThing);
-        server.setProperty("number",38);
+        server.getThing("SimpleThing").setProperty("number",38);
         ServientBuilder.start();
         System.in.read();
     }

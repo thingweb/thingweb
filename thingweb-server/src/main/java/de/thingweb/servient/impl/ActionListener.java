@@ -40,46 +40,37 @@ import java.util.function.Function;
  */
 public class ActionListener extends AbstractRESTListener {
 
-	private static final Logger log = LoggerFactory.getLogger(ActionListener.class);
+    private static final Logger log = LoggerFactory.getLogger(ActionListener.class);
     private final Action action;
-    private StateContainer m_state;
+    private final ServedThing servedThing;
 
-    public ActionListener(StateContainer m_state, Action action) {
+    public ActionListener(ServedThing servedThing, Action action) {
         this.action = action;
-        this.m_state = m_state;
+        this.servedThing = servedThing;
     }
 
     @Override
-	public Content onGet()	{
-		return new Content(("Action: " + action.getName()).getBytes(), MediaType.TEXT_PLAIN);
-	}
+    public Content onGet() {
+        return new Content(("Action: " + action.getName()).getBytes(), MediaType.TEXT_PLAIN);
+    }
 
 
     @Override
-	public void onPut(Content data) {
-		log.warn("Action was called by PUT, which is a violation of the spec");
-		Function<?, ?> handler = m_state.getHandler(action);
+    public void onPut(Content data) {
+        log.warn("Action was called by PUT, which is a violation of the spec");
+        Object o = ContentHelper.getValueFromJson(data);
+        log.debug("invoking {}", action.getName());
 
-		System.out.println("invoking " + action.getName());
-
-		Map map = (Map) ContentHelper.parse(data, Map.class);
-		Object o = map.get("value");
-
-		Function<Object, Object> objectHandler = (Function<Object, Object>) handler;
-		objectHandler.apply(o);
-	}
+        Object response = servedThing.invokeAction(action, o);
+    }
 
     @Override
-	public Content onPost(Content data) {
-		Function<?, ?> handler = m_state.getHandler(action);
+    public Content onPost(Content data) {
+        Object o = ContentHelper.getValueFromJson(data);
+        log.debug("invoking {}", action.getName());
 
-		System.out.println("invoking " + action.getName());
+        Object response = servedThing.invokeAction(action, o);
 
-		Object o = ContentHelper.getValueFromJson(data);
-
-		Function<Object, Object> objectHandler = (Function<Object, Object>) handler;
-		Object response = objectHandler.apply(o);
-
-		return ContentHelper.wrap(response,MediaType.APPLICATION_JSON);
-	}
+        return ContentHelper.wrap(response, MediaType.APPLICATION_JSON);
+    }
 }

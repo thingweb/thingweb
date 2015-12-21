@@ -1,16 +1,12 @@
 package de.thingweb.servient.impl;
 
-import de.thingweb.servient.InteractionListener;
 import de.thingweb.servient.ThingInterface;
-import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -25,13 +21,16 @@ public class ServedThing implements ThingInterface {
      * Sync object for {@link #m_stateSync}.
      */
     private final Object m_stateSync = new Object();
-    private final Collection<InteractionListener> m_listeners =
-            new CopyOnWriteArrayList<>();
-    private StateContainer m_state;
-    private Thing m_thingModel;
+    private final Thing m_thingModel;
+    private final StateContainer m_state;
 
     public ServedThing(Thing thing) {
+        this.m_thingModel = thing;
+        this.m_state = new StateContainer(thing);
+    }
 
+    public Thing getThingModel() {
+        return m_thingModel;
     }
 
     @Override
@@ -46,9 +45,10 @@ public class ServedThing implements ThingInterface {
 
         synchronized (m_stateSync) {
             m_state.setProperty(property, value);
-            for (InteractionListener listener : m_listeners) {
-                listener.onWriteProperty(property.getName(), value, this);
-            }
+            m_state.getUpdateHandlers(property)
+                    .parallelStream()
+                    .forEach(handler -> handler.accept(value));
+
             property.setChanged();
         }
     }
@@ -75,10 +75,6 @@ public class ServedThing implements ThingInterface {
                     "property does not belong to served thing");
         }
 
-        for (InteractionListener listener : m_listeners) {
-            listener.onReadProperty(property.getName(), this);
-        }
-
         synchronized (m_stateSync) {
             return m_state.getProperty(property);
         }
@@ -99,38 +95,44 @@ public class ServedThing implements ThingInterface {
 
     @Override
     public Object invokeAction(String actionName, Object parameter) {
+        Action action = m_thingModel.getAction(actionName);
+        if (action == null) {
+            log.warn("onInvoke for actionName '{}' not found in thing model", actionName);
+            throw new IllegalArgumentException(actionName);
+        } else {
+            return invokeAction(action, parameter);
+        }
+    }
 
+    @Override
+    public Object invokeAction(Action action, Object parameter) {
+        Function<?, ?> handler = m_state.getHandler(action);
+
+        Function<Object, Object> objectHandler = (Function<Object, Object>) handler;
+        Object result = objectHandler.apply(parameter);
+
+        return result;
     }
 
     @Override
     public void onUpdate(String propertyName, Consumer<Object> callback) {
-        this.addInteractionListener(new InteractionListener() {
-            @Override
-            public void onReadProperty(String propertyName, ThingServer thingServer) {
-
-            }
-
-            @Override
-            public void onWriteProperty(String changedPropertyName, Object newValue, ThingServer thingServer) {
-                if(changedPropertyName.equals(propertyName)) {
-                    callback.accept(newValue);
-                }
-            }
-        });
+        Property property = m_thingModel.getProperty(propertyName);
+        if (property == null) {
+            log.warn("property {} not found in thing {}", propertyName, m_thingModel.getName());
+            throw new IllegalArgumentException(propertyName);
+        } else {
+            m_state.addUpdateHandler(property, callback);
+        }
     }
 
     @Override
     public void onInvoke(String actionName, Function<Object, Object> callback) {
         Action action = m_thingModel.getAction(actionName);
-        if(action == null) {
+        if (action == null) {
             log.warn("onInvoke for actionName '" + actionName + "' not found in thing model");
         } else {
             m_state.addHandler(action, callback);
         }
     }
 
-    @Override
-    public void addInteractionListener(InteractionListener listener) {
-        m_listeners.add(listener);
-    }
 }

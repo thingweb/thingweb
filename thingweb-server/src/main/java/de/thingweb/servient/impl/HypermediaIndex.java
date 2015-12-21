@@ -60,26 +60,26 @@ public class HypermediaIndex implements RESTListener {
         } catch (JsonProcessingException e) {
             json = "{ \"error\" : \" " + e.getMessage() + "\"  }";
         }
-        return new Content(json.getBytes(),MediaType.APPLICATION_JSON);
+        return new Content(json.getBytes(), MediaType.APPLICATION_JSON);
     }
 
     @Override
-    public Content onGet() throws UnsupportedOperationException, RuntimeException {
+    public Content onGet() throws RuntimeException {
         return myContent;
     }
 
     @Override
-    public void onPut(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException {
+    public void onPut(Content data) throws RuntimeException {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public Content onPost(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException {
+    public Content onPost(Content data) throws RuntimeException {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public void onDelete() throws UnsupportedOperationException, RuntimeException {
+    public void onDelete() throws RuntimeException {
         throw new UnsupportedOperationException("not implemented");
     }
 

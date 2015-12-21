@@ -27,15 +27,12 @@ package de.thingweb.servient;
 
 import de.thingweb.thing.Thing;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 /**
  * The ThingServer is thread safe.
  */
 public interface ThingServer {
 
-	void addThing(Thing thing);
+    ThingInterface addThing(Thing thing);
 
-	ThingInterface getThing(String thingName);
+    ThingInterface getThing(String thingName);
 }
