@@ -25,12 +25,38 @@
 package de.thingweb.security;
 
 /**
- * Created by mchn1210 on 22.12.2015.
+ *  Validator for securitty tokens
+ *  checks signature and validates claims against requirements
  */
 public interface SecurityTokenValidator {
-    void setAssumptions(TokenAssumptions assumptions);
+    /**
+     *  Set a new ste of required claims resp. attributes to be checked in the token
+     * @param requirements replacement requirements
+     */
+    void setRequirements(TokenRequirements requirements);
 
-    TokenAssumptions getAssumptions();
+    /**
+     * Get currents requirements imposed on tokes to validate
+     * @return set of requirements
+     */
+    TokenRequirements getRequirements();
 
-    String checkValidity(String method, String uri, String token);
+    /**
+     * Check a token if it validates and fulfills the required properties
+     * also checkn if it contains access rights for the given resource and the given method
+     * and return the subject the token was issued for
+     *
+     * @param method the method used for the REST call, e.g. GET, PUT, POST or DELETE
+     * @param uri the relative uri of the accessed resource
+     * @param token the JWT that the request contained (base64-encoded String)
+     * @return subject claim if validated, null if not
+     */
+    String checkValidity(String method, String uri, String token) throws UnauthorizedException;
+
+    /**
+     * Check a token if it is signed correctly and fulfills the requirements
+     * @param token
+     * @return
+     */
+    boolean isValid(String token);
 }
