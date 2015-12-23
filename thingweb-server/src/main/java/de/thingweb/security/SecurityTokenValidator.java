@@ -55,10 +55,4 @@ public interface SecurityTokenValidator {
      */
     String checkValidity(String method, String resource, String jwt) throws UnauthorizedException, TokenExpiredException;
 
-    /**
-     * Check a token if it is signed correctly and fulfills the requirements
-     * @param jwt the token to decode and validate
-     * @return subject claim if validated, null if not
-     */
-    String isValid(String jwt) throws UnauthorizedException, TokenExpiredException;
 }

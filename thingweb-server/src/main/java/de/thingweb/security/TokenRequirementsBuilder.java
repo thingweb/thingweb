@@ -61,4 +61,11 @@ public class TokenRequirementsBuilder {
     public TokenRequirements createTokenRequirements() {
         return new TokenRequirements(issuer, audience, expirationTimeDefined, verificationKey, client);
     }
+
+    public static TokenRequirements createDefault() {
+        //by default, just verify that it can expire
+        return TokenRequirements.build()
+                .setExpirationTimeDefined(true)
+                .createTokenRequirements();
+    }
 }

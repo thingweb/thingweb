@@ -61,29 +61,11 @@ public class SecurityTokenValidator4NicePlugfest implements SecurityTokenValidat
 
         //throw exception
 
-        //else
-
-        //return claims
-
-        return null;
-    }
-
-    @Override
-    public String isValid(String jwt) throws UnauthorizedException, TokenExpiredException {
-        //decode jwt
-
-        //use validator on decoded jwt
-
-        //apply extended checks
-
-        //if not valid
-
-        //throw exception
+        throw new UnauthorizedException();
 
         //else
 
         //return claims
-
-        return null;
     }
+
 }

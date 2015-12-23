@@ -1,31 +1,35 @@
 /*
- * The MIT License (MIT)
  *
- * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * The MIT License (MIT)
+ *  *
+ *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  *
+ *  * Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  * of this software and associated documentation files (the "Software"), to deal
+ *  * in the Software without restriction, including without limitation the rights
+ *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  * copies of the Software, and to permit persons to whom the Software is
+ *  * furnished to do so, subject to the following conditions:
+ *  *
+ *  * The above copyright notice and this permission notice shall be included in
+ *  * all copies or substantial portions of the Software.
+ *  *
+ *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  * THE SOFTWARE.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
  */
 
 package de.thingweb.binding.http;
 
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
+import de.thingweb.security.TokenExpiredException;
+import de.thingweb.security.UnauthorizedException;
 import de.thingweb.thing.Content;
 import de.thingweb.thing.MediaType;
 import fi.iki.elonen.NanoHTTPD;
@@ -65,11 +69,25 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 			return new Response(Response.Status.NOT_FOUND,MIME_PLAINTEXT,msg);
         }
 
-        if(!authorize(session)) {
-			return new Response(Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "Unauthorized");
+		//validate token
+		if(listener.hasProtection()) {
+			try {
+				String jwt = null;
+				String auth = session.getHeaders().get("Authorization");
+				if (auth != null) {
+					if (auth.startsWith("Bearer ")) {
+						jwt = auth.substring("Bearer ".length());
+					}
+				}
+				listener.validate(session.getMethod().name(), uri, jwt);
+			} catch (TokenExpiredException e) {
+				return new Response(Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "Your token has expired");
+			} catch (UnauthorizedException e) {
+				return new Response(Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "Unauthorized");
+			}
 		}
 
-        //get result
+		//get result
         try {
 			switch (session.getMethod()) {
 			    case GET:
@@ -100,7 +118,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
 	}
 
-    private boolean authorize(IHTTPSession session) {
+    private boolean authorize(String M) {
 		//to be replaced once tokenverifier is in place
 		return true;
 
