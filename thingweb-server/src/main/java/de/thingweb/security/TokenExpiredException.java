@@ -27,9 +27,8 @@
 package de.thingweb.security;
 
 /**
- * Created by Johannes on 22.12.2015.
- * This Exception is thrown when the token is not valid or a normal token has insufficient privileges
- *
+ * This exception is trown when the token was expired
+ * Created by Johannes on 23.12.2015.
  */
-public class UnauthorizedException extends Exception {
+public class TokenExpiredException extends Exception {
 }

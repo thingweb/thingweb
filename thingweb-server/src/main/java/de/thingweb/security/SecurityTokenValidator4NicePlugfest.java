@@ -26,39 +26,64 @@
 
 package de.thingweb.security;
 
-public class TokenRequirementsBuilder {
-    private String issuer = null;
-    private String audience = null;
-    private boolean expirationTimeDefined = false;
-    private String verificationKey = null;
-    private String client = null;
+/**
+ * Created by Johannes on 23.12.2015.
+ */
+public class SecurityTokenValidator4NicePlugfest implements SecurityTokenValidator {
+    private TokenRequirements requirements;
 
-    public TokenRequirementsBuilder setIssuer(String issuer) {
-        this.issuer = issuer;
-        return this;
+    public SecurityTokenValidator4NicePlugfest(TokenRequirements requirements) {
+        setRequirements(requirements);
     }
 
-    public TokenRequirementsBuilder setAudience(String audience) {
-        this.audience = audience;
-        return this;
+    @Override
+    public void setRequirements(TokenRequirements requirements) {
+        this.requirements = requirements;
+        //setup validator according to requirements?
     }
 
-    public TokenRequirementsBuilder setExpirationTimeDefined(boolean expirationTimeDefined) {
-        this.expirationTimeDefined = expirationTimeDefined;
-        return this;
+    @Override
+    public TokenRequirements getRequirements() {
+        return this.requirements;
     }
 
-    public TokenRequirementsBuilder setVerificationKey(String verificationKey) {
-        this.verificationKey = verificationKey;
-        return this;
+    @Override
+    public String checkValidity(String method, String resource, String jwt) throws UnauthorizedException, TokenExpiredException {
+        //decode jwt
+
+        //use validator on decoded jwt
+
+        //apply extended checks
+
+        //check if method and resource are in aic
+
+        //if not valid
+
+        //throw exception
+
+        //else
+
+        //return claims
+
+        return null;
     }
 
-    public TokenRequirementsBuilder setClient(String client) {
-        this.client = client;
-        return this;
-    }
+    @Override
+    public String isValid(String jwt) throws UnauthorizedException, TokenExpiredException {
+        //decode jwt
 
-    public TokenRequirements createTokenRequirements() {
-        return new TokenRequirements(issuer, audience, expirationTimeDefined, verificationKey, client);
+        //use validator on decoded jwt
+
+        //apply extended checks
+
+        //if not valid
+
+        //throw exception
+
+        //else
+
+        //return claims
+
+        return null;
     }
 }
