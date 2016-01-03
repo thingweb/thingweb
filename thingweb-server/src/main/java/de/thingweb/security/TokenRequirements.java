@@ -2,7 +2,7 @@
  *
  *  * The MIT License (MIT)
  *  *
- *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -32,20 +32,33 @@ package de.thingweb.security;
 public class TokenRequirements {
     private final String issuer;
     private final String audience;
-    private final boolean expirationTimeDefined;
+    private final long expirationTimeOffset;
     private final String verificationKey;
-    private final String client;
+    private final String clientId;
+    private final boolean validateSignature;
+    // should be migrated to enum
+    private final String tokenType;
+
+    public TokenRequirements(String issuer, String audience, long expirationTimeOffset, String verificationKey, String clientId, boolean validateSignature, String tokenType) {
+        this.issuer = issuer;
+        this.audience = audience;
+        this.expirationTimeOffset = expirationTimeOffset;
+        this.verificationKey = verificationKey;
+        this.clientId = clientId;
+        this.validateSignature = validateSignature;
+        this.tokenType = tokenType;
+    }
 
     public static TokenRequirementsBuilder build() {
         return new TokenRequirementsBuilder();
     }
 
-    public TokenRequirements(String issuer, String audience, boolean expirationTimeDefined, String verificationKey, String client) {
-        this.issuer = issuer;
-        this.audience = audience;
-        this.expirationTimeDefined = expirationTimeDefined;
-        this.verificationKey = verificationKey;
-        this.client = client;
+    public boolean validateSignature() {
+        return validateSignature;
+    }
+
+    public String getTokenType() {
+        return tokenType;
     }
 
     public String getIssuer() {
@@ -60,12 +73,12 @@ public class TokenRequirements {
         return verificationKey;
     }
 
-    public String getClient() {
-        return client;
+    public String getClientId() {
+        return clientId;
     }
 
-    public boolean checkExpirationTimeDefined() {
-        return expirationTimeDefined;
+    public long getExpirationTimeOffset() {
+        return expirationTimeOffset;
     }
 
     public boolean checkIssuer() {
@@ -81,7 +94,11 @@ public class TokenRequirements {
     }
 
     public boolean checkClient() {
-        return client !=null;
+        return clientId !=null;
+    }
+
+    public boolean validateExpiration() {
+        return expirationTimeOffset >= 0;
     }
 
 }

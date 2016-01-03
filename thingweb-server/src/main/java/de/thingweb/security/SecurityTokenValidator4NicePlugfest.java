@@ -2,7 +2,7 @@
  *
  *  * The MIT License (MIT)
  *  *
- *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -57,15 +57,15 @@ public class SecurityTokenValidator4NicePlugfest implements SecurityTokenValidat
 
         //check if method and resource are in aic
 
-        //if not valid
+        //if not valid...
 
         //throw exception
 
         throw new UnauthorizedException();
 
-        //else
+        //else...
 
-        //return claims
+        //return claims - or in our simple case, the subject
     }
 
 }

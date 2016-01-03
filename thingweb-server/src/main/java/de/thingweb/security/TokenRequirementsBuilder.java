@@ -2,7 +2,7 @@
  *
  *  * The MIT License (MIT)
  *  *
- *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,28 @@ package de.thingweb.security;
 public class TokenRequirementsBuilder {
     private String issuer = null;
     private String audience = null;
-    private boolean expirationTimeDefined = false;
+    private long expirationTimeOffset = -1;
     private String verificationKey = null;
-    private String client = null;
+    private String clientId = null;
+    private String tokenType = "ES256";
+    private boolean validateSignature = true;
+
+    public static TokenRequirements createDefault() {
+        //by default, just verify that it can expire
+        return TokenRequirements.build()
+                .validateAt(0)
+                .createTokenRequirements();
+    }
+
+    public TokenRequirementsBuilder setValidateSignature(boolean validateSignature) {
+        this.validateSignature = validateSignature;
+        return this;
+    }
+
+    public TokenRequirementsBuilder setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+        return this;
+    }
 
     public TokenRequirementsBuilder setIssuer(String issuer) {
         this.issuer = issuer;
@@ -43,8 +62,8 @@ public class TokenRequirementsBuilder {
         return this;
     }
 
-    public TokenRequirementsBuilder setExpirationTimeDefined(boolean expirationTimeDefined) {
-        this.expirationTimeDefined = expirationTimeDefined;
+    public TokenRequirementsBuilder validateAt(long expirationTimeOffset) {
+        this.expirationTimeOffset = expirationTimeOffset;
         return this;
     }
 
@@ -53,19 +72,12 @@ public class TokenRequirementsBuilder {
         return this;
     }
 
-    public TokenRequirementsBuilder setClient(String client) {
-        this.client = client;
+    public TokenRequirementsBuilder setClientId(String clientId) {
+        this.clientId = clientId;
         return this;
     }
 
     public TokenRequirements createTokenRequirements() {
-        return new TokenRequirements(issuer, audience, expirationTimeDefined, verificationKey, client);
-    }
-
-    public static TokenRequirements createDefault() {
-        //by default, just verify that it can expire
-        return TokenRequirements.build()
-                .setExpirationTimeDefined(true)
-                .createTokenRequirements();
+        return new TokenRequirements(issuer, audience, expirationTimeOffset, verificationKey, clientId, validateSignature, tokenType);
     }
 }
