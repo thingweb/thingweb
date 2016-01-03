@@ -2,7 +2,7 @@
  *
  *  * The MIT License (MIT)
  *  *
- *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
 public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
-    private final Map<String,RESTListener> resmap = new HashMap<>();
+    private final Map<String,RESTListener> resmap = new LinkedHashMap<>();
 	private Logger log = LoggerFactory.getLogger(NanoHttpServer.class);
 
 	public NanoHttpServer() throws IOException {

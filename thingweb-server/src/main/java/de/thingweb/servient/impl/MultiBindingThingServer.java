@@ -39,6 +39,7 @@ import de.thingweb.util.encoding.ContentHelper;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 
 /**
@@ -68,6 +69,12 @@ public class MultiBindingThingServer implements ThingServer {
 
     public MultiBindingThingServer(ResourceBuilder... bindings) {
         Collections.addAll(m_bindings, bindings);
+        m_bindings.forEach(resourceBuilder ->
+                resourceBuilder.newResource(Defines.BASE_URL, new HypermediaIndex(
+                                new HyperMediaLink("things", Defines.BASE_THING_URL)
+                        )
+                )
+        );
     }
 
     @Override
@@ -92,31 +99,29 @@ public class MultiBindingThingServer implements ThingServer {
     }
 
     private void createBindings(ServedThing thingModel) {
+
+        final List<HyperMediaLink> thinglinks = things.keySet().stream()
+                .sorted()
+                .map(name -> new HyperMediaLink("thing", Defines.BASE_THING_URL + name))
+                .collect(Collectors.toList());
+
+        final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);
+
         for (ResourceBuilder binding : m_bindings) {
+            // update/create HATEOAS links to things
+            binding.newResource(Defines.BASE_THING_URL, thingIndex);
             createBinding(binding, thingModel);
         }
     }
 
     private void createBinding(ResourceBuilder resources, ServedThing servedThing) {
-        Thing thingModel = servedThing.getThingModel();
+        final Thing thingModel = servedThing.getThingModel();
 
-        // root
-        resources.newResource(Defines.BASE_URL, new HypermediaIndex(
-                        new HyperMediaLink("things", Defines.BASE_THING_URL)
-                )
-        );
+        final Collection<Property> properties = thingModel.getProperties();
+        final Collection<Action> actions = thingModel.getActions();
 
-        // things
-        resources.newResource(Defines.BASE_THING_URL, new HypermediaIndex(
-                        new HyperMediaLink("thing", Defines.BASE_THING_URL + thingModel.getName())
-                )
-        );
-
-        Collection<Property> properties = thingModel.getProperties();
-        Collection<Action> actions = thingModel.getActions();
-
-        List<HyperMediaLink> interactionLinks = new LinkedList<>();
-        Map<String, RESTListener> interactionListeners = new HashMap<>();
+        final List<HyperMediaLink> interactionLinks = new LinkedList<>();
+        final Map<String, RESTListener> interactionListeners = new HashMap<>();
 
         // collect properties
         for (Property property : properties) {

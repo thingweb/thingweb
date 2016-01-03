@@ -65,8 +65,8 @@ public final class Thing {
 
         m_name = name;
 
-        List<InteractionDescription> interactions = Collections.emptyList();
-        Metadata metas = new Metadata(name, Collections.emptyMap(), Collections.emptyList());
+        List<InteractionDescription> interactions = new ArrayList<>();
+        Metadata metas = new Metadata(name, null,null);
         m_td = new ThingDescription(metas,interactions);
     }
 
