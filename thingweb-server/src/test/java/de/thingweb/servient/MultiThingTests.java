@@ -37,7 +37,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -88,9 +87,7 @@ public class MultiThingTests {
         });
     }
 
-
-    //no trivial solution - commented out, thingweb only works with sane names for now
-    //@Test
+    @Test
     public void notUrlConformNames() throws Exception {
         final Thing thing = new Thing("Ugly strange näime");
         thing.addProperty(Property.getBuilder("not url kompätibel").build());
@@ -105,13 +102,14 @@ public class MultiThingTests {
         final ArrayNode jsonNode = (ArrayNode) jsonMapper.readTree(thingroot);
         final String thingHref = jsonNode.get(0).get("href").textValue();
 
+        // this replacement needs to be done when writing the json
         final URL thingUrl = new URL(thingroot,thingHref);
         final ArrayNode thingLinks = (ArrayNode) jsonMapper.readTree(thingUrl);
 
         thingLinks.forEach(node -> {
             try {
-                new URL(node.get("href").textValue());
-            } catch (MalformedURLException e) {
+                jsonMapper.readTree(new URL(thingUrl,node.get("href").textValue()));
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         });

@@ -99,10 +99,9 @@ public class MultiBindingThingServer implements ThingServer {
     }
 
     private void createBindings(ServedThing thingModel) {
-
         final List<HyperMediaLink> thinglinks = things.keySet().stream()
                 .sorted()
-                .map(name -> new HyperMediaLink("thing", Defines.BASE_THING_URL + name))
+                .map(name -> new HyperMediaLink("thing", Defines.BASE_THING_URL + urlize(name)))
                 .collect(Collectors.toList());
 
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);
@@ -137,7 +136,7 @@ public class MultiBindingThingServer implements ThingServer {
 //            ));
 
             interactionListeners.put(url + "/value", new PropertyListener(servedThing, property));
-            interactionLinks.add(new HyperMediaLink("property", url));
+            interactionLinks.add(new HyperMediaLink("property", urlize(url)));
         }
 
         // collect actions
@@ -145,16 +144,17 @@ public class MultiBindingThingServer implements ThingServer {
             //TODO optimize by preconstructing strings and using format
             final String url = thingurl + "/" + action.getName();
             interactionListeners.put(url, new ActionListener(servedThing, action));
-            interactionLinks.add(new HyperMediaLink("action", url));
+            interactionLinks.add(new HyperMediaLink("action", urlize(url)));
         }
 
         //add listener for thing description
         String tdUrl = thingurl + "/.td";
-        interactionLinks.add(new HyperMediaLink("description",tdUrl));
+        interactionLinks.add(new HyperMediaLink("description",urlize(tdUrl)));
         interactionListeners.put(tdUrl,
                 new AbstractRESTListener() {
                     @Override
                     public Content onGet() {
+                        //TODO fill up metadata
                         ThingDescription td = thingModel.getThingDescription();
 
                         //manually adding the context
@@ -176,6 +176,15 @@ public class MultiBindingThingServer implements ThingServer {
                 entry -> resources.newResource(entry.getKey(), entry.getValue())
         );
 
+    }
+
+    private static String urlize(String name) {
+//        try {
+//            return URLEncoder.encode(name,"UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            return URLEncoder.encode(name);
+//        }
+        return name.replace(' ','+');
     }
 
 }
