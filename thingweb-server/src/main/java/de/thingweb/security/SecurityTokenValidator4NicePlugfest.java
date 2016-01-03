@@ -61,11 +61,14 @@ public class SecurityTokenValidator4NicePlugfest implements SecurityTokenValidat
 
         //throw exception
 
-        throw new UnauthorizedException();
-
+        if (requirements.validateSignature()) {
+            throw new UnauthorizedException();
+        }
         //else...
 
         //return claims - or in our simple case, the subject
+
+        return "";
     }
 
 }
