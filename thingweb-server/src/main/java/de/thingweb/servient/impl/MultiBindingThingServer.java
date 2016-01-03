@@ -122,10 +122,11 @@ public class MultiBindingThingServer implements ThingServer {
 
         final List<HyperMediaLink> interactionLinks = new LinkedList<>();
         final Map<String, RESTListener> interactionListeners = new HashMap<>();
+        final String thingurl = Defines.BASE_THING_URL + thingModel.getName();
 
         // collect properties
         for (Property property : properties) {
-            String url = Defines.BASE_THING_URL + thingModel.getName() + "/" + property.getName();
+            String url = thingurl + "/" + property.getName();
 
             interactionListeners.put(url, new PropertyListener(servedThing, property));
 
@@ -142,13 +143,13 @@ public class MultiBindingThingServer implements ThingServer {
         // collect actions
         for (Action action : actions) {
             //TODO optimize by preconstructing strings and using format
-            String url = Defines.BASE_THING_URL + thingModel.getName() + "/" + action.getName();
+            final String url = thingurl + "/" + action.getName();
             interactionListeners.put(url, new ActionListener(servedThing, action));
             interactionLinks.add(new HyperMediaLink("action", url));
         }
 
         //add listener for thing description
-        String tdUrl = Defines.BASE_THING_URL + thingModel.getName() + "/.td";
+        String tdUrl = thingurl + "/.td";
         interactionLinks.add(new HyperMediaLink("description",tdUrl));
         interactionListeners.put(tdUrl,
                 new AbstractRESTListener() {
@@ -166,7 +167,7 @@ public class MultiBindingThingServer implements ThingServer {
                 });
 
         // thing root
-        resources.newResource(Defines.BASE_THING_URL + thingModel.getName(),
+        resources.newResource(thingurl,
                 new HypermediaIndex(interactionLinks)
         );
 

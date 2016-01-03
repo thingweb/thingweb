@@ -63,7 +63,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
         //if not found return 404
         if(listener== null) {
-            String msg = "Resource not found, availiable resources:\n";
+            String msg = String.format("Resource %s not found, availiable resources:\n",uri);
 			msg += resmap.keySet().stream().collect(Collectors.joining("\n"));
 
 			return new Response(Response.Status.NOT_FOUND,MIME_PLAINTEXT,msg);

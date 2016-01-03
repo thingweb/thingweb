@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -48,16 +49,17 @@ import static org.hamcrest.Matchers.*;
 public class MultiThingTests {
 
     private ObjectMapper jsonMapper;
+    private ThingServer server;
 
     @Before
     public void setUp() throws Exception {
         ServientBuilder.initialize();
         jsonMapper = new ObjectMapper();
+        server = ServientBuilder.newThingServer();
     }
 
     @Test
     public void multiThingServient() throws Exception {
-        ThingServer server = ServientBuilder.newThingServer();
         int nthings =10;
         Thing[] things = new Thing[nthings];
 
@@ -84,6 +86,46 @@ public class MultiThingTests {
             assertThat(link.get("href").textValue(),startsWith("/things/"));
             assertThat(link.get("href").textValue(),not(isEmptyOrNullString()));
         });
+    }
+
+
+    //no trivial solution - commented out, thingweb only works with sane names for now
+    //@Test
+    public void notUrlConformNames() throws Exception {
+        final Thing thing = new Thing("Ugly strange näime");
+        thing.addProperty(Property.getBuilder("not url kompätibel").build());
+        thing.addAction(Action.getBuilder("wierdly named äktschn").build());
+
+        server.addThing(thing);
+
+        ServientBuilder.start();
+
+        URL thingroot = new URL("http://localhost:8080/things/");
+
+        final ArrayNode jsonNode = (ArrayNode) jsonMapper.readTree(thingroot);
+        final String thingHref = jsonNode.get(0).get("href").textValue();
+
+        final URL thingUrl = new URL(thingroot,thingHref);
+        final ArrayNode thingLinks = (ArrayNode) jsonMapper.readTree(thingUrl);
+
+        thingLinks.forEach(node -> {
+            try {
+                new URL(node.get("href").textValue());
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public static void main(String[] args) throws Exception {
+        final Thing thing = new Thing("Ugly strange näime");
+        thing.addProperty(Property.getBuilder("not url kompätibel").build());
+        thing.addAction(Action.getBuilder("wierdly named äktschn").build());
+
+        ServientBuilder.initialize();
+        ServientBuilder.newThingServer(thing);
+        ServientBuilder.start();
+
     }
 
     @After
