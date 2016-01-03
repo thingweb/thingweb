@@ -1,0 +1,19 @@
+{
+  "@context": "http://w3c.github.io/wot/w3c-wot-td-context.jsonld",
+  "metadata": {
+    "name": "partial"
+  },
+  "interactions": [
+    {
+      "@type": "Property",
+      "name": "number",
+      "outputData": "xsd:unsignedByte",
+      "writable": true
+    },   {
+      "@type": "Action",
+      "name": "testaction",
+      "inputData": "xsd:unsignedByte",
+      "outputData": ""
+    }
+  ]
+}

@@ -1,5 +1,33 @@
+/*
+ *
+ *  * The MIT License (MIT)
+ *  *
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
+ *  *
+ *  * Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  * of this software and associated documentation files (the "Software"), to deal
+ *  * in the Software without restriction, including without limitation the rights
+ *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  * copies of the Software, and to permit persons to whom the Software is
+ *  * furnished to do so, subject to the following conditions:
+ *  *
+ *  * The above copyright notice and this permission notice shall be included in
+ *  * all copies or substantial portions of the Software.
+ *  *
+ *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  * THE SOFTWARE.
+ *
+ */
+
 package de.thingweb.servient;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.thingweb.desc.DescriptionParser;
 import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.thing.Content;
@@ -20,9 +48,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static de.thingweb.servient.TestTools.fromUrl;
 import static de.thingweb.servient.TestTools.readResource;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -31,7 +57,6 @@ import static org.junit.Assert.assertThat;
 public class ServientTestHttp {
 
     private ThingServer server;
-    private Thread serverThread;
     private ThingInterface thing;
 
     @Before
@@ -101,6 +126,21 @@ public class ServientTestHttp {
         assertThat("value is 42", future.get() ,is(42));
     }
 
+    @Test
+    public void readTD() throws Exception {
+        String fromSrv = TestTools.fromUrl("http://localhost:8080/things/SimpleThing/.td");
+        String orig = readResource("simplething.jsonld");
+
+        ObjectNode srvJson = (ObjectNode) ContentHelper.readJSON(fromSrv);
+        JsonNode origJson = ContentHelper.readJSON(orig);
+
+        ThingDescription td = DescriptionParser.fromBytes(fromSrv.getBytes());
+        ThingDescription reference = DescriptionParser.fromBytes(orig.getBytes());
+
+        assertThat("json objects comparision should match",srvJson,equalTo(origJson));
+
+        assertThat(ContentHelper.getJsonMapper().valueToTree(td),equalTo(ContentHelper.getJsonMapper().valueToTree(reference)));
+    }
 
     @After
     public void tearDown() throws IOException {

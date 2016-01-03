@@ -2,7 +2,7 @@
  *
  *  * The MIT License (MIT)
  *  *
- *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 
 package de.thingweb.servient.impl;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
@@ -155,7 +156,13 @@ public class MultiBindingThingServer implements ThingServer {
                 new AbstractRESTListener() {
                     @Override
                     public Content onGet() {
-                        return ContentHelper.wrap(thingModel.getThingDescription(),
+                        ThingDescription td = thingModel.getThingDescription();
+
+                        //manually adding the context
+                        ObjectNode json = ContentHelper.getJsonMapper().valueToTree(td);
+                        json.put("@context","http://w3c.github.io/wot/w3c-wot-td-context.jsonld");
+
+                        return ContentHelper.wrap(json,
                                         MediaType.APPLICATION_JSON);
                     }
                 });
