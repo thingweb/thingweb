@@ -108,9 +108,14 @@ public class ServientSetupTests {
     }
 
     @Test
-    public void partialThing() throws Exception {
+    public void addPartialThing() throws Exception {
+        String json = readResource("interactiononly.jsonld");
+        ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
+        Thing partialThing = new Thing(thingDescription);
+        ThingServer server = ServientBuilder.newThingServer();
+        ServientBuilder.start();
+        server.addThing(partialThing);
     }
-
 
     @After
     public void tearDown() throws IOException {
