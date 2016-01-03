@@ -142,6 +142,24 @@ public class MultiBindingThingServer implements ThingServer {
             interactionLinks.add(new HyperMediaLink("action", url));
         }
 
+        //add listener for thing description
+        String tdUrl = Defines.BASE_THING_URL + thingModel.getName() + "/.td";
+        interactionLinks.add(new HyperMediaLink("description",tdUrl));
+        interactionListeners.put(tdUrl,
+                new AbstractRESTListener() {
+                    @Override
+                    public Content onGet() {
+                        ThingDescription td = thingModel.getThingDescription();
+
+                        //manually adding the context
+                        ObjectNode json = ContentHelper.getJsonMapper().valueToTree(td);
+                        json.put("@context", "http://w3c.github.io/wot/w3c-wot-td-context.jsonld");
+
+                        return ContentHelper.wrap(json,
+                                MediaType.APPLICATION_JSON);
+                    }
+                });
+
         // thing root
         resources.newResource(Defines.BASE_THING_URL + thingModel.getName(),
                 new HypermediaIndex(interactionLinks)
@@ -152,20 +170,6 @@ public class MultiBindingThingServer implements ThingServer {
                 entry -> resources.newResource(entry.getKey(), entry.getValue())
         );
 
-        resources.newResource(Defines.BASE_THING_URL + thingModel.getName() + "/.td",
-                new AbstractRESTListener() {
-                    @Override
-                    public Content onGet() {
-                        ThingDescription td = thingModel.getThingDescription();
-
-                        //manually adding the context
-                        ObjectNode json = ContentHelper.getJsonMapper().valueToTree(td);
-                        json.put("@context","http://w3c.github.io/wot/w3c-wot-td-context.jsonld");
-
-                        return ContentHelper.wrap(json,
-                                        MediaType.APPLICATION_JSON);
-                    }
-                });
     }
 
 }
