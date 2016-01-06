@@ -5,11 +5,11 @@
     "protocols": {
       "CoAP": {
         "uri": "coap://localhost:5683/things/simplething",
-        "priority": 1
+        "priority": 2
       },
       "HTTP": {
         "uri": "http://localhost:8080/things/simplething",
-        "priority": 2
+        "priority": 1
       }
     },
     "encodings": [

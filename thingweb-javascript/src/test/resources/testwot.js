@@ -11,9 +11,6 @@ srv.onUpdate("number", function(nv) {
 });
 print("added change listener");
 
-srv.setProperty("number",42);
-print("called change on server");
-
 client.setProperty("number",66)
     .then(function() {
         print("returned success");
@@ -22,3 +19,6 @@ client.setProperty("number",66)
         print("got error " + err);
     });
 print("setting value via client");
+
+srv.setProperty("number",42);
+print("called change on server");

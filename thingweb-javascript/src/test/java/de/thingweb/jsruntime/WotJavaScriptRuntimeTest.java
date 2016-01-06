@@ -43,4 +43,11 @@ public class WotJavaScriptRuntimeTest {
 
         jsrt.runScript(script);
     }
+
+    public static void main(String[] args) throws Exception {
+        //just done to avoid junit-sideffects
+        WotJavaScriptRuntimeTest test = new WotJavaScriptRuntimeTest();
+        test.testRunFile();
+    }
+
 }
