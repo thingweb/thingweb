@@ -2,7 +2,7 @@
  *
  *  * The MIT License (MIT)
  *  *
- *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@ import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.Option;
 import org.eclipse.californium.core.coap.OptionSet;
+import org.eclipse.californium.core.network.Exchange;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
 import java.util.Observable;
@@ -91,7 +92,26 @@ public class WotCoapResource extends CoapResource implements  Observer{
         return mt;
     }
 
-    private void authorize(CoapExchange exchange) throws UnauthorizedException, TokenExpiredException {
+    @Override
+    public void handleRequest(Exchange exchange) {
+        final CoapExchange coapExchange = new CoapExchange(exchange, this);
+        try {
+            final CoAP.Code code = exchange.getRequest().getCode();
+            authorize(coapExchange, code.toString());
+            switch (code) {
+                case GET:	handleGET(coapExchange); break;
+                case POST:	handlePOST(coapExchange); break;
+                case PUT:	handlePUT(coapExchange); break;
+                case DELETE: handleDELETE(coapExchange); break;
+            }
+        } catch (UnauthorizedException e) {
+            coapExchange.respond(CoAP.ResponseCode.UNAUTHORIZED);
+        } catch (TokenExpiredException e) {
+            coapExchange.respond(CoAP.ResponseCode.FORBIDDEN);
+        }
+    }
+
+    private void authorize(CoapExchange exchange, String method) throws UnauthorizedException, TokenExpiredException {
         if(m_restListener.hasProtection()) {
             Optional<Option> tokenOption = exchange.getRequestOptions().asSortedList()
                     .parallelStream()
@@ -100,8 +120,7 @@ public class WotCoapResource extends CoapResource implements  Observer{
 
             if (tokenOption.isPresent()) {
                 String jwt = tokenOption.get().getStringValue();
-
-                m_restListener.validate("GET", this.getPath(), jwt);
+                m_restListener.validate(method.toUpperCase(), this.getPath(), jwt);
             }
         }
     }
@@ -109,16 +128,11 @@ public class WotCoapResource extends CoapResource implements  Observer{
     @Override
     public void handleGET(CoapExchange exchange) {
         try {
-            authorize(exchange);
             Content response = m_restListener.onGet();
         	int contentFormat = getCoapContentFormat(response.getMediaType());
         	exchange.respond(CoAP.ResponseCode.CONTENT, response.getContent(), contentFormat);
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
-        } catch (UnauthorizedException e) {
-            exchange.respond(CoAP.ResponseCode.UNAUTHORIZED);
-        } catch (TokenExpiredException e) {
-            exchange.respond(CoAP.ResponseCode.FORBIDDEN);
         } catch (Exception e) {
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -127,21 +141,14 @@ public class WotCoapResource extends CoapResource implements  Observer{
     @Override
     public void handlePUT(CoapExchange exchange) {
         try {
-            authorize(exchange);
-
             // e.g., "Content-Format":"application/exi", "Accept":"application/xml"
             MediaType mt = getMediaType(exchange.getRequestOptions());
-
             m_restListener.onPut(new Content(exchange.getRequestPayload(), mt));
             exchange.respond(CoAP.ResponseCode.CHANGED);
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
         } catch (IllegalArgumentException e) {
             exchange.respond(CoAP.ResponseCode.BAD_REQUEST, e.getMessage());
-        } catch (UnauthorizedException e) {
-            exchange.respond(CoAP.ResponseCode.UNAUTHORIZED);
-        } catch (TokenExpiredException e) {
-            exchange.respond(CoAP.ResponseCode.FORBIDDEN);
         } catch (Exception e) {
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -150,9 +157,7 @@ public class WotCoapResource extends CoapResource implements  Observer{
     @Override
     public void handlePOST(CoapExchange exchange) {
         try {
-            authorize(exchange);
             byte[] reqPayload = exchange.getRequestPayload();
-        	System.out.println("RequestOptions: " + exchange.getRequestOptions());
             MediaType mt = getMediaType(exchange.getRequestOptions());
             Content request = new Content(reqPayload, mt);
         	Content response = m_restListener.onPost(request);
@@ -164,10 +169,6 @@ public class WotCoapResource extends CoapResource implements  Observer{
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
         } catch (IllegalArgumentException e) {
             exchange.respond(CoAP.ResponseCode.BAD_REQUEST, e.getMessage());
-        } catch (UnauthorizedException e) {
-            exchange.respond(CoAP.ResponseCode.UNAUTHORIZED);
-        } catch (TokenExpiredException e) {
-            exchange.respond(CoAP.ResponseCode.FORBIDDEN);
         } catch (Exception e) {
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -176,15 +177,10 @@ public class WotCoapResource extends CoapResource implements  Observer{
     @Override
     public void handleDELETE(CoapExchange exchange) {
         try {
-            authorize(exchange);
             m_restListener.onDelete();
             exchange.respond(CoAP.ResponseCode.DELETED);
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
-        } catch (UnauthorizedException e) {
-            exchange.respond(CoAP.ResponseCode.UNAUTHORIZED);
-        } catch (TokenExpiredException e) {
-            exchange.respond(CoAP.ResponseCode.FORBIDDEN);
         } catch (Exception e) {
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
         }    }
