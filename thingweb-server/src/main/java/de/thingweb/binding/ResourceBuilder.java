@@ -2,7 +2,7 @@
  *
  *  * The MIT License (MIT)
  *  *
- *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -29,5 +29,8 @@ package de.thingweb.binding;
 public interface ResourceBuilder {
 
 	void newResource(String url, RESTListener restListener);
-	
+
+	String getBase();
+
+	String getIdentifier();
 }

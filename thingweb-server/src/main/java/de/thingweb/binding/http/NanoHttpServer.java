@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -47,11 +48,15 @@ import java.util.stream.Collectors;
 
 public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
-    private final Map<String,RESTListener> resmap = new LinkedHashMap<>();
+	public static final int PORT = 8080;
+	private final Map<String,RESTListener> resmap = new LinkedHashMap<>();
 	private Logger log = LoggerFactory.getLogger(NanoHttpServer.class);
+	private final String baseuri;
 
 	public NanoHttpServer() throws IOException {
-        super(8080);
+        super(PORT);
+		String hostname = InetAddress.getLocalHost().getHostName();
+		baseuri = String.format("http://%s:%s",hostname,PORT);
     }
 
     @Override
@@ -156,4 +161,14 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
     public void newResource(String url, RESTListener restListener) {
         resmap.put(url.toLowerCase(),restListener);
     }
+
+	@Override
+	public String getBase() {
+		return baseuri;
+	}
+
+	@Override
+	public String getIdentifier() {
+		return "HTTP";
+	}
 }

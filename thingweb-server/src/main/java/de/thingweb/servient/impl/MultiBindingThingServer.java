@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
+import de.thingweb.desc.pojo.Protocol;
 import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.servient.Defines;
 import de.thingweb.servient.ThingInterface;
@@ -106,11 +107,18 @@ public class MultiBindingThingServer implements ThingServer {
 
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);
 
+        final Map<String, Protocol> protocols = thingModel.getThingModel().getThingDescription().getMetadata().getProtocols();
+
+        int prio=1;
         for (ResourceBuilder binding : m_bindings) {
             // update/create HATEOAS links to things
             binding.newResource(Defines.BASE_THING_URL, thingIndex);
             createBinding(binding, thingModel);
+            final Protocol protocol = new Protocol(binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()),prio++);
+            protocols.put(binding.getIdentifier(),protocol);
         }
+
+
     }
 
     private void createBinding(ResourceBuilder resources, ServedThing servedThing) {
