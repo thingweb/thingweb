@@ -39,11 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.*;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Scanner;
+import java.net.InetAddress;
 import java.util.concurrent.CompletableFuture;
 
 import static de.thingweb.servient.TestTools.fromUrl;
@@ -131,13 +127,17 @@ public class ServientTestHttp {
         String fromSrv = TestTools.fromUrl("http://localhost:8080/things/SimpleThing/.td");
         String orig = readResource("simplething.jsonld");
 
+        orig = orig.replace("localhost", InetAddress.getLocalHost().getHostName());
+
         ObjectNode srvJson = (ObjectNode) ContentHelper.readJSON(fromSrv);
         JsonNode origJson = ContentHelper.readJSON(orig);
 
         ThingDescription td = DescriptionParser.fromBytes(fromSrv.getBytes());
         ThingDescription reference = DescriptionParser.fromBytes(orig.getBytes());
 
-        assertThat("json objects comparision should match",srvJson,equalTo(origJson));
+        assertThat("jsonld context should match",srvJson.get("@context"),equalTo(origJson.get("@context")));
+        assertThat("metadata content should match",srvJson.get("metadata"),equalTo(origJson.get("metadata")));
+        assertThat("interactions should match",srvJson.get("interactions"),equalTo(origJson.get("interactions")));
 
         assertThat(ContentHelper.getJsonMapper().valueToTree(td),equalTo(ContentHelper.getJsonMapper().valueToTree(reference)));
     }

@@ -66,7 +66,11 @@ public final class Thing {
         m_name = name;
 
         List<InteractionDescription> interactions = new ArrayList<>();
-        Metadata metas = new Metadata(name, null,null);
+        Map<String, Protocol> protocols = new LinkedHashMap<>();
+        //TODO hardcoded JSON for now, retrieve list from ContentHelper
+        List<String> encodings = Arrays.asList("JSON");
+
+        Metadata metas = new Metadata(name, protocols,encodings);
         m_td = new ThingDescription(metas,interactions);
     }
 

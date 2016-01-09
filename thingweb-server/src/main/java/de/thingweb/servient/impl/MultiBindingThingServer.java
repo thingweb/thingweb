@@ -38,6 +38,8 @@ import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.*;
 import de.thingweb.util.encoding.ContentHelper;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -144,7 +146,7 @@ public class MultiBindingThingServer implements ThingServer {
 //            ));
 
             interactionListeners.put(url + "/value", new PropertyListener(servedThing, property));
-            interactionLinks.add(new HyperMediaLink("property", urlize(url)));
+            interactionLinks.add(new HyperMediaLink("property", urlizeTokens(url)));
         }
 
         // collect actions
@@ -152,12 +154,12 @@ public class MultiBindingThingServer implements ThingServer {
             //TODO optimize by preconstructing strings and using format
             final String url = thingurl + "/" + action.getName();
             interactionListeners.put(url, new ActionListener(servedThing, action));
-            interactionLinks.add(new HyperMediaLink("action", urlize(url)));
+            interactionLinks.add(new HyperMediaLink("action", urlizeTokens(url)));
         }
 
         //add listener for thing description
         String tdUrl = thingurl + "/.td";
-        interactionLinks.add(new HyperMediaLink("description",urlize(tdUrl)));
+        interactionLinks.add(new HyperMediaLink("description",urlizeTokens(tdUrl)));
         interactionListeners.put(tdUrl,
                 new AbstractRESTListener() {
                     @Override
@@ -186,13 +188,20 @@ public class MultiBindingThingServer implements ThingServer {
 
     }
 
+    //Better move these methods to a helper class
+
+    private static String urlizeTokens(String url) {
+        return Arrays.stream(url.split("/"))
+                .map(MultiBindingThingServer::urlize)
+                .collect(Collectors.joining("/"));
+    }
+
     private static String urlize(String name) {
-//        try {
-//            return URLEncoder.encode(name,"UTF-8");
-//        } catch (UnsupportedEncodingException e) {
-//            return URLEncoder.encode(name);
-//        }
-        return name.replace(' ','+');
+        try {
+            return URLEncoder.encode(name,"UTF-8").toLowerCase();
+        } catch (UnsupportedEncodingException e) {
+            return URLEncoder.encode(name).toLowerCase();
+        }
     }
 
 }

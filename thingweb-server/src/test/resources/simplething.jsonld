@@ -4,7 +4,7 @@
     "name": "SimpleThing",
     "protocols": {
       "CoAP": {
-        "uri": "coap://localhost:5683/things/simplething",
+        "uri": "coap://localhost/things/simplething",
         "priority": 1
       },
       "HTTP": {

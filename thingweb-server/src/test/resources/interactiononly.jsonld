@@ -1,7 +1,9 @@
 {
   "@context": "http://w3c.github.io/wot/w3c-wot-td-context.jsonld",
   "metadata": {
-    "name": "partial"
+    "name": "partial",
+    "protocols" : {},
+    "encodings" : []
   },
   "interactions": [
     {
