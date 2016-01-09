@@ -40,6 +40,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Properties;
 import java.util.Scanner;
 
 /**
@@ -60,6 +61,12 @@ public class TestTools {
     public static String readResource(String path) throws URISyntaxException, IOException {
         URI uri = TestTools.class.getClassLoader().getResource(path).toURI();
         return new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("UTF-8"));
+    }
+
+    public static Properties loadPropertiesFromResources(String path) throws URISyntaxException, IOException {
+        Properties props = new Properties();
+        props.load(TestTools.class.getClassLoader().getResourceAsStream(path));
+        return props;
     }
 
     public static String fromUrl(String url) throws Exception {

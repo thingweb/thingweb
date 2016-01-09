@@ -68,7 +68,7 @@ public class SecurityTokenValidator4NicePlugfest implements SecurityTokenValidat
 
         //return claims - or in our simple case, the subject
 
-        return "";
+        return "0c5f83a7-cf08-4f48-8337-bfc65ea149ff";
     }
 
 }
