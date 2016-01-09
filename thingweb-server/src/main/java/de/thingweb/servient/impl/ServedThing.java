@@ -162,4 +162,7 @@ public class ServedThing implements ThingInterface {
         }
     }
 
+    public String getName() {
+        return m_thingModel.getName();
+    }
 }
