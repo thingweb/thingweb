@@ -28,8 +28,7 @@
 
 // UNIRES, Jetty
 
-package thingweb.discovery;
-
+package de.thingweb.discovery;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,7 +46,7 @@ public class TDRepository {
 	private int repository_port;
 
 	/** Constructer set up the endpoint address of the TD repository */
-	public  TDRepository(String  repository_uri, int repository_port) {
+	public TDRepository(String  repository_uri, int repository_port) {
 	 
 		this.repository_uri = repository_uri;
 		this.repository_port =repository_port;
