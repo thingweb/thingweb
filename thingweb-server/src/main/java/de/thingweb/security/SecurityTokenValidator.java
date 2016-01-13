@@ -2,7 +2,7 @@
  *
  *  * The MIT License (MIT)
  *  *
- *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@
 
 package de.thingweb.security;
 
+import org.jose4j.lang.JoseException;
+
 /**
  *  Validator for securitty tokens
  *  checks signature and validates claims against requirements
@@ -35,7 +37,7 @@ public interface SecurityTokenValidator {
      *  Set a new ste of required claims resp. attributes to be checked in the token
      * @param requirements replacement requirements
      */
-    void setRequirements(TokenRequirements requirements);
+    void setRequirements(TokenRequirements requirements) throws JoseException;
 
     /**
      * Get currents requirements imposed on tokes to validate

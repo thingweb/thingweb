@@ -26,17 +26,13 @@
 
 package de.thingweb.security;
 
-import static org.junit.Assert.fail;
-
-import java.util.Properties;
-
-import de.thingweb.security.*;
-import junit.framework.Assert;
-
+import de.thingweb.servient.TestTools;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.thingweb.servient.TestTools;
+import java.util.Properties;
+
+import static org.junit.Assert.fail;
 
 /**
  * Created by Johannes on 03.01.2016.
@@ -117,7 +113,7 @@ public class SecurityTokenValidator4NicePlugfestTest {
         );
 
         //commented out to keep build
-        //validator.checkValidity("GET","/",testVectors.getProperty("min-token.HS256.goodCase"));
+        validator.checkValidity("GET","/",testVectors.getProperty("min-token.HS256.goodCase"));
     }
 
     @Test
@@ -143,6 +139,6 @@ public class SecurityTokenValidator4NicePlugfestTest {
                 );
 
         //commented out to keep build
-        //validator.checkValidity("GET","/",testVectors.getProperty("min-token.ES256.goodCase"));
+        validator.checkValidity("GET","/",testVectors.getProperty("min-token.ES256.goodCase"));
     }
 }

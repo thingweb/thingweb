@@ -47,7 +47,6 @@ public class ActionListener extends AbstractRESTListener {
     public ActionListener(ServedThing servedThing, Action action) {
         this.action = action;
         this.servedThing = servedThing;
-
         this.inputType = this.action.getParams().get("parm");
     }
 

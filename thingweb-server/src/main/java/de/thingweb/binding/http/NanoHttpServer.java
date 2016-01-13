@@ -78,7 +78,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 		if(listener.hasProtection()) {
 			try {
 				String jwt = null;
-				String auth = session.getHeaders().get("Authorization");
+				String auth = session.getHeaders().get("authorization");
 				if (auth != null) {
 					if (auth.startsWith("Bearer ")) {
 						jwt = auth.substring("Bearer ".length());
@@ -88,7 +88,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 			} catch (TokenExpiredException e) {
 				return new Response(Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "Your token has expired");
 			} catch (UnauthorizedException e) {
-				return new Response(Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "Unauthorized");
+				return new Response(Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "Unauthorized: " + e.getMessage());
 			}
 		}
 

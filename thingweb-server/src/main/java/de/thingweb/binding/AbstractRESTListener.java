@@ -2,7 +2,7 @@
  *
  *  * The MIT License (MIT)
  *  *
- *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -26,31 +26,28 @@
 
 package de.thingweb.binding;
 
-import de.thingweb.security.*;
+import de.thingweb.security.SecurityTokenValidator;
+import de.thingweb.security.TokenExpiredException;
+import de.thingweb.security.TokenRequirements;
+import de.thingweb.security.UnauthorizedException;
 import de.thingweb.thing.Content;
 
 import java.util.Observable;
 
 public class AbstractRESTListener extends Observable implements RESTListener {
-	protected boolean protection = false;
+	protected boolean protection = true;
 
-	private static SecurityTokenValidator validator;
+	private SecurityTokenValidator validator;
 	public static TokenRequirements requirements;
-
-	protected static SecurityTokenValidator getValidator() {
-		if(validator == null) {
-			if(requirements == null) {
-				requirements = TokenRequirementsBuilder.createDefault();
-			}
-			validator = new SecurityTokenValidator4NicePlugfest(requirements);
-		}
-		return validator;
-	};
 
 	@Override
 	public String validate(String method, String uri, String jwt) throws UnauthorizedException, TokenExpiredException {
-		return getValidator().checkValidity(method,uri,jwt);
-	};
+		if (this.validator != null) {
+			return this.validator.checkValidity(method,uri,jwt);
+		}
+
+		return null;
+	}
 
 	@Override
 	public boolean hasProtection() {
@@ -58,8 +55,9 @@ public class AbstractRESTListener extends Observable implements RESTListener {
 	}
 
 	@Override
-	public void setProtection(boolean protection) {
-		this.protection = protection;
+	public void protectWith(SecurityTokenValidator validator) {
+		this.protection = true;
+		this.validator = validator;
 	}
 
 	@Override

@@ -2,7 +2,7 @@
  *
  *  * The MIT License (MIT)
  *  *
- *  * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 
 package de.thingweb.binding;
 
+import de.thingweb.security.SecurityTokenValidator;
 import de.thingweb.security.TokenExpiredException;
 import de.thingweb.security.UnauthorizedException;
 import de.thingweb.thing.Content;
@@ -38,7 +39,7 @@ public interface RESTListener {
 
 	boolean hasProtection();
 
-	void setProtection(boolean protection);
+	void protectWith(SecurityTokenValidator validator);
 
 	Content onGet() throws UnsupportedOperationException, RuntimeException;
 
