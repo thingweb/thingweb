@@ -26,15 +26,17 @@
 
 package de.thingweb.security;
 
-import de.thingweb.servient.TestTools;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.fail;
 
 import java.util.Properties;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.junit.Assert.fail;
+import de.thingweb.security.*;
+import junit.framework.Assert;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import de.thingweb.servient.TestTools;
 
 /**
  * Created by Johannes on 03.01.2016.
@@ -43,8 +45,9 @@ public class SecurityTokenValidator4NicePlugfestTest {
 
     private static final String ISSUER = "NicePlugfestAS";
     private static final String AUDIENCE = "NicePlugfestRS";
-    private static final String PUBKEY_ES256 = "";
+    private static final String PUBKEY_ES256 = "{\"keys\":[{\"kty\": \"EC\",\"d\": \"_hysUUk5sRGAHhl7RJN7x5UhBMiy6pl6kHR5-ZaWzpU\",\"use\": \"sig\",\"crv\": \"P-256\",\"kid\": \"PlugFestNice\",\"x\": \"CQsJZUvJWx5yB5EwuipDXRDye4Ybg0wwqxpGgZtcl3w\",\"y\": \"qzYskD2N7GrGDSgo6N9pPLXMIwr6jowFGyqsTJGmpz4\",\"alg\": \"ES256\"},{\"kty\": \"oct\",\"kid\": \"018c0ae5-4d9b-471b-bfd6-eef314bc7037\",\"use\": \"sig\",\"alg\": \"HS256\",\"k\": \"aEp0WElaMnVTTjVrYlFmYnRUTldicGRtaGtWOEZKRy1PbmJjNm14Q2NZZw==\"}]}";
     private static final String SUBJECT = "0c5f83a7-cf08-4f48-8337-bfc65ea149ff";
+    private static final String TYPE = "org:w3:wot:jwt:as:min";
 
     private SecurityTokenValidator validator;
     private TokenRequirementsBuilder builder;
@@ -55,23 +58,32 @@ public class SecurityTokenValidator4NicePlugfestTest {
         builder = TokenRequirements.build()
                 .setIssuer(ISSUER)
                 .setAudience(AUDIENCE)
-                .setVerificationKey(PUBKEY_ES256);
+                .setVerificationKey(PUBKEY_ES256)
+                .setTokenType(TYPE)
+                .setValidateSignature(true);
         validator  = new SecurityTokenValidator4NicePlugfest(builder.createTokenRequirements());
         testVectors = TestTools.loadPropertiesFromResources("nice-plugfest-jwt-testvectors.properties");
     }
 
     @Test
     public void testValidMinimalES256Token() throws Exception {
-        String jwt = "";
+    	 testVectors.keySet().parallelStream()
+         .map(key -> (String) key)
+         .filter(key -> key.startsWith("min-token") && key.endsWith(".goodCase"))
+         .forEach((name) -> {
+             String jwt = testVectors.getProperty(name);
+             System.out.println("Key:" + name + "\tToken: " + jwt);
+             try {
+                 validator.checkValidity("GET", "/", jwt);
+                 System.out.println("revoked " + name);
+             } catch (UnauthorizedException e) {
+            	 fail("false positive on " + name);
+             } catch (TokenExpiredException e) {
+                 fail("Unexpected Expiery Exception");
+             }
 
-        //TODO remove this - disabling signature check for now
-        builder.setValidateSignature(false);
-        validator.setRequirements(builder.createTokenRequirements());
-
-        //the provided method and uri is irrelevant for now
-        String subject = validator.checkValidity("GET", "/", jwt);
-
-        assertThat(subject,equalToIgnoringCase(SUBJECT));
+         }
+ );
     }
 
     @Test(expected = UnauthorizedException.class)
