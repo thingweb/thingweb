@@ -64,8 +64,12 @@ public class HttpClientImpl extends AbstractClientImpl {
 	}
 
 	public void put(String propertyName, Content propertyValue, Callback callback) throws UnsupportedException {
+		put(propertyName, propertyValue, callback, null);
+	}
+	
+	public void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken) throws UnsupportedException {
 		try {
-			CallbackPutActionTask cgt = new CallbackPutActionTask(propertyName, propertyValue, callback, false);
+			CallbackPutActionTask cgt = new CallbackPutActionTask(propertyName, propertyValue, callback, false, securityAsToken);
 			executorService.submit(cgt);
 		} catch (Exception e) {
 			log.warn(e.getMessage());
@@ -88,6 +92,10 @@ public class HttpClientImpl extends AbstractClientImpl {
 	}
 
 	public void observe(String propertyName, Callback callback) throws UnsupportedException {
+		observe(propertyName, callback, null);
+	}
+	
+	public void observe(String propertyName, Callback callback, String securityAsToken) throws UnsupportedException {
 		callback.onObserveError(propertyName);
 		// throw new UnsupportedException("Not implemented yet");
 	}
@@ -97,8 +105,12 @@ public class HttpClientImpl extends AbstractClientImpl {
 	}
 
 	public void action(String actionName, Content actionValue, Callback callback) throws UnsupportedException {
+		action(actionName, actionValue, callback, null);
+	}
+	
+	public void action(String actionName, Content actionValue, Callback callback, String securityAsToken) throws UnsupportedException {
 		try {
-			CallbackPutActionTask cgt = new CallbackPutActionTask(actionName, actionValue, callback, true);
+			CallbackPutActionTask cgt = new CallbackPutActionTask(actionName, actionValue, callback, true, securityAsToken);
 			executorService.submit(cgt);
 		} catch (Exception e) {
 			log.warn(e.getMessage());
@@ -157,13 +169,21 @@ public class HttpClientImpl extends AbstractClientImpl {
 		private final Callback callback;
 		private final Content propertyValue;
 		private final boolean isAction;
+		private final String securityAsToken;
 
 		CallbackPutActionTask(String name, Content propertyValue, Callback callback, boolean isAction) {
+			this(name, propertyValue, callback, isAction, null);
+		}
+		
+		CallbackPutActionTask(String name, Content propertyValue, Callback callback, boolean isAction, String securityAsToken) {
 			this.name = name;
 			this.propertyValue = propertyValue;
 			this.callback = callback;
 			this.isAction = isAction;
+			this.securityAsToken = securityAsToken;
 		}
+		
+		// String securityAsToken
 
 		public void run() {
 			try {
@@ -178,6 +198,9 @@ public class HttpClientImpl extends AbstractClientImpl {
 				httpCon.setDoOutput(true);
 				httpCon.setRequestProperty("content-type", propertyValue.getMediaType().mediaType);
 				httpCon.setRequestMethod(isAction ? "POST" : "PUT");
+				if(securityAsToken != null) {
+					httpCon.setRequestProperty("Authorization", "Bearer " + securityAsToken);
+				}
 
 				OutputStream out = httpCon.getOutputStream();
 				out.write(propertyValue.getContent());

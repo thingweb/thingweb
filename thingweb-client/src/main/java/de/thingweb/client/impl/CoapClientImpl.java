@@ -38,7 +38,6 @@ import org.eclipse.californium.core.CoapObserveRelation;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.OptionSet;
-import org.eclipse.californium.core.coap.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +59,10 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	public void put(String propertyName, Content propertyValue, Callback callback) {
 		doCoapPut(propertyName, propertyValue, callback, true);
+	}
+	
+	public void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken) throws UnsupportedException {
+		callback.onGetError("Security not yet implemented");
 	}
 	
 	
@@ -142,6 +145,10 @@ public class CoapClientImpl extends AbstractClientImpl {
 		observes.put(propertyName, relation);
 	}
 	
+	public void observe(String propertyName, Callback callback, String securityAsToken) throws UnsupportedException {
+		callback.onGetError("Security not yet implemented");
+	}
+	
 	public void observeRelease(String propertyName) {
 		observes.remove(propertyName).proactiveCancel();
 	}
@@ -149,6 +156,10 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	public void action(String actionName, Content actionValue, Callback callback) {
 		doCoapPost(actionName, actionValue, callback);
+	}
+	
+	public void action(String actionName, Content actionValue, Callback callback, String securityAsToken) throws UnsupportedException {
+		callback.onGetError("Security not yet implemented");
 	}
 
 
