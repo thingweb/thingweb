@@ -46,6 +46,8 @@ public interface Client {
 	
 	public void get(String propertyName, Callback callback) throws UnsupportedException;
 	
+	public void get(String propertyName, Callback callback, String securityAsToken) throws UnsupportedException;
+	
 	public void observe(String propertyName, Callback callback) throws UnsupportedException;
 	
 	public void observeRelease(String propertyName) throws UnsupportedException;

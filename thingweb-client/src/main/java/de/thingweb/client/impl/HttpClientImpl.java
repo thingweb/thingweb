@@ -74,8 +74,12 @@ public class HttpClientImpl extends AbstractClientImpl {
 	}
 
 	public void get(String propertyName, Callback callback) throws UnsupportedException {
+		get(propertyName, callback, null);
+	}
+	
+	public void get(String propertyName, Callback callback, String securityAsToken) throws UnsupportedException {
 		try {
-			CallbackGetTask cgt = new CallbackGetTask(propertyName, callback);
+			CallbackGetTask cgt = new CallbackGetTask(propertyName, callback, securityAsToken);
 			executorService.submit(cgt);
 		} catch (Exception e) {
 			log.warn(e.getMessage());
@@ -105,10 +109,16 @@ public class HttpClientImpl extends AbstractClientImpl {
 	class CallbackGetTask implements Runnable {
 		private final String propertyName;
 		private final Callback callback;
+		private final String securityAsToken;
 
 		CallbackGetTask(String propertyName, Callback callback) {
+			this(propertyName, callback, null);
+		}
+		
+		CallbackGetTask(String propertyName, Callback callback, String securityAsToken) {
 			this.propertyName = propertyName;
 			this.callback = callback;
+			this.securityAsToken = securityAsToken;
 		}
 
 		public void run() {
@@ -116,6 +126,9 @@ public class HttpClientImpl extends AbstractClientImpl {
 				URL url = new URL(uri + URI_PART_PROPERTIES + propertyName + (useValueStringInGetAndPutUrl ? "" : "/value"));
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setRequestMethod("GET");
+				if(securityAsToken != null) {
+					httpCon.setRequestProperty("Authorization", "Bearer " + securityAsToken);
+				}
 
 				InputStream is = httpCon.getInputStream();
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();

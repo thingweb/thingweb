@@ -25,6 +25,7 @@
 package de.thingweb.client.impl;
 
 import de.thingweb.client.Callback;
+import de.thingweb.client.UnsupportedException;
 import de.thingweb.desc.pojo.ActionDescription;
 import de.thingweb.desc.pojo.EventDescription;
 import de.thingweb.desc.pojo.PropertyDescription;
@@ -115,6 +116,10 @@ public class CoapClientImpl extends AbstractClientImpl {
 				callback.onGetError(propertyName);
 			}
 		});
+	}
+	
+	public void get(String propertyName, Callback callback, String securityAsToken) throws UnsupportedException {
+		callback.onGetError("Security not yet implemented");
 	}
 	
 	
