@@ -28,6 +28,7 @@ import de.thingweb.client.Callback;
 import de.thingweb.client.UnsupportedException;
 import de.thingweb.desc.pojo.ActionDescription;
 import de.thingweb.desc.pojo.EventDescription;
+import de.thingweb.desc.pojo.Metadata;
 import de.thingweb.desc.pojo.PropertyDescription;
 import de.thingweb.desc.pojo.Protocol;
 import de.thingweb.thing.Content;
@@ -52,8 +53,8 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	Map<String, CoapObserveRelation> observes = new HashMap<>();
 	
-	public CoapClientImpl(Protocol prot, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
-		super(prot.getUri(), properties, actions, events);
+	public CoapClientImpl(Protocol prot, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
+		super(prot.getUri(), metadata, properties, actions, events);
 	}
 	
 	

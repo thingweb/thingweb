@@ -26,12 +26,15 @@ package de.thingweb.client;
 
 import de.thingweb.desc.pojo.ActionDescription;
 import de.thingweb.desc.pojo.EventDescription;
+import de.thingweb.desc.pojo.Metadata;
 import de.thingweb.desc.pojo.PropertyDescription;
 import de.thingweb.thing.Content;
 
 import java.util.List;
 
 public interface Client {
+	
+	public Metadata getMetadata();
 	
 	public List<PropertyDescription> getProperties();
 	

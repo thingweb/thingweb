@@ -27,14 +27,14 @@ package de.thingweb.client.impl;
 import de.thingweb.client.Client;
 import de.thingweb.desc.pojo.ActionDescription;
 import de.thingweb.desc.pojo.EventDescription;
+import de.thingweb.desc.pojo.Metadata;
 import de.thingweb.desc.pojo.PropertyDescription;
 
 import java.util.List;
 
 public abstract class AbstractClientImpl implements Client {
 	
-	// private static final Logger log = LoggerFactory.getLogger(AbstractClientImpl.class);
-	
+	final Metadata metadata;
 	final List<PropertyDescription> properties;
 	final List<ActionDescription> actions;
 	final List<EventDescription> events;
@@ -50,8 +50,9 @@ public abstract class AbstractClientImpl implements Client {
 	// TODO remove if settled
 	final boolean useValueStringInGetAndPutUrl = true;
 
-	public AbstractClientImpl(String uri, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
+	public AbstractClientImpl(String uri, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
 		this.uri = uri;
+		this.metadata = metadata;
 		this.properties = properties;
 		this.actions = actions;
 		this.events = events;
@@ -59,6 +60,10 @@ public abstract class AbstractClientImpl implements Client {
 	
 	public String getUsedProtocolURI() {
 		return this.uri;
+	}
+	
+	public Metadata getMetadata() {
+		return this.metadata;
 	}
 	
 	public List<PropertyDescription> getProperties() {
