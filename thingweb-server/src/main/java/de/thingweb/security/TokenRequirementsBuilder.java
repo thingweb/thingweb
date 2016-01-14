@@ -38,6 +38,7 @@ public class TokenRequirementsBuilder {
     public static TokenRequirements createDefault() {
         //by default, just verify that it can expire
         return TokenRequirements.build()
+                .setValidateSignature(false)
                 .validateAt(0)
                 .createTokenRequirements();
     }

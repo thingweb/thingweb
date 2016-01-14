@@ -239,6 +239,16 @@ public final class Thing {
 
     private ThingDescription m_td;
 
+    public boolean isProtected() {
+        return protection;
+    }
+
+    public Thing setProtection(boolean protection) {
+        this.protection = protection;
+        return this;
+    }
+
+    private boolean protection = false;
 
     private final Collection<Property> m_properties =
             new CopyOnWriteArrayList<>();
