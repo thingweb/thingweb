@@ -25,7 +25,6 @@
 package de.thingweb.client.impl;
 
 import de.thingweb.client.Callback;
-import de.thingweb.client.UnsupportedException;
 import de.thingweb.desc.pojo.ActionDescription;
 import de.thingweb.desc.pojo.EventDescription;
 import de.thingweb.desc.pojo.Metadata;
@@ -38,7 +37,9 @@ import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapObserveRelation;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.coap.Option;
 import org.eclipse.californium.core.coap.OptionSet;
+import org.eclipse.californium.core.coap.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +49,10 @@ import java.util.Map;
 
 public class CoapClientImpl extends AbstractClientImpl {
 	
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(CoapClientImpl.class);
+	
+	final int SECURITY_TOKEN_NUMBER = 65000;
+	final String SECURITY_BEARER_STRING = "Bearer ";
 	
 	Map<String, CoapObserveRelation> observes = new HashMap<>();
 	
@@ -59,56 +62,57 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	
 	public void put(String propertyName, Content propertyValue, Callback callback) {
-		doCoapPut(propertyName, propertyValue, callback, true);
+		put(propertyName, propertyValue, callback, null);
 	}
 	
-	public void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken) throws UnsupportedException {
-		callback.onGetError("Security not yet implemented");
-	}
-	
-	
-	protected void doCoapPut(String name, Content value, Callback callback, boolean isPut) {
+	public void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken) {
 		String uriPart = URI_PART_PROPERTIES;
-		CoapClient coap = new CoapClient(uri + uriPart + name + (useValueStringInGetAndPutUrl ? "" : "/value"));
-		coap.put(new CoapHandler() {
-
-			@Override
-			public void onLoad(CoapResponse response) {
-				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
-				callback.onPut(name, content);
-			}
-
-			@Override
-			public void onError() {
-				callback.onPutError(name);
-			}
-		}, value.getContent(), getCoapContentFormat(value.getMediaType()));
-	}
-
-	protected void doCoapPost(String name, Content value, Callback callback) {
-		final String uriPart = URI_PART_ACTIONS;
-		CoapClient coap = new CoapClient(uri + uriPart + name);
-		coap.post(new CoapHandler() {
-
-			@Override
-			public void onLoad(CoapResponse response) {
-				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
-				callback.onAction(name, content);
-			}
-
-			@Override
-			public void onError() {
-				callback.onActionError(name);
-			}
-		}, value.getContent(), getCoapContentFormat(value.getMediaType()));
-	}
-
-
-	public void get(String propertyName, Callback callback) {
-		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
+		CoapClient coap = new CoapClient(uri + uriPart + propertyName + (useValueStringInGetAndPutUrl ? "" : "/value"));
+		
+		log.info("CoAP put " + coap.getURI() + " (Security=" + securityAsToken + ")");
+		
+		Request request = Request.newPut();
+		request.setPayload(propertyValue.getContent());
+		request.getOptions().setContentFormat(getCoapContentFormat(propertyValue.getMediaType()));
+		
+		if(securityAsToken != null) {
+			Option tokenOption = new Option(SECURITY_TOKEN_NUMBER, (SECURITY_BEARER_STRING + securityAsToken));
+			request.getOptions().addOption(tokenOption);			
+		}
 		
 		// asynchronous
-		coap.get(new CoapHandler() {
+		coap.advanced(new CoapHandler() {
+			@Override
+			public void onLoad(CoapResponse response) {
+				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
+				callback.onPut(propertyName, content);
+			}
+
+			@Override
+			public void onError() {
+				callback.onPutError(propertyName);
+			}
+		}, request);
+		
+	}
+
+	public void get(String propertyName, Callback callback) {
+		get(propertyName, callback, null);
+	}
+	
+	public void get(String propertyName, Callback callback, String securityAsToken) {
+		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
+		
+		log.info("CoAP get " + coap.getURI() + " (Security=" + securityAsToken + ")");
+		
+		Request request = Request.newGet();
+		if(securityAsToken != null) {
+			Option tokenOption = new Option(SECURITY_TOKEN_NUMBER, (SECURITY_BEARER_STRING + securityAsToken));
+			request.getOptions().addOption(tokenOption);			
+		}
+		
+		// asynchronous
+		coap.advanced(new CoapHandler() {
 			@Override
 			public void onLoad(CoapResponse response) {
 				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
@@ -119,16 +123,23 @@ public class CoapClientImpl extends AbstractClientImpl {
 			public void onError() {
 				callback.onGetError(propertyName);
 			}
-		});
-	}
-	
-	public void get(String propertyName, Callback callback, String securityAsToken) throws UnsupportedException {
-		callback.onGetError("Security not yet implemented");
+		}, request);
 	}
 	
 	
 	public void observe(String propertyName, Callback callback) {
+		observe(propertyName, callback, null);
+	}
+	
+	public void observe(String propertyName, Callback callback, String securityAsToken) {
 		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
+		
+		log.info("CoAP observe " + coap.getURI() + " (Security=" + securityAsToken + ")");
+		
+		// TODO How to add option to CoAP observe
+		// no method Request.newObserve() exists!
+		log.warn("Currently no security for CoAP observe implemented");
+		
 		// observing
 		CoapObserveRelation relation = coap.observe(new CoapHandler() {
 			@Override
@@ -146,21 +157,44 @@ public class CoapClientImpl extends AbstractClientImpl {
 		observes.put(propertyName, relation);
 	}
 	
-	public void observe(String propertyName, Callback callback, String securityAsToken) throws UnsupportedException {
-		callback.onGetError("Security not yet implemented");
-	}
-	
 	public void observeRelease(String propertyName) {
 		observes.remove(propertyName).proactiveCancel();
 	}
 
 	
 	public void action(String actionName, Content actionValue, Callback callback) {
-		doCoapPost(actionName, actionValue, callback);
+		action(actionName, actionValue, callback, null);
 	}
 	
-	public void action(String actionName, Content actionValue, Callback callback, String securityAsToken) throws UnsupportedException {
-		callback.onGetError("Security not yet implemented");
+	public void action(String actionName, Content actionValue, Callback callback, String securityAsToken) {
+		final String uriPart = URI_PART_ACTIONS;
+		CoapClient coap = new CoapClient(uri + uriPart + actionName);
+		
+		log.info("CoAP post " + coap.getURI() + " (Security=" + securityAsToken + ")");
+		
+		Request request = Request.newPost();
+		request.setPayload(actionValue.getContent());
+		request.getOptions().setContentFormat(getCoapContentFormat(actionValue.getMediaType()));
+		
+		if(securityAsToken != null) {
+			Option tokenOption = new Option(SECURITY_TOKEN_NUMBER, (SECURITY_BEARER_STRING + securityAsToken));
+			request.getOptions().addOption(tokenOption);			
+		}
+		
+		// asynchronous
+		coap.advanced(new CoapHandler() {
+			@Override
+			public void onLoad(CoapResponse response) {
+				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
+				callback.onAction(actionName, content);
+			}
+
+			@Override
+			public void onError() {
+				callback.onActionError(actionName);
+			}
+		}, request);
+		
 	}
 
 
