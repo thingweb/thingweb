@@ -30,6 +30,7 @@
 
 package de.thingweb.discovery;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,19 +47,22 @@ public class TDRepository {
 	private int repository_port;
 
 	/** Constructer set up the endpoint address of the TD repository */
-	public TDRepository(String  repository_uri, int repository_port) {
+	public  TDRepository(String  repository_uri, int repository_port) {
 	 
 		this.repository_uri = repository_uri;
 		this.repository_port =repository_port;
 	}
 	
-	/**  This method takes a properties which you are looking for or a SPARQL query  
-	 * @param search properties or a SPARQL query
+	/**  This method takes a SPARQL query and send it o the TD repository    
+	 * @search SPARQL query
 	 * @return JSON array of relevant TD files (=empty array means no match)
 	 * */
-	public JSONArray tdSearch(String search) throws Exception  {
+	public JSONArray tdTripleSearch(String search) throws Exception  {
 		
-		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
+		// if triple search contains spaces, replaces with  %20
+		String search_without_space = search.replace(" ", " %20");
+		
+		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search_without_space);
 		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
 		myURLConnection.setRequestMethod("GET");
 		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -74,6 +78,33 @@ public class TDRepository {
 		return jsonLDs;
 	}
 	
+	/** This method takes a free text search and send it o the TD repository 
+	 * @search free text search
+	 * @return JSON array of relevant TD files (=empty array means no match)
+	 * */
+	public JSONArray tdFreeTextSearch(String search) throws Exception  {
+		
+		//TODO: implement method
+
+	
+		return null;
+	}
+	
+	/** This method request the TD repository to return the names of all known Things  
+	 * @return String array of Things names (=empty array means no Thing is present in TD repository)
+	 * */
+	public String[] nameOfThings() throws Exception  {
+		
+		//TODO: implement method
+
+	
+		return null;
+	}
+	
+	
+	
+	
+	
 	/** Brings input stream into string representation  */
 	private  String streamToString(InputStream in) throws IOException {
 		  StringBuilder out = new StringBuilder();
@@ -83,17 +114,4 @@ public class TDRepository {
 		  br.close();
 		  return out.toString();
 		}
-	
-	
-	public static void main(String args[]) {
-		
-		TDRepository tdr = new TDRepository("localhost", 3030);
-		
-		try {
-			tdr.tdSearch("Lamp");
-		} catch (Exception e) {
-
-			e.printStackTrace();
-		}
-	}
 }

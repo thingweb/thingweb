@@ -24,6 +24,21 @@
 
 package de.thingweb.client.impl;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.californium.core.CoapClient;
+import org.eclipse.californium.core.CoapHandler;
+import org.eclipse.californium.core.CoapResponse;
+import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.coap.MessageObserver;
+import org.eclipse.californium.core.coap.Option;
+import org.eclipse.californium.core.coap.OptionSet;
+import org.eclipse.californium.core.coap.Request;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.thingweb.client.Callback;
 import de.thingweb.desc.pojo.ActionDescription;
 import de.thingweb.desc.pojo.EventDescription;
@@ -32,20 +47,6 @@ import de.thingweb.desc.pojo.PropertyDescription;
 import de.thingweb.desc.pojo.Protocol;
 import de.thingweb.thing.Content;
 import de.thingweb.thing.MediaType;
-import org.eclipse.californium.core.CoapClient;
-import org.eclipse.californium.core.CoapHandler;
-import org.eclipse.californium.core.CoapObserveRelation;
-import org.eclipse.californium.core.CoapResponse;
-import org.eclipse.californium.core.coap.MediaTypeRegistry;
-import org.eclipse.californium.core.coap.Option;
-import org.eclipse.californium.core.coap.OptionSet;
-import org.eclipse.californium.core.coap.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class CoapClientImpl extends AbstractClientImpl {
 	
@@ -54,7 +55,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	final int SECURITY_TOKEN_NUMBER = 65000;
 	final String SECURITY_BEARER_STRING = "Bearer ";
 	
-	Map<String, CoapObserveRelation> observes = new HashMap<>();
+	Map<String, ObserveRelation> observes = new HashMap<>();
 	
 	public CoapClientImpl(Protocol prot, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
 		super(prot.getUri(), metadata, properties, actions, events);
@@ -136,12 +137,14 @@ public class CoapClientImpl extends AbstractClientImpl {
 		
 		log.info("CoAP observe " + coap.getURI() + " (Security=" + securityAsToken + ")");
 		
-		// TODO How to add option to CoAP observe
-		// no method Request.newObserve() exists!
-		log.warn("Currently no security for CoAP observe implemented");
+		Request request = Request.newGet().setObserve();
+		if(securityAsToken != null) {
+			Option tokenOption = new Option(SECURITY_TOKEN_NUMBER, (SECURITY_BEARER_STRING + securityAsToken));
+			request.getOptions().addOption(tokenOption);			
+		}
 		
-		// observing
-		CoapObserveRelation relation = coap.observe(new CoapHandler() {
+		// asynchronous
+		coap.advanced(new CoapHandler() {
 			@Override
 			public void onLoad(CoapResponse response) {
 				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
@@ -152,13 +155,44 @@ public class CoapClientImpl extends AbstractClientImpl {
 			public void onError() {
 				callback.onObserveError(propertyName);
 			}
-		});
+		}, request);
 		
-		observes.put(propertyName, relation);
+		observes.put(propertyName, new ObserveRelation(request, coap));
 	}
 	
+	class ObserveRelation {
+		final Request request;
+		final CoapClient coap;
+		public ObserveRelation(Request request, CoapClient coap) {
+			this.request = request;
+			this.coap = coap;
+		}
+	}
+	
+	protected void proactiveCancel(ObserveRelation or) {
+		Request request = or.request;
+		
+		Request cancel = Request.newGet();
+		// copy options, but set Observe to cancel
+		cancel.setOptions(request.getOptions());
+		cancel.setObserveCancel();
+		// use same Token
+		cancel.setToken(request.getToken());
+		cancel.setDestination(request.getDestination());
+		cancel.setDestinationPort(request.getDestinationPort());
+		// dispatch final response to the same message observers
+		for (MessageObserver mo: request.getMessageObservers())
+			cancel.addMessageObserver(mo);
+		// endpoint.sendRequest(cancel);
+		or.coap.advanced(cancel);
+		// cancel old ongoing request
+		request.cancel();
+		// setCanceled(true);
+	}
+	
+	
 	public void observeRelease(String propertyName) {
-		observes.remove(propertyName).proactiveCancel();
+		proactiveCancel(observes.remove(propertyName));
 	}
 
 	
