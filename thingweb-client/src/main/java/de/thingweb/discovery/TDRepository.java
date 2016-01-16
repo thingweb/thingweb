@@ -31,14 +31,14 @@
 package de.thingweb.discovery;
 
 
+import org.json.JSONArray;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import org.json.JSONArray;
 
 /** Class to interact with a TD repository */
 public class TDRepository {
@@ -54,7 +54,7 @@ public class TDRepository {
 	}
 	
 	/**  This method takes a SPARQL query and send it o the TD repository    
-	 * @search SPARQL query
+	 * @param search SPARQL query
 	 * @return JSON array of relevant TD files (=empty array means no match)
 	 * */
 	public JSONArray tdTripleSearch(String search) throws Exception  {
@@ -79,7 +79,7 @@ public class TDRepository {
 	}
 	
 	/** This method takes a free text search and send it o the TD repository 
-	 * @search free text search
+	 * @param search free text search
 	 * @return JSON array of relevant TD files (=empty array means no match)
 	 * */
 	public JSONArray tdFreeTextSearch(String search) throws Exception  {
