@@ -1,0 +1,1 @@
+Note: the XML schema schema-for-json-strings.xsd is one proposal and matter of discussion!

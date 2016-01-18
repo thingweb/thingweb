@@ -10,7 +10,6 @@ For information about what it does, see also:
 ### Building ###
 
 * we are using [Gradle](https://gradle.org/) as build tool
-* the application is built using the [Gradle Application Plugin](https://docs.gradle.org/current/userguide/application_plugin.html)
 
 There is a also build setup on [drone.io](https://drone.io/github.com/thingweb/thingweb/latest).
 [![Build Status](https://drone.io/github.com/thingweb/thingweb/status.png)](https://drone.io/github.com/thingweb/thingweb/latest)

@@ -33,4 +33,6 @@ public interface Binding {
 	ResourceBuilder getResourceBuilder();
 
 	void start() throws IOException;
+
+	void stop() throws IOException;
 }

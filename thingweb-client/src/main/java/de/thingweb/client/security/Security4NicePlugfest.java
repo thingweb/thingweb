@@ -29,7 +29,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -215,9 +217,18 @@ public class Security4NicePlugfest {
 		return null;
 	}
 
+	
+	// Note: minimal
 	public String requestASToken(Registration registration) throws IOException {
+		return requestASToken(registration, null);
+	}
+	
+	// Note: normal (additional base)
+	// "adds" should be an array of id and value
+	// e.g., String[] adds = {"rsId", "39478105-224a-4492-b352-f2375dfe37cb", "rId", "/trafficlight", "mths", "GET POST"};
+	public String requestASToken(Registration registration, String[] adds) throws IOException {
 		String asToken = null;
-
+		
 		// Token Acquisition
 		// Create a HTTP request as in the following prototype and send
 		// it via TLS to the AM
@@ -242,6 +253,20 @@ public class Security4NicePlugfest {
 		httpConTokenAcquisition.setRequestMethod("POST");
 
 		String requestBodyTokenAcquisition = "grant_type=client_credentials";
+		if(adds == null || adds.length == 0) {
+			// no additions
+		} else {
+			if(adds.length % 2 == 0) {
+				for(int i=0; i<(adds.length-1); i+=2) {
+					requestBodyTokenAcquisition += "&";
+					requestBodyTokenAcquisition += URLEncoder.encode(adds[i], "UTF-8");
+					requestBodyTokenAcquisition += "=";
+					requestBodyTokenAcquisition += URLEncoder.encode(adds[i+1], "UTF-8");
+				}
+			} else {
+				log.warn("Additional information for token not used! Not a multiple of 2: " + Arrays.toString(adds));
+			}
+		}
 
 		OutputStream outTokenAcquisition = httpConTokenAcquisition.getOutputStream();
 		outTokenAcquisition.write(requestBodyTokenAcquisition.getBytes());

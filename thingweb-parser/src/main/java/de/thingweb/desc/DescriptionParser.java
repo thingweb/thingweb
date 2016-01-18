@@ -34,9 +34,7 @@ import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.core.JsonLdUtils;
 import com.github.jsonldjava.utils.JsonUtils;
-import com.hp.hpl.jena.rdf.model.Model;
 import com.siemens.ct.exi.exceptions.EXIException;
-import com.sun.crypto.provider.DESCipher;
 
 import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.encoding.json.exi.EXI4JSONParser;
@@ -110,6 +108,8 @@ public class DescriptionParser {
     
     public static ThingDescription fromBytes(byte[] data) throws JsonParseException, IOException {
     	ByteArrayInputStream bais = new ByteArrayInputStream(data);
+    	
+    	// check whether we deal with an exified JSON file
     	bais.mark(5); // latest after 4 byte cookie and 2 distinguishing bits it is clear whether we deal with an EXI file
     	try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -121,7 +121,7 @@ public class DescriptionParser {
 			bais = new ByteArrayInputStream(baos.toByteArray());
 			
 		} catch (EXIException | SAXException e) {
-			// something went wrong with EXI --> reset & try json
+			// something went wrong with EXI --> reset & try "plain-text" json
 			bais.reset();
 		}
     	

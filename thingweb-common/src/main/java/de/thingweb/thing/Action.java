@@ -1,25 +1,27 @@
 /*
- * The MIT License (MIT)
  *
- * Copyright (c) 2015 Siemens AG and the thingweb community
+ *  * The MIT License (MIT)
+ *  *
+ *  * Copyright (c) 2016 Siemens AG and the thingweb community
+ *  *
+ *  * Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  * of this software and associated documentation files (the "Software"), to deal
+ *  * in the Software without restriction, including without limitation the rights
+ *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  * copies of the Software, and to permit persons to whom the Software is
+ *  * furnished to do so, subject to the following conditions:
+ *  *
+ *  * The above copyright notice and this permission notice shall be included in
+ *  * all copies or substantial portions of the Software.
+ *  *
+ *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  * THE SOFTWARE.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
  */
 
 package de.thingweb.thing;
@@ -31,10 +33,18 @@ public class Action {
 
     private final Map<String, String> params;
     private final String name;
+    private final String inputType;
+    private final String outputType;
 
-    protected Action(String name,Map<String, String> params) {
-        this.params = params;
+    @Deprecated
+    protected Action(String name, Map<String, String> params) {
+        this(name, params.get("parm"), "");
+    }
+    protected Action(String name, String inputType, String outputType) {
+        this.params = new HashMap<>();
         this.name = name;
+        this.inputType = inputType;
+        this.outputType = outputType;
     }
 
     /**
@@ -46,6 +56,15 @@ public class Action {
         return new Action.Builder(name);
     }
 
+    public String getInputType() {
+        return inputType;
+    }
+
+    public String getOutputType() {
+        return outputType;
+    }
+
+    @Deprecated
     public Map<String, String> getParams() {
         return params;
     }
@@ -59,9 +78,21 @@ public class Action {
         private final Map<String,String> params = new HashMap<>();
 
         private final String name;
+        private String inputType = "";
+        private String outputType = "";
 
         private Builder(String name) {
             this.name = name;
+        }
+
+        public Builder setInputType(String inputType) {
+            this.inputType = inputType;
+            return this;
+        }
+
+        public Builder setOutputType(String outputType) {
+            this.outputType = outputType;
+            return this;
         }
 
         /**
@@ -69,7 +100,9 @@ public class Action {
          * @param name name of the parameter
          * @param type Type of the parameter
          * @return the Builder (fluent Method call)
+         * @deprecated spec addresses single input and output type definitions, use structured types
          * */
+        @Deprecated
         public Action.Builder addParam(String name, String type) {
             this.params.put(name,type);
             return this;
@@ -80,7 +113,10 @@ public class Action {
          * @return the constructed Action
          */
         public Action build() {
-            return new Action(name,params);
+            if(params == null)
+                    return new Action(name,inputType,outputType);
+               else
+                       return new Action(name,params);
         }
     }
 }

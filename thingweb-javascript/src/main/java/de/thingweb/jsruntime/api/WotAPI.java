@@ -4,6 +4,9 @@ import de.thingweb.client.ClientFactory;
 import de.thingweb.client.UnsupportedException;
 import de.thingweb.desc.DescriptionParser;
 import de.thingweb.desc.pojo.ThingDescription;
+import de.thingweb.servient.ServientBuilder;
+import de.thingweb.servient.ThingInterface;
+import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.Thing;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
@@ -23,19 +26,6 @@ public class WotAPI {
         return version;
     }
 
-//    public void callJava() {
-//        System.out.println("Java function called from js");
-//    }
-//
-//    public void toJava(ScriptObjectMirror obj) {
-//        System.out.println("Java got an object from js: " + obj.getClassName());
-//    }
-//
-//    public void callMe(Function fun) {
-//        System.out.println("Java got a callback from js: " + fun.getClass());
-//        fun.apply("hello!");
-//    }
-
     private static ClientFactory cf;
     private static ClientFactory getClientFactory() {
         if(cf == null)
@@ -43,10 +33,25 @@ public class WotAPI {
         return cf;
     }
 
+    private static ThingServer thingServer;
+    private static ThingServer getThingServer() {
+        if(thingServer == null) {
+            try {
+                thingServer = ServientBuilder.newThingServer();
+                ServientBuilder.start();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return thingServer;
+    }
+
     public ExposedThing exposeFromUri(String uri) {
         try {
             ThingDescription description = DescriptionParser.fromURL(new URL(uri));
-            return ExposedThing.from(description);
+            Thing thing = new Thing(description);
+            ThingInterface servedThing = getThingServer().addThing(thing);
+            return ExposedThing.from(servedThing);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -63,7 +68,9 @@ public class WotAPI {
     public ExposedThing expose(String jsonld)  {
         try {
             ThingDescription description = DescriptionParser.fromBytes(jsonld.getBytes());
-            return ExposedThing.from(description);
+            Thing thing = new Thing(description);
+            ThingInterface servedThing = getThingServer().addThing(thing);
+            return ExposedThing.from(servedThing);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

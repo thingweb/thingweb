@@ -46,7 +46,12 @@ public class HttpBinding implements Binding {
 	public void start() throws IOException {
 		m_server.start();
 	}
-	
-	
+
+	@Override
+	public void stop() throws IOException {
+		m_server.stop();
+	}
+
+
 	private NanoHttpServer m_server;
 }

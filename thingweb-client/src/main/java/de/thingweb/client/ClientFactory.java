@@ -45,6 +45,7 @@ public class ClientFactory {
 	private static final Logger log = LoggerFactory.getLogger(ClientFactory.class);
 	
 	ThingDescription td;
+	Metadata metadata;
 	List<PropertyDescription> properties;
 	List<ActionDescription> actions;
 	List<EventDescription> events;
@@ -109,7 +110,7 @@ public class ClientFactory {
 		encodings = new ArrayList<>();
 		protocols = new ArrayList<>();
 
-		log.debug("Process thing dedesription");
+		log.debug("Process thing desription");
 		log.debug("# Interactions");
 		List<InteractionDescription> interactions = td.getInteractions();
 		for(InteractionDescription id : interactions) {
@@ -134,7 +135,7 @@ public class ClientFactory {
 			}
 		}
 		
-		Metadata metadata = td.getMetadata();
+		metadata = td.getMetadata();
 		log.debug("# Metadata " + metadata.getName());
 		log.debug("# Encodings");
 		List<String> encs = metadata.getEncodings();
@@ -169,11 +170,11 @@ public class ClientFactory {
 			if(suri != null && suri.length()>0){
 				URI uri = new URI(suri);
 				if(isCoapScheme(uri.getScheme())) {
-					Client c = new CoapClientImpl(p, properties, actions, events);
+					Client c = new CoapClientImpl(p, metadata, properties, actions, events);
 					tm.put(p.priority, c);
 					log.info("Found matching client '" + CoapClientImpl.class.getName() + "' with priority " + p.priority);
 				} else if(isHttpScheme(uri.getScheme())) {
-					Client c = new HttpClientImpl(p, properties, actions, events);
+					Client c = new HttpClientImpl(p, metadata, properties, actions, events);
 					tm.put(p.priority, c);
 					log.info("Found matching client '" + HttpClientImpl.class.getName() + "' with priority " + p.priority);
 				}				

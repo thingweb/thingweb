@@ -24,86 +24,96 @@
 
 package de.thingweb.client.impl;
 
-import de.thingweb.client.Callback;
-import de.thingweb.desc.pojo.ActionDescription;
-import de.thingweb.desc.pojo.EventDescription;
-import de.thingweb.desc.pojo.PropertyDescription;
-import de.thingweb.desc.pojo.Protocol;
-import de.thingweb.thing.Content;
-import de.thingweb.thing.MediaType;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapHandler;
-import org.eclipse.californium.core.CoapObserveRelation;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.coap.MessageObserver;
+import org.eclipse.californium.core.coap.Option;
 import org.eclipse.californium.core.coap.OptionSet;
 import org.eclipse.californium.core.coap.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import de.thingweb.client.Callback;
+import de.thingweb.desc.pojo.ActionDescription;
+import de.thingweb.desc.pojo.EventDescription;
+import de.thingweb.desc.pojo.Metadata;
+import de.thingweb.desc.pojo.PropertyDescription;
+import de.thingweb.desc.pojo.Protocol;
+import de.thingweb.thing.Content;
+import de.thingweb.thing.MediaType;
 
 public class CoapClientImpl extends AbstractClientImpl {
 	
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(CoapClientImpl.class);
 	
-	Map<String, CoapObserveRelation> observes = new HashMap<>();
+	final int SECURITY_TOKEN_NUMBER = 65000;
+	final String SECURITY_BEARER_STRING = "Bearer ";
 	
-	public CoapClientImpl(Protocol prot, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
-		super(prot.getUri(), properties, actions, events);
+	Map<String, ObserveRelation> observes = new HashMap<>();
+	
+	public CoapClientImpl(Protocol prot, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
+		super(prot.getUri(), metadata, properties, actions, events);
 	}
 	
 	
 	public void put(String propertyName, Content propertyValue, Callback callback) {
-		doCoapPut(propertyName, propertyValue, callback, true);
+		put(propertyName, propertyValue, callback, null);
 	}
 	
-	
-	protected void doCoapPut(String name, Content value, Callback callback, boolean isPut) {
+	public void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken) {
 		String uriPart = URI_PART_PROPERTIES;
-		CoapClient coap = new CoapClient(uri + uriPart + name + (useValueStringInGetAndPutUrl ? "" : "/value"));
-		coap.put(new CoapHandler() {
-
-			@Override
-			public void onLoad(CoapResponse response) {
-				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
-				callback.onPut(name, content);
-			}
-
-			@Override
-			public void onError() {
-				callback.onPutError(name);
-			}
-		}, value.getContent(), getCoapContentFormat(value.getMediaType()));
-	}
-
-	protected void doCoapPost(String name, Content value, Callback callback) {
-		final String uriPart = URI_PART_ACTIONS;
-		CoapClient coap = new CoapClient(uri + uriPart + name);
-		coap.post(new CoapHandler() {
-
-			@Override
-			public void onLoad(CoapResponse response) {
-				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
-				callback.onAction(name, content);
-			}
-
-			@Override
-			public void onError() {
-				callback.onActionError(name);
-			}
-		}, value.getContent(), getCoapContentFormat(value.getMediaType()));
-	}
-
-
-	public void get(String propertyName, Callback callback) {
-		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
+		CoapClient coap = new CoapClient(uri + uriPart + propertyName + (useValueStringInGetAndPutUrl ? "" : "/value"));
+		
+		log.info("CoAP put " + coap.getURI() + " (Security=" + securityAsToken + ")");
+		
+		Request request = Request.newPut();
+		request.setPayload(propertyValue.getContent());
+		request.getOptions().setContentFormat(getCoapContentFormat(propertyValue.getMediaType()));
+		
+		if(securityAsToken != null) {
+			Option tokenOption = new Option(SECURITY_TOKEN_NUMBER, (SECURITY_BEARER_STRING + securityAsToken));
+			request.getOptions().addOption(tokenOption);			
+		}
 		
 		// asynchronous
-		coap.get(new CoapHandler() {
+		coap.advanced(new CoapHandler() {
+			@Override
+			public void onLoad(CoapResponse response) {
+				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
+				callback.onPut(propertyName, content);
+			}
+
+			@Override
+			public void onError() {
+				callback.onPutError(propertyName);
+			}
+		}, request);
+		
+	}
+
+	public void get(String propertyName, Callback callback) {
+		get(propertyName, callback, null);
+	}
+	
+	public void get(String propertyName, Callback callback, String securityAsToken) {
+		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
+		
+		log.info("CoAP get " + coap.getURI() + " (Security=" + securityAsToken + ")");
+		
+		Request request = Request.newGet();
+		if(securityAsToken != null) {
+			Option tokenOption = new Option(SECURITY_TOKEN_NUMBER, (SECURITY_BEARER_STRING + securityAsToken));
+			request.getOptions().addOption(tokenOption);			
+		}
+		
+		// asynchronous
+		coap.advanced(new CoapHandler() {
 			@Override
 			public void onLoad(CoapResponse response) {
 				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
@@ -114,14 +124,27 @@ public class CoapClientImpl extends AbstractClientImpl {
 			public void onError() {
 				callback.onGetError(propertyName);
 			}
-		});
+		}, request);
 	}
 	
 	
 	public void observe(String propertyName, Callback callback) {
+		observe(propertyName, callback, null);
+	}
+	
+	public void observe(String propertyName, Callback callback, String securityAsToken) {
 		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
-		// observing
-		CoapObserveRelation relation = coap.observe(new CoapHandler() {
+		
+		log.info("CoAP observe " + coap.getURI() + " (Security=" + securityAsToken + ")");
+		
+		Request request = Request.newGet().setObserve();
+		if(securityAsToken != null) {
+			Option tokenOption = new Option(SECURITY_TOKEN_NUMBER, (SECURITY_BEARER_STRING + securityAsToken));
+			request.getOptions().addOption(tokenOption);			
+		}
+		
+		// asynchronous
+		coap.advanced(new CoapHandler() {
 			@Override
 			public void onLoad(CoapResponse response) {
 				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
@@ -132,18 +155,80 @@ public class CoapClientImpl extends AbstractClientImpl {
 			public void onError() {
 				callback.onObserveError(propertyName);
 			}
-		});
+		}, request);
 		
-		observes.put(propertyName, relation);
+		observes.put(propertyName, new ObserveRelation(request, coap));
 	}
 	
+	class ObserveRelation {
+		final Request request;
+		final CoapClient coap;
+		public ObserveRelation(Request request, CoapClient coap) {
+			this.request = request;
+			this.coap = coap;
+		}
+	}
+	
+	protected void proactiveCancel(ObserveRelation or) {
+		Request request = or.request;
+		
+		Request cancel = Request.newGet();
+		// copy options, but set Observe to cancel
+		cancel.setOptions(request.getOptions());
+		cancel.setObserveCancel();
+		// use same Token
+		cancel.setToken(request.getToken());
+		cancel.setDestination(request.getDestination());
+		cancel.setDestinationPort(request.getDestinationPort());
+		// dispatch final response to the same message observers
+		for (MessageObserver mo: request.getMessageObservers())
+			cancel.addMessageObserver(mo);
+		// endpoint.sendRequest(cancel);
+		or.coap.advanced(cancel);
+		// cancel old ongoing request
+		request.cancel();
+		// setCanceled(true);
+	}
+	
+	
 	public void observeRelease(String propertyName) {
-		observes.remove(propertyName).proactiveCancel();
+		proactiveCancel(observes.remove(propertyName));
 	}
 
 	
 	public void action(String actionName, Content actionValue, Callback callback) {
-		doCoapPost(actionName, actionValue, callback);
+		action(actionName, actionValue, callback, null);
+	}
+	
+	public void action(String actionName, Content actionValue, Callback callback, String securityAsToken) {
+		final String uriPart = URI_PART_ACTIONS;
+		CoapClient coap = new CoapClient(uri + uriPart + actionName);
+		
+		log.info("CoAP post " + coap.getURI() + " (Security=" + securityAsToken + ")");
+		
+		Request request = Request.newPost();
+		request.setPayload(actionValue.getContent());
+		request.getOptions().setContentFormat(getCoapContentFormat(actionValue.getMediaType()));
+		
+		if(securityAsToken != null) {
+			Option tokenOption = new Option(SECURITY_TOKEN_NUMBER, (SECURITY_BEARER_STRING + securityAsToken));
+			request.getOptions().addOption(tokenOption);			
+		}
+		
+		// asynchronous
+		coap.advanced(new CoapHandler() {
+			@Override
+			public void onLoad(CoapResponse response) {
+				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
+				callback.onAction(actionName, content);
+			}
+
+			@Override
+			public void onError() {
+				callback.onActionError(actionName);
+			}
+		}, request);
+		
 	}
 
 

@@ -1,0 +1,32 @@
+{
+  "@context": "http://w3c.github.io/wot/w3c-wot-td-context.jsonld",
+  "metadata": {
+    "name": "SimpleThing",
+    "protocols": {
+      "CoAP": {
+        "uri": "coap://localhost:5683/things/simplething",
+        "priority": 2
+      },
+      "HTTP": {
+        "uri": "http://localhost:8080/things/simplething",
+        "priority": 1
+      }
+    },
+    "encodings": [
+      "JSON"
+    ]
+  },
+  "interactions": [
+    {
+      "@type": "Property",
+      "name": "number",
+      "outputData": "xsd:unsignedByte",
+      "writable": true
+    },   {
+      "@type": "Action",
+      "name": "testaction",
+      "inputData": "xsd:unsignedByte",
+      "outputData": ""
+    }
+  ]
+}

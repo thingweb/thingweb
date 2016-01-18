@@ -38,41 +38,41 @@ import java.util.Observer;
  * Created by Johannes on 07.10.2015.
  */
 public class PropertyListener extends AbstractRESTListener implements Observer {
+    private static final Logger log = LoggerFactory.getLogger(PropertyListener.class);
     private final Property property;
-    private MultiBindingThingServer multiBindingThingServer;
-	private static final Logger log = LoggerFactory.getLogger(PropertyListener.class);
+    private final ServedThing servedThing;
 
-	public PropertyListener(MultiBindingThingServer multiBindingThingServer, Property property) {
+    public PropertyListener(ServedThing servedThing, Property property) {
         this.property = property;
-        this.multiBindingThingServer = multiBindingThingServer;
-		property.addObserver(this);
+        this.servedThing = servedThing;
+        property.addObserver(this);
     }
 
     @Override
-	public Content onGet() {
-		if (!property.isReadable()) {
-			throw new UnsupportedOperationException();
-		}
+    public Content onGet() {
+        if (!property.isReadable()) {
+            throw new UnsupportedOperationException();
+        }
 
-		Object res = multiBindingThingServer.getProperty(property);
-		return ContentHelper.makeJsonValue(res);
+        Object res = servedThing.getProperty(property);
+        return ContentHelper.makeJsonValue(res);
 
-	}
+    }
 
     @Override
-	public void onPut(Content data) {
-		if (!property.isWriteable()) {
-			throw new UnsupportedOperationException(property.getName() + " is not writable");
-		}
+    public void onPut(Content data) {
+        if (!property.isWriteable()) {
+            throw new UnsupportedOperationException(property.getName() + " is not writable");
+        }
 
-		Object o = ContentHelper.getValueFromJson(data);
-		multiBindingThingServer.setProperty(property, o);
-	}
+        Object o = ContentHelper.getValueFromJson(data);
+        servedThing.setProperty(property, o);
+    }
 
 
-	@Override
-	public void update(Observable o, Object arg) {
-		log.info("change detected: " + o + " to " + arg);
-		setChanged();
-	}
+    @Override
+    public void update(Observable o, Object arg) {
+        log.info("change detected: " + o + " to " + arg);
+        setChanged();
+    }
 }

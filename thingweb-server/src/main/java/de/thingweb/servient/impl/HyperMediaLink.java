@@ -46,6 +46,18 @@ public class HyperMediaLink {
     @JsonProperty("mediaType")
     private String mediaType;
 
+    public HyperMediaLink(String rel, String href) {
+        this.rel = rel;
+        this.href = href;
+    }
+
+    public HyperMediaLink(String rel, String href, String method, String mediaType) {
+        this.rel = rel;
+        this.href = href;
+        this.method = method;
+        this.mediaType = mediaType;
+    }
+
     public String getRel() {
         return rel;
     }
@@ -75,18 +87,6 @@ public class HyperMediaLink {
     }
 
     public void setMediaType(String mediaType) {
-        this.mediaType = mediaType;
-    }
-
-    public HyperMediaLink(String rel, String href) {
-        this.rel = rel;
-        this.href = href;
-    }
-
-    public HyperMediaLink(String rel, String href, String method, String mediaType) {
-        this.rel = rel;
-        this.href = href;
-        this.method = method;
         this.mediaType = mediaType;
     }
 }
