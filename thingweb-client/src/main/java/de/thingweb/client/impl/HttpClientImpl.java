@@ -136,7 +136,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 
 		public void run() {
 			try {
-				URL url = new URL(uri + URI_PART_PROPERTIES + propertyName + (useValueStringInGetAndPutUrl ? "" : "/value"));
+				URL url = new URL(uri + URI_PART_PROPERTIES + propertyName + (useValueStringInGetAndPutUrl ? "/value" : ""));
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setRequestMethod("GET");
 				if(securityAsToken != null) {
@@ -191,7 +191,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 				String uriPart = isAction ? URI_PART_PROPERTIES : URI_PART_ACTIONS;
 				URL url;
 				if(!isAction) {
-					url = new URL(uri + uriPart + name + (useValueStringInGetAndPutUrl ? "" : "/value"));
+					url = new URL(uri + uriPart + name + (useValueStringInGetAndPutUrl ? "/value" : ""));
 				} else {
 					url = new URL(uri + uriPart + name);
 				}
