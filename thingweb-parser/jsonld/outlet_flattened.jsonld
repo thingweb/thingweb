@@ -1,0 +1,112 @@
+{
+	"@graph": [{
+		"name": "MyOutlet",
+		"@id": "_:b0",
+		"protocols": "_:b1"
+	}, {
+		"HTTP": {
+			"@id": "_:b3"
+		},
+		"@id": "_:b1"
+	}, {
+		"outputData": "xsd:boolean",
+		"@type": "Event",
+		"name": "powerStateChanged",
+		"@id": "_:b2"
+	}, {
+		"td:priority": 2,
+		"@id": "_:b3",
+		"uri": "http://www.example.com:80/outlet"
+	}, {
+		"outputData": "xsd:boolean",
+		"td:writeable": false,
+		"@type": "Property",
+		"name": "outletInUse",
+		"@id": "_:b4"
+	}, {
+		"outputData": "xsd:float",
+		"@type": "Event",
+		"name": "powerConsumptionChanged",
+		"@id": "_:b5"
+	}, {
+		"metadata": "_:b0",
+		"@id": "_:b6",
+		"interactions": ["_:b5", "_:b7", "_:b2", "_:b8", "_:b4", "_:b9"]
+	}, {
+		"outputData": "xsd:boolean",
+		"@type": "Event",
+		"name": "outletUsageChanged",
+		"@id": "_:b7"
+	}, {
+		"outputData": "xsd:float",
+		"td:writeable": false,
+		"@type": "Property",
+		"name": "powerConsumption",
+		"@id": "_:b8"
+	}, {
+		"outputData": "xsd:boolean",
+		"td:writeable": true,
+		"@type": "Property",
+		"name": "powerStateOn",
+		"@id": "_:b9"
+	}],
+	"@context": {
+		"outputData": {
+			"@type": "@id",
+			"@id": "td:hasOutput"
+		},
+		"metadata": {
+			"@type": "@id",
+			"@id": "td:hasMetadata"
+		},
+		"Action": "td:Action",
+		"xsd": "http://www.w3.org/2001/XMLSchema#",
+		"Metadata": "td:Metadata",
+		"JSON": "td:JSON",
+		"interactions": {
+			"@type": "@id",
+			"@id": "td:hasInteraction",
+			"@container": "@set"
+		},
+		"writable": {
+			"@type": "xsd:boolean",
+			"@id": "td:writeable"
+		},
+		"JSON-LD": "td:JSON-LD",
+		"CoAP": "td:CoAP",
+		"protocols": {
+			"@type": "@id",
+			"@id": "td:protocol"
+		},
+		"XMPP": "td:XMPP",
+		"Property": "td:Property",
+		"stability": {
+			"@type": "xsd:integer",
+			"@id": "td:stability"
+		},
+		"inputData": {
+			"@type": "@id",
+			"@id": "td:hasInput"
+		},
+		"encodings": {
+			"@type": "@id",
+			"@id": "td:encoding",
+			"@container": "@set"
+		},
+		"HTTP": "td:HTTP",
+		"priority": {
+			"@type": "xsd:integer",
+			"@id": "td:priority"
+		},
+		"uri": {
+			"@type": "xsd:anyURI",
+			"@id": "td:associatedUri"
+		},
+		"WebSocket": "td:WebSocket",
+		"td": "http://www.w3c.org/wot/td#",
+		"XML": "td:XML",
+		"EXI": "td:EXI",
+		"name": "td:name",
+		"Event": "td:Event"
+	}
+}
