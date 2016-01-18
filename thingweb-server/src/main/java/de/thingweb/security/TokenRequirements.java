@@ -27,78 +27,185 @@
 package de.thingweb.security;
 
 /**
+ * Bean class representing the inputs (validation key, allowed clock skew) and
+ * requirements (expected values) for security token validation
+ * 
  * Created by Johannes on 22.12.2015.
  */
 public class TokenRequirements {
-    private final String issuer;
-    private final String audience;
-    private final long expirationTimeOffset;
-    private final String verificationKey;
-    private final String clientId;
-    private final boolean validateSignature;
-    // should be migrated to enum
-    private final String tokenType;
 
-    public TokenRequirements(String issuer, String audience, long expirationTimeOffset, String verificationKey, String clientId, boolean validateSignature, String tokenType) {
-        this.issuer = issuer;
-        this.audience = audience;
-        this.expirationTimeOffset = expirationTimeOffset;
-        this.verificationKey = verificationKey;
-        this.clientId = clientId;
-        this.validateSignature = validateSignature;
-        this.tokenType = tokenType;
-    }
+	// The verification key(s) for the security token signatures (a string that
+	// represents a JWKS)
+	private final String verificationKeys;
 
-    public static TokenRequirementsBuilder build() {
-        return new TokenRequirementsBuilder();
-    }
+	// The allowed clock screw (in secs)
+	private final long allowedClockDrift;
 
-    public boolean validateSignature() {
-        return validateSignature;
-    }
+	// The expected audience
+	private final String audience;
 
-    public String getTokenType() {
-        return tokenType;
-    }
+	// The expected issuer
+	private final String issuer;
 
-    public String getIssuer() {
-        return issuer;
-    }
+	// The expected caller
+	private final String clientId;
 
-    public String getAudience() {
-        return audience;
-    }
+	// The expected token type TODO: migrate data type to enum
+	private final String tokenType;
 
-    public String getVerificationKey() {
-        return verificationKey;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param verificationKey
+	 *            the signature validation key (a string that represents a JWKS,
+	 *            may be <code>null</code>, in that case no signature check is
+	 *            done)
+	 * @param allowedClockDrift
+	 *            the allowed clock screw in secs (may be negative, in this case
+	 *            no timeliness check is done)
+	 * @param audience
+	 *            the expected audience (may be <code>null</code>, in this case
+	 *            no audience check is done)
+	 * @param issuer
+	 *            the expected issuer (may be <code>null</code>, in this case no
+	 *            issuer check is done)
+	 * @param clientId
+	 *            the expected caller (may be <code>null</code>, in this case no
+	 *            subject check is done)
+	 * @param tokenType
+	 *            the expected token type (may be <code>null</code>, in this
+	 *            case no token type check is done)
+	 */
+	public TokenRequirements(String verificationKey, long allowedClockDrift,
+			String audience, String issuer, String clientId, String tokenType) {
+		this.verificationKeys = verificationKey;
+		this.allowedClockDrift = allowedClockDrift;
+		this.audience = audience;
+		this.issuer = issuer;
+		this.clientId = clientId;
+		this.tokenType = tokenType;
+	}
 
-    public String getClientId() {
-        return clientId;
-    }
+	/**
+	 * A builder method for TokenRequirementsBuilder
+	 * 
+	 * @return the TokenRequirementsBuilder instance
+	 */
+	public static TokenRequirementsBuilder build() {
+		return new TokenRequirementsBuilder();
+	}
 
-    public long getExpirationTimeOffset() {
-        return expirationTimeOffset;
-    }
+	/**
+	 * Get the signature validation key(s) (a string that represents a JWKS, may
+	 * be <code>null</code>, in that case no signature check is done)
+	 * 
+	 * @return the signature validation key(s)
+	 */
+	public String getVerificationKeys() {
+		return verificationKeys;
+	}
 
-    public boolean checkIssuer() {
-        return issuer!=null;
-    }
+	/**
+	 * Determine whether signatures shall be checked
+	 * 
+	 * @return <code>true</code> if signature values are checked
+	 */
+	public boolean validateSignature() {
+		return verificationKeys != null;
+	}
 
-    public boolean checkAudience() {
-        return audience!=null;
-    }
+	/**
+	 * Get the allowed clock drift in secs (may be negative, in this case no
+	 * timeliness check is done)
+	 * 
+	 * @return the allowed clock drift in secs
+	 */
+	public long getAllowedClockDriftSecs() {
+		return allowedClockDrift;
+	}
 
-    public boolean checkVerificationKey() {
-        return verificationKey!=null;
-    }
+	/**
+	 * Determine whether timeliness shall be checked
+	 * 
+	 * @return <code>true</code> if timeliness is checked
+	 */
+	public boolean validateExpiration() {
+		return allowedClockDrift >= 0;
+	}
 
-    public boolean checkClient() {
-        return clientId !=null;
-    }
+	/**
+	 * Get the expected audience (may be <code>null</code>, in this case no
+	 * audience check is done)
+	 * 
+	 * @return the expected audience
+	 */
+	public String getAudience() {
+		return audience;
+	}
 
-    public boolean validateExpiration() {
-        return expirationTimeOffset >= 0;
-    }
+	/**
+	 * Determine whether expectations on audience are checked
+	 * 
+	 * @return <code>true</code> if the expected audience is checked
+	 */
+	public boolean checkAudience() {
+		return audience != null;
+	}
 
+	/**
+	 * Get the expected issuer (may be <code>null</code>, in this case no issuer
+	 * check is done)
+	 * 
+	 * @return the expected issuer
+	 */
+	public String getIssuer() {
+		return issuer;
+	}
+
+	/**
+	 * Determine whether expectations on issuers are checked
+	 * 
+	 * @return <code>true</code> if the expected issuer is checked
+	 */
+	public boolean checkIssuer() {
+		return issuer != null;
+	}
+
+	/**
+	 * Get the expected client identifier (may be <code>null</code>, in this
+	 * case no subject check is done)
+	 * 
+	 * @return the expected client identifier
+	 */
+	public String getClientId() {
+		return clientId;
+	}
+
+	/**
+	 * Determine whether expectations on subject are checked
+	 * 
+	 * @return <code>true</code> if the expected subject is checked
+	 */
+	public boolean checkSubject() {
+		return clientId != null;
+	}
+
+	/**
+	 * Get the expected token type (may be <code>null</code>, in this case no
+	 * token type check is done)
+	 * 
+	 * @return the expected token type
+	 */
+	public String getTokenType() {
+		return tokenType;
+	}
+
+	/**
+	 * Determine whether expectations on the token type are checked
+	 * 
+	 * @return <code>true</code> if the expected token type is checked
+	 */
+	public boolean checkTokenType() {
+		return tokenType != null;
+	}
 }

@@ -27,15 +27,27 @@
 package de.thingweb.security;
 
 /**
+ * This Exception is thrown when the token is not valid or a normal token has
+ * insufficient privileges
+ * 
  * Created by Johannes on 22.12.2015.
- * This Exception is thrown when the token is not valid or a normal token has insufficient privileges
- *
  */
 public class UnauthorizedException extends Exception {
-    public UnauthorizedException(String s) {
-        super(s);
-    }
 
-    public UnauthorizedException() {
-    }
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Constructor
+	 */
+	public UnauthorizedException() {
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param s
+	 */
+	public UnauthorizedException(String s) {
+		super(s);
+	}
 }

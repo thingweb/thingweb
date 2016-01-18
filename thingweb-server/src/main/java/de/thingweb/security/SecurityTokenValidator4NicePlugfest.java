@@ -42,127 +42,149 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * This class implements the SecurityTokenValidator interface for the Nice
+ * Plugfest of the W3C IG WoT
+ * 
  * Created by Johannes on 23.12.2015.
  */
-public class SecurityTokenValidator4NicePlugfest implements SecurityTokenValidator {
+public class SecurityTokenValidator4NicePlugfest implements
+		SecurityTokenValidator {
 
-    private static final Logger log = LoggerFactory.getLogger(SecurityTokenValidator4NicePlugfest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SecurityTokenValidator4NicePlugfest.class);
 
-    public final static String CLAIM_TYP = "typ";
-    public final static String CLAIM_ACI = "aci";
-    public final static String ACI_RES = "res";
-    public final static String ACI_MTH = "mth";
-    protected JwtConsumer jwtConsumer;
-    private TokenRequirements requirements;
+	// The keyword word for the 'type' claim
+	private final static String CLAIM_TYP = "typ";
 
-    public SecurityTokenValidator4NicePlugfest(TokenRequirements requirements) throws JoseException {
-        setRequirements(requirements);
-    }
+	// The keyword word for the 'aci' claim
+	private final static String CLAIM_ACI = "aci";
 
-    @Override
-    public TokenRequirements getRequirements() {
-        return this.requirements;
-    }
+	// The keyword word the resource abstraction in an 'aci' claim
+	private final static String ACI_RES = "res";
 
-    @Override
-    public void setRequirements(TokenRequirements requirements) throws JoseException {
-        if(requirements == null) requirements = TokenRequirementsBuilder.createDefault();
-        this.requirements = requirements;
+	// The keyword word the method abstraction in an 'aci' claim
+	private final static String ACI_MTH = "mth";
 
-        JwtConsumerBuilder jwtConsumerBuilder = new JwtConsumerBuilder();
+	// The TokenRequirements instance
+	private TokenRequirements requirements;
 
-        if(requirements.validateSignature()) {
-            JsonWebKeySet jsonWebKeySet = new JsonWebKeySet(requirements.getVerificationKey());
-            VerificationKeyResolver jwksResolver = new JwksVerificationKeyResolver(jsonWebKeySet.getJsonWebKeys());
-            jwtConsumerBuilder.setVerificationKeyResolver(jwksResolver);
-        }
+	// The JwtConsumer instance
+	private JwtConsumer jwtConsumer;
 
-        if (requirements.checkAudience()) {
-            jwtConsumerBuilder.setExpectedAudience(requirements.getAudience());
-        }
+	/**
+	 * Constructor
+	 * 
+	 * @param requirements
+	 *            the TokenRequirements instance
+	 * @throws JoseException
+	 */
+	public SecurityTokenValidator4NicePlugfest(TokenRequirements requirements)
+			throws JoseException {
+		setRequirements(requirements);
+	}
 
-        if (requirements.checkIssuer()) {
-            jwtConsumerBuilder.setExpectedIssuer(requirements.getIssuer());
-        }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.thingweb.security.SecurityTokenValidator#setRequirements(de.thingweb
+	 * .security.TokenRequirements)
+	 */
+	@Override
+	public void setRequirements(TokenRequirements requirements)
+			throws JoseException {
+		if (requirements == null) {
+			requirements = TokenRequirementsBuilder.createDefault();
+		}
+		this.requirements = requirements;
+		JwtConsumerBuilder jwtConsumerBuilder = new JwtConsumerBuilder();
+		if (requirements.validateSignature()) {
+			JsonWebKeySet jsonWebKeySet = new JsonWebKeySet(
+					requirements.getVerificationKeys());
+			VerificationKeyResolver jwksResolver = new JwksVerificationKeyResolver(
+					jsonWebKeySet.getJsonWebKeys());
+			jwtConsumerBuilder.setVerificationKeyResolver(jwksResolver);
+		}
+		if (requirements.validateExpiration()) {
+			jwtConsumerBuilder.setRequireExpirationTime()
+					.setAllowedClockSkewInSeconds(
+							(int) requirements.getAllowedClockDriftSecs());
+		}
+		if (requirements.checkAudience()) {
+			jwtConsumerBuilder.setExpectedAudience(requirements.getAudience());
+		}
+		if (requirements.checkIssuer()) {
+			jwtConsumerBuilder.setExpectedIssuer(requirements.getIssuer());
+		}
+		if (requirements.checkSubject()) {
+			jwtConsumerBuilder.setExpectedSubject(requirements.getClientId());
+		}
+		this.jwtConsumer = jwtConsumerBuilder.build();
+	}
 
-        if (requirements.checkClient()) {
-            jwtConsumerBuilder.setExpectedSubject(requirements.getClientId());
-        }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.thingweb.security.SecurityTokenValidator#getRequirements()
+	 */
+	@Override
+	public TokenRequirements getRequirements() {
+		return this.requirements;
+	}
 
-        if (requirements.validateExpiration()) {
-            jwtConsumerBuilder.setRequireExpirationTime().setAllowedClockSkewInSeconds(
-                    (int) requirements.getExpirationTimeOffset());
-        }
-
-        // TODO: iat validate
-
-        jwtConsumer = jwtConsumerBuilder.build();
-    }
-
-    @Override
-    public String checkValidity(String method, String resource, String jwt) throws UnauthorizedException,
-            TokenExpiredException {
-
-        if (jwt == null || "".equals(jwt)) {
-            throw new UnauthorizedException("No Token");
-        }
-
-        JwtClaims claims = null;
-        // all checks is base on validate signature
-        if (requirements.validateSignature()) {
-            try {
-                claims = jwtConsumer.processToClaims(jwt);
-            } catch (InvalidJwtException e) {
-                // the error message contain the details
-                log.warn("error when validating token: {}", jwt);
-                throw new UnauthorizedException();
-            }
-
-            if (requirements.getTokenType() != null) {
-                String typ = (String) claims.getClaimValue(CLAIM_TYP);
-                if (typ == null || !typ.equals(requirements.getTokenType())) {
-                    throw new UnauthorizedException("unexpected token type " + typ);
-                }
-            }
-
-            // check if method and resource are in aci
-            List<Map> aci = (List<Map>) claims.getClaimValue(CLAIM_ACI);
-            if (aci == null || aci.size() == 0) {
-                // is minimal token, not check the aci
-            } else if (aci.size() == 0) {
-                // aci is not match the design
-                throw new UnauthorizedException("No valid ACI claims in extended token");
-            } else {
-                boolean checkAci = false;
-                for (Map ac : aci) {
-                    String res = (String) ac.get(ACI_RES);
-                    List<String> mths = (List<String>) ac.get(ACI_MTH);
-                    if (res != null && ac.get(ACI_MTH) != null) {
-                        if (res.equals(resource) && mths.contains(method)) {
-                            checkAci = true;
-                            break;
-                        }
-                    } else {
-                        // in each one including one res and mths
-                        throw new UnauthorizedException();
-                    }
-                }
-                if (!checkAci) {
-                    // method and resource are not in aci
-                    throw new UnauthorizedException("Resource/Method is not in ACI");
-                }
-
-            }
-
-            // return claims - or in our simple case, the subject
-            try {
-                return claims.getSubject();
-            } catch (MalformedClaimException e) {
-                throw new UnauthorizedException();
-            }
-        }
-        // else not validate the jwt return default subject
-        else return null;
-    }
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.thingweb.security.SecurityTokenValidator#checkValidity(java.lang.String
+	 * , java.lang.String, java.lang.String)
+	 */
+	@Override
+	public String checkValidity(String jwt, String method, String resource)
+			throws UnauthorizedException, TokenExpiredException {
+		JwtClaims claims = null;
+		// Perform the basic checks: signature validation, checking of expected
+		// audience, issuer, subject and timeliness - see setRequirements()
+		try {
+			claims = jwtConsumer.processToClaims(jwt);
+		} catch (InvalidJwtException e) {
+			LOG.error("Error when validating token: ", jwt);
+			throw new UnauthorizedException();
+		}
+		// Perform supplementary checks: token type and request method/resource
+		if (requirements.checkTokenType()) {
+			if (!requirements.getTokenType().equals(
+					claims.getClaimValue(CLAIM_TYP))) {
+				throw new UnauthorizedException("Unexpected token type: "
+						+ claims.getClaimValue(CLAIM_TYP));
+			}
+		}
+		if (method != null && resource != null) {
+			List<Map> aci = (List<Map>) claims.getClaimValue(CLAIM_ACI);
+			if (aci == null || aci.size() == 0) {
+				throw new UnauthorizedException("No ACI claims in token");
+			} else {
+				boolean aciOkay = false;
+				for (Map ac : aci) {
+					String res = (String) ac.get(ACI_RES);
+					List<String> mths = (List<String>) ac.get(ACI_MTH);
+					if (resource.equals(res)
+							&& (mths != null && mths.contains(method))) {
+						aciOkay = true;
+						break;
+					}
+				}
+				if (!aciOkay) {
+					throw new UnauthorizedException(
+							"Resource/method is not in ACI");
+				}
+			}
+		}
+		// Return the subject claim value
+		try {
+			return claims.getSubject();
+		} catch (MalformedClaimException e) {
+			throw new UnauthorizedException("Getting the subject claim failed");
+		}
+	}
 }

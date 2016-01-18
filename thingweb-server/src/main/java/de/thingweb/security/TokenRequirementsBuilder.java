@@ -26,59 +26,123 @@
 
 package de.thingweb.security;
 
+/**
+ * Builder class for TokenRequirements
+ * 
+ * Created by Johannes on 22.12.2015.
+ */
 public class TokenRequirementsBuilder {
-    private String issuer = null;
-    private String audience = null;
-    private long expirationTimeOffset = -1;
-    private String verificationKey = null;
-    private String clientId = null;
-    private String tokenType = "ES256";
-    private boolean validateSignature = true;
 
-    public static TokenRequirements createDefault() {
-        //by default, just verify that it can expire
-        return TokenRequirements.build()
-                .setValidateSignature(false)
-                .validateAt(0)
-                .createTokenRequirements();
-    }
+	// The verification keys for the security token signatures (a string that
+	// represents a JWKS)
+	private String verificationKeys = null;
 
-    public TokenRequirementsBuilder setValidateSignature(boolean validateSignature) {
-        this.validateSignature = validateSignature;
-        return this;
-    }
+	// The allowed clock screw in secs
+	private long allowedClockDrift = -1;
 
-    public TokenRequirementsBuilder setTokenType(String tokenType) {
-        this.tokenType = tokenType;
-        return this;
-    }
+	// The expected audience
+	private String audience = null;
 
-    public TokenRequirementsBuilder setIssuer(String issuer) {
-        this.issuer = issuer;
-        return this;
-    }
+	// The expected issuer
+	private String issuer = null;
 
-    public TokenRequirementsBuilder setAudience(String audience) {
-        this.audience = audience;
-        return this;
-    }
+	// The expected caller
+	private String clientId = null;
 
-    public TokenRequirementsBuilder validateAt(long expirationTimeOffset) {
-        this.expirationTimeOffset = expirationTimeOffset;
-        return this;
-    }
+	// The expected token type TODO: migrate data type to enum
+	private String tokenType = null;
 
-    public TokenRequirementsBuilder setVerificationKey(String verificationKey) {
-        this.verificationKey = verificationKey;
-        return this;
-    }
+	/**
+	 * Create the TokenRequirementsBuilder instance
+	 * 
+	 * @return the TokenRequirementsBuilder instance
+	 */
+	public TokenRequirements createTokenRequirements() {
+		return new TokenRequirements(verificationKeys, allowedClockDrift,
+				audience, issuer, clientId, tokenType);
+	}
 
-    public TokenRequirementsBuilder setClientId(String clientId) {
-        this.clientId = clientId;
-        return this;
-    }
+	/**
+	 * Create the TokenRequirementsBuilder instance providing defaults
+	 * 
+	 * @return the TokenRequirementsBuilder instance providing defaults
+	 */
+	public static TokenRequirements createDefault() {
+		// by default, just verify that it can expire
+		return TokenRequirements.build().validateAt(0)
+				.createTokenRequirements();
+	}
 
-    public TokenRequirements createTokenRequirements() {
-        return new TokenRequirements(issuer, audience, expirationTimeOffset, verificationKey, clientId, validateSignature, tokenType);
-    }
+	/**
+	 * Set the verification keys for the security token signatures
+	 * 
+	 * @param verificationKeys
+	 *            the verification keys for the security token signatures (a
+	 *            string that represents a JWKS)
+	 * @return the TokenRequirementsBuilder instance
+	 */
+	public TokenRequirementsBuilder setVerificationKeys(String verificationKeys) {
+		this.verificationKeys = verificationKeys;
+		return this;
+	}
+
+	/**
+	 * Set the allowed clock screw in secs
+	 * 
+	 * @param allowedClockDrift
+	 *            the allowed clock screw in secs
+	 * @return the TokenRequirementsBuilder instance
+	 */
+	public TokenRequirementsBuilder validateAt(long allowedClockDrift) {
+		this.allowedClockDrift = allowedClockDrift;
+		return this;
+	}
+
+	/**
+	 * Set the expected audience
+	 * 
+	 * @param audience
+	 *            the expected audience
+	 * @return the TokenRequirementsBuilder instance
+	 */
+	public TokenRequirementsBuilder setAudience(String audience) {
+		this.audience = audience;
+		return this;
+	}
+
+	/**
+	 * Set the expected issuer
+	 * 
+	 * @param issuer
+	 *            the expected issuer
+	 * @return the TokenRequirementsBuilder instance
+	 */
+	public TokenRequirementsBuilder setIssuer(String issuer) {
+		this.issuer = issuer;
+		return this;
+	}
+
+	/**
+	 * Set the expected caller
+	 * 
+	 * @param clientId
+	 *            the expected caller
+	 * @return the TokenRequirementsBuilder instance
+	 */
+	public TokenRequirementsBuilder setClientId(String clientId) {
+		this.clientId = clientId;
+		return this;
+	}
+
+	/**
+	 * Set the expected token type
+	 * 
+	 * @param tokenType
+	 *            the expected token type
+	 * @return the TokenRequirementsBuilder instance
+	 */
+	public TokenRequirementsBuilder setTokenType(String tokenType) {
+		this.tokenType = tokenType;
+		return this;
+	}
 }
