@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import org.json.JSONArray;
 
@@ -60,9 +61,10 @@ public class TDRepository {
 	public JSONArray tdTripleSearch(String search) throws Exception  {
 		
 		// if triple search contains spaces, replaces with  %20
-		String search_without_space = search.replace(" ", " %20");
+		//String search_without_space = search.replace(" ", " %20");
+		search = URLEncoder.encode(search);
 		
-		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search_without_space);
+		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
 		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
 		myURLConnection.setRequestMethod("GET");
 		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
