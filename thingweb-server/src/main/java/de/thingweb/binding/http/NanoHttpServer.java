@@ -122,12 +122,12 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 			}
 			return addCORSHeaders(res);
 		} catch (UnsupportedOperationException e) {
-			return new Response(Status.METHOD_NOT_ALLOWED, MIME_PLAINTEXT, e.toString());
+			return addCORSHeaders(new Response(Status.METHOD_NOT_ALLOWED, MIME_PLAINTEXT, e.toString()));
 		} catch (IllegalArgumentException e) {
-			return new Response(Status.BAD_REQUEST, MIME_PLAINTEXT, e.toString());
+			return addCORSHeaders(new Response(Status.BAD_REQUEST, MIME_PLAINTEXT, e.toString()));
 		} catch (Exception e) {
 			log.error("callback raised error", e);
-			return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, e.toString());
+			return addCORSHeaders(new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, e.toString()));
 		}
 
 	}
