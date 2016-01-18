@@ -131,19 +131,6 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
 	}
 
-    private boolean authorize(String M) {
-		//to be replaced once tokenverifier is in place
-		return true;
-
-		//String jwt = null;
-        //String auth = session.getHeaders().get("Authorization");
-        //if(auth != null) {
-        //    if(auth.startsWith("Bearer ")) {
-        //        jwt = auth.substring("Bearer ".length());
-        //    }
-        //return tokenVerifier.isAuthorized(jwt);
-    }
-
     private static Content getPayload(IHTTPSession session) throws IOException {
     	// Daniel: to get rid of socket timeout 
     	// http://stackoverflow.com/questions/22349772/retrieve-http-body-in-nanohttpd
