@@ -68,7 +68,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	public void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken) {
 		String uriPart = URI_PART_PROPERTIES;
-		CoapClient coap = new CoapClient(uri + uriPart + propertyName + (useValueStringInGetAndPutUrl ? "" : "/value"));
+		CoapClient coap = new CoapClient(uri + uriPart + propertyName + (useValueStringInGetAndPutUrl ? "/value" : ""));
 		
 		log.info("CoAP put " + coap.getURI() + " (Security=" + securityAsToken + ")");
 		
@@ -102,7 +102,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	public void get(String propertyName, Callback callback, String securityAsToken) {
-		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
+		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "/value" : ""));
 		
 		log.info("CoAP get " + coap.getURI() + " (Security=" + securityAsToken + ")");
 		
@@ -133,7 +133,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	public void observe(String propertyName, Callback callback, String securityAsToken) {
-		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "" : "/value"));
+		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "/value" : ""));
 		
 		log.info("CoAP observe " + coap.getURI() + " (Security=" + securityAsToken + ")");
 		
