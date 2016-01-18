@@ -55,7 +55,7 @@ public class SecurityTokenValidator4NicePlugfestTest {
 	private static final String GOOD_CASE_KEYWORD = ".goodCase";
 
 	private static final String MIN_TOKEN_ES256_KEYWORD = "min-token.ES256";
-	
+
 	private static final String VALIDATION_KEY_HS256 = "{\"keys\":[{\"kty\": \"oct\",\"kid\": \"018c0ae5-4d9b-471b-bfd6-eef314bc7037\",\"use\": \"sig\",\"alg\": \"HS256\",\"k\": \"aEp0WElaMnVTTjVrYlFmYnRUTldicGRtaGtWOEZKRy1PbmJjNm14Q2NZZw==\"}]}";
 
 	private static final String VALIDATION_KEY_ES256 = "{\"keys\":[{\"kty\": \"EC\",\"d\": \"_hysUUk5sRGAHhl7RJN7x5UhBMiy6pl6kHR5-ZaWzpU\",\"use\": \"sig\",\"crv\": \"P-256\",\"kid\": \"PlugFestNice\",\"x\": \"CQsJZUvJWx5yB5EwuipDXRDye4Ybg0wwqxpGgZtcl3w\",\"y\": \"qzYskD2N7GrGDSgo6N9pPLXMIwr6jowFGyqsTJGmpz4\",\"alg\": \"ES256\"}]}";
@@ -63,10 +63,6 @@ public class SecurityTokenValidator4NicePlugfestTest {
 	/*
 	 * Static members to represent 'expected' objects/values
 	 */
-	private static final String MIN_TOKEN_RESOURCE_DEFAULT = "/";
-
-	private static final String MIN_TOKEN_METHOD_DEFAULT = "GET";
-
 	private static final String MIN_TOKEN_SUBJECT_DEFAULT = "0c5f83a7-cf08-4f48-8337-bfc65ea149ff";
 
 	private static final String MIN_TOKEN_TYPE_DEFAULT = "org:w3:wot:jwt:as:min";
@@ -140,9 +136,7 @@ public class SecurityTokenValidator4NicePlugfestTest {
 							String jwt = testVectors.getProperty(name);
 							try {
 								String subClaim = minTokenES256Validator
-										.checkValidity(jwt,
-												MIN_TOKEN_METHOD_DEFAULT,
-												MIN_TOKEN_RESOURCE_DEFAULT);
+										.checkValidity(jwt, null, null);
 								assertEquals(MIN_TOKEN_SUBJECT_DEFAULT,
 										subClaim);
 								System.out.println("Token referred to by key: "
@@ -176,9 +170,7 @@ public class SecurityTokenValidator4NicePlugfestTest {
 							String jwt = testVectors.getProperty(name);
 							try {
 								String subClaim = minTokenHS256Validator
-										.checkValidity(jwt,
-												MIN_TOKEN_METHOD_DEFAULT,
-												MIN_TOKEN_RESOURCE_DEFAULT);
+										.checkValidity(jwt, null, null);
 								assertEquals(MIN_TOKEN_SUBJECT_DEFAULT,
 										subClaim);
 								System.out.println("Token referred to by key: "
@@ -211,9 +203,8 @@ public class SecurityTokenValidator4NicePlugfestTest {
 						(name) -> {
 							String jwt = testVectors.getProperty(name);
 							try {
-								minTokenES256Validator.checkValidity(
-										MIN_TOKEN_METHOD_DEFAULT,
-										MIN_TOKEN_RESOURCE_DEFAULT, jwt);
+								minTokenES256Validator.checkValidity(jwt,
+										null, null);
 								fail("False positive for " + name);
 							} catch (UnauthorizedException e) {
 								System.out
@@ -241,26 +232,21 @@ public class SecurityTokenValidator4NicePlugfestTest {
 				.map(key -> (String) key)
 				.filter(key -> key.startsWith(MIN_TOKEN_HS256_KEYWORD)
 						&& !key.endsWith(GOOD_CASE_KEYWORD))
-				.forEach(
-						(name) -> {
-							String jwt = testVectors.getProperty(name);
-							try {
-								minTokenHS256Validator.checkValidity(
-										MIN_TOKEN_METHOD_DEFAULT,
-										MIN_TOKEN_RESOURCE_DEFAULT, jwt);
-								fail("False positive on " + name);
-							} catch (UnauthorizedException e) {
-								// Expected
-								System.out
-										.println("Token referred to by key: "
-												+ name
-												+ " is INVALID-as expected. Token details: "
-												+ jwt);
-							} catch (TokenExpiredException e) {
-								// Minimal tokens do not have a lifetime
-								fail("Unexpected TokenExpiredException");
-							}
-						});
+				.forEach((name) -> {
+					String jwt = testVectors.getProperty(name);
+					try {
+						minTokenHS256Validator.checkValidity(jwt, null, null);
+						fail("False positive on " + name);
+					} catch (UnauthorizedException e) {
+						// Expected
+						System.out.println("Token referred to by key: " + name
+								+ " is INVALID-as expected. Token details: "
+								+ jwt);
+					} catch (TokenExpiredException e) {
+						// Minimal tokens do not have a lifetime
+						fail("Unexpected TokenExpiredException");
+					}
+				});
 	}
 
 	// TODO: add tests with "normal" tokens signed with ES256 and HS256
