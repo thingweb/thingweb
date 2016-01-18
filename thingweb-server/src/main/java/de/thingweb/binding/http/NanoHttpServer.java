@@ -108,11 +108,14 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 					break;
 			    case POST:
 			    	resp = listener.onPost(getPayload(session));
-			    	res = new Response(Status.OK, MIME_PLAINTEXT, new String(resp.getContent()));
+			    	res = new Response(Status.OK, resp.getMediaType().mediaType, new String(resp.getContent()));
 					break;
 			    case DELETE:
 			        listener.onDelete();
 			        res = new Response(null);
+					break;
+				case OPTIONS:
+					res = new Response(null);
 					break;
 			    default:
 			        res = new Response(Response.Status.METHOD_NOT_ALLOWED,MIME_PLAINTEXT,"Method not allowed");
