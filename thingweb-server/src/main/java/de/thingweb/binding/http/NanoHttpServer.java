@@ -120,9 +120,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 			    default:
 			        res = new Response(Response.Status.METHOD_NOT_ALLOWED,MIME_PLAINTEXT,"Method not allowed");
 			}
-			// TODO defaulting to accept all origins - should be configurable
-			res.addHeader("Access-Control-Allow-Origin","*");
-			return res;
+			return addCORSHeaders(res);
 		} catch (UnsupportedOperationException e) {
 			return new Response(Status.METHOD_NOT_ALLOWED, MIME_PLAINTEXT, e.toString());
 		} catch (IllegalArgumentException e) {
@@ -132,6 +130,20 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 			return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, e.toString());
 		}
 
+	}
+
+	private Response addCORSHeaders(Response resp) {
+		// TODO defaulting cors - should be configurable
+		final String DEFAULT_ALLOWED_HEADERS = "origin,accept,content-type";
+		final String ALLOWED_METHODS = "GET, POST, PUT, DELETE, OPTIONS, HEAD";
+
+		resp.addHeader("Access-Control-Allow-Origin","*");
+		resp.addHeader("Access-Control-Allow-Headers", DEFAULT_ALLOWED_HEADERS);
+		resp.addHeader("Access-Control-Allow-Credentials", "true");
+		resp.addHeader("Access-Control-Allow-Methods", ALLOWED_METHODS);
+		//resp.addHeader("Access-Control-Max-Age", "" + MAX_AGE);
+
+		return resp;
 	}
 
     private static Content getPayload(IHTTPSession session) throws IOException {
