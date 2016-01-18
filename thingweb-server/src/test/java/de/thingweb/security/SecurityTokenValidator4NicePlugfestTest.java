@@ -109,17 +109,15 @@ public class SecurityTokenValidator4NicePlugfestTest {
 		minTokenES256Reqs = TokenRequirements.build()
 				.setIssuer(MIN_TOKEN_ISSUER_DEFAULT)
 				.setAudience(MIN_TOKEN_AUDIENCE_DEFAULT)
-				.setVerificationKey(VALIDATION_KEY_ES256)
-				.setTokenType(MIN_TOKEN_TYPE_DEFAULT)
-				.setValidateSignature(true);
+				.setVerificationKeys(VALIDATION_KEY_ES256)
+				.setTokenType(MIN_TOKEN_TYPE_DEFAULT);
 		minTokenES256Validator = new SecurityTokenValidator4NicePlugfest(
 				minTokenES256Reqs.createTokenRequirements());
 		minTokenHS256Reqs = TokenRequirements.build()
 				.setIssuer(MIN_TOKEN_ISSUER_DEFAULT)
 				.setAudience(MIN_TOKEN_AUDIENCE_DEFAULT)
-				.setVerificationKey(VALIDATION_KEY_HS256)
-				.setTokenType(MIN_TOKEN_TYPE_DEFAULT)
-				.setValidateSignature(true);
+				.setVerificationKeys(VALIDATION_KEY_HS256)
+				.setTokenType(MIN_TOKEN_TYPE_DEFAULT);
 		minTokenHS256Validator = new SecurityTokenValidator4NicePlugfest(
 				minTokenHS256Reqs.createTokenRequirements());
 	}
@@ -142,9 +140,9 @@ public class SecurityTokenValidator4NicePlugfestTest {
 							String jwt = testVectors.getProperty(name);
 							try {
 								String subClaim = minTokenES256Validator
-										.checkValidity(
+										.checkValidity(jwt,
 												MIN_TOKEN_METHOD_DEFAULT,
-												MIN_TOKEN_RESOURCE_DEFAULT, jwt);
+												MIN_TOKEN_RESOURCE_DEFAULT);
 								assertEquals(MIN_TOKEN_SUBJECT_DEFAULT,
 										subClaim);
 								System.out.println("Token referred to by key: "
@@ -178,9 +176,9 @@ public class SecurityTokenValidator4NicePlugfestTest {
 							String jwt = testVectors.getProperty(name);
 							try {
 								String subClaim = minTokenHS256Validator
-										.checkValidity(
+										.checkValidity(jwt,
 												MIN_TOKEN_METHOD_DEFAULT,
-												MIN_TOKEN_RESOURCE_DEFAULT, jwt);
+												MIN_TOKEN_RESOURCE_DEFAULT);
 								assertEquals(MIN_TOKEN_SUBJECT_DEFAULT,
 										subClaim);
 								System.out.println("Token referred to by key: "

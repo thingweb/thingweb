@@ -52,9 +52,8 @@ public class RemoveMe_SecureServerLauncher {
         final TokenRequirements tokenRequirements = TokenRequirements.build()
                 .setIssuer(ISSUER)
                 .setAudience(AUDIENCE)
-                .setVerificationKey(PUBKEY_ES256)
+                .setVerificationKeys(PUBKEY_ES256)
                 .setTokenType(TYPE)
-                .setValidateSignature(true)
                 .createTokenRequirements();
 
         ServientBuilder.initialize();
