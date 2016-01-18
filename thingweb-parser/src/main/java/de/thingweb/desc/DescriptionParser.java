@@ -143,8 +143,7 @@ public class DescriptionParser {
      * reshapes the input JSON-LD object using the standard
      * Thing Description context and having the thing description
      * resource as object root.
-     * @param jsonld UTF-8 encoded JSON-LD object
-     * @param format triple serialization format
+     * @param data UTF-8 encoded JSON-LD object
      * @return the reshaped JSON-LD object
      * @throws IOException
      */
