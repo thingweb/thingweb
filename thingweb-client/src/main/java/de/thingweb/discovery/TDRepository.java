@@ -32,6 +32,7 @@ package de.thingweb.discovery;
 
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,11 +59,11 @@ public class TDRepository {
 	 * @param search SPARQL query
 	 * @return JSON array of relevant TD files (=empty array means no match)
 	 * */
-	public JSONArray tdTripleSearch(String search) throws Exception  {
+	public JSONObject tdTripleSearch(String search) throws Exception  {
 		
 		// if triple search contains spaces, replaces with  %20
 		//String search_without_space = search.replace(" ", " %20");
-		search = URLEncoder.encode(search);
+		search = URLEncoder.encode(search, "UTF-8");
 		
 		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
 		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
@@ -73,9 +74,11 @@ public class TDRepository {
 
 		InputStream in = myURLConnection.getInputStream();
 								
-		JSONArray jsonLDs = new JSONArray(streamToString(in));
+	//	JSONArray jsonLDs = new JSONArray(streamToString(in));
+		
+		JSONObject jsonLDs = new JSONObject(streamToString(in));
 
-		System.out.println(streamToString(in));
+		System.out.println(jsonLDs);
 		
 		return jsonLDs;
 	}
@@ -84,7 +87,7 @@ public class TDRepository {
 	 * @param search free text search
 	 * @return JSON array of relevant TD files (=empty array means no match)
 	 * */
-	public JSONArray tdFreeTextSearch(String search) throws Exception  {
+	public JSONObject tdFreeTextSearch(String search) throws Exception  {
 		
 		//TODO: implement method
 
@@ -95,7 +98,7 @@ public class TDRepository {
 	/** This method request the TD repository to return the names of all known Things  
 	 * @return String array of Things names (=empty array means no Thing is present in TD repository)
 	 * */
-	public String[] nameOfThings() throws Exception  {
+	public JSONObject nameOfThings() throws Exception  {
 		
 		//TODO: implement method
 
