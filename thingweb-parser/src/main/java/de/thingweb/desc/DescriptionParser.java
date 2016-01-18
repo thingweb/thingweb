@@ -32,8 +32,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
+import com.github.jsonldjava.core.JsonLdUtils;
 import com.github.jsonldjava.utils.JsonUtils;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.siemens.ct.exi.exceptions.EXIException;
+import com.sun.crypto.provider.DESCipher;
 
 import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.encoding.json.exi.EXI4JSONParser;
@@ -138,16 +141,26 @@ public class DescriptionParser {
     
     /**
      * reshapes the input JSON-LD object using the standard
-     * Thing Description context.
-     * @param jsonld
-     * @return
-     * @throws IOException 
-     * @throws JsonProcessingException 
+     * Thing Description context and having the thing description
+     * resource as object root.
+     * @param jsonld UTF-8 encoded JSON-LD object
+     * @param format triple serialization format
+     * @return the reshaped JSON-LD object
+     * @throws IOException
      */
-    public static String reshape(String jsonld) throws JsonProcessingException, IOException {
+    public static String reshape(byte[] data) throws IOException {
       ObjectMapper om = new ObjectMapper();
-      Object root = om.readValue(jsonld, HashMap.class);
-      return compactJson(root).toString();
+      
+      try {
+        Object jsonld = JsonUtils.fromInputStream(new ByteArrayInputStream(data));
+        // TODO put the frame online instead
+        Object frame = om.readValue("{\"http://www.w3c.org/wot/td#hasMetadata\":{}}", HashMap.class);
+        
+        jsonld = JsonLdProcessor.frame(jsonld, frame, new JsonLdOptions());
+        return compactJson(jsonld).toString();
+      } catch (JsonLdError e) {
+        throw new IOException("Can't reshape triples", e);
+      }
     }
 
 }
