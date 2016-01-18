@@ -94,24 +94,32 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
 		//get result
         try {
+			Response res;
 			switch (session.getMethod()) {
 			    case GET:
 			    	Content resp = listener.onGet();
 			    	// TODO how to handle accepted mimeTypes
 			    	// e.g., accept=text/html,application/xhtml+xml,application/xml;
-			    	return new Response(Status.OK, resp.getMediaType().mediaType,  new ByteArrayInputStream(resp.getContent()));
+			    	res = new Response(Status.OK, resp.getMediaType().mediaType,  new ByteArrayInputStream(resp.getContent()));
+					break;
 			    case PUT:
 			        listener.onPut(getPayload(session));
-			        return new Response(null);
+			        res = new Response(null);
+					break;
 			    case POST:
 			    	resp = listener.onPost(getPayload(session));
-			    	return new Response(Status.OK, MIME_PLAINTEXT, new String(resp.getContent()));
+			    	res = new Response(Status.OK, MIME_PLAINTEXT, new String(resp.getContent()));
+					break;
 			    case DELETE:
 			        listener.onDelete();
-			        return new Response(null);
+			        res = new Response(null);
+					break;
 			    default:
-			        return new Response(Response.Status.METHOD_NOT_ALLOWED,MIME_PLAINTEXT,"Method not allowed");
+			        res = new Response(Response.Status.METHOD_NOT_ALLOWED,MIME_PLAINTEXT,"Method not allowed");
 			}
+			// TODO defaulting to accept all origins - should be configurable
+			res.addHeader("Access-Control-Allow-Origin","*");
+			return res;
 		} catch (UnsupportedOperationException e) {
 			return new Response(Status.METHOD_NOT_ALLOWED, MIME_PLAINTEXT, e.toString());
 		} catch (IllegalArgumentException e) {
