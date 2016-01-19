@@ -132,21 +132,22 @@ public class TDRepository {
 
 		System.out.println(jsonLDs);
 		
-		return jsonLDs;";
-		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
-		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
-		myURLConnection.setRequestMethod("GET");
-		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		myURLConnection.setDoInput(true);
-		myURLConnection.setDoOutput(true);
-
-		InputStream in = myURLConnection.getInputStream();
- 
-		JSONObject jsonLDs = new JSONObject(streamToString(in));
-
-		System.out.println(jsonLDs);
-		
 		return jsonLDs;
+//		";
+//		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
+//		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
+//		myURLConnection.setRequestMethod("GET");
+//		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//		myURLConnection.setDoInput(true);
+//		myURLConnection.setDoOutput(true);
+//
+//		InputStream in = myURLConnection.getInputStream();
+// 
+//		JSONObject jsonLDs = new JSONObject(streamToString(in));
+//
+//		System.out.println(jsonLDs);
+//		
+//		return jsonLDs;
  
 	}
 	
