@@ -34,6 +34,8 @@ import de.thingweb.thing.MediaType;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Map;
 
 /**
@@ -121,14 +123,20 @@ public class ContentHelper {
         try {
             return clazz.cast(o);
         } catch(ClassCastException e) {
-            String msg = String.format(
+            final String msg = String.format(
                     "expected value to be of type %s, not %s in %s",
                     clazz,
                     o.getClass(),
                     o.toString()
-                    );
-            log.warn(msg);
-            throw new IllegalArgumentException(msg);
+            );
+            if(o instanceof String) {
+                try {
+                    return clazz.cast(NumberFormat.getInstance().parse((String) o));
+                } catch (ParseException e1) {
+                    log.warn(msg);
+                    throw new IllegalArgumentException(msg);
+                }
+            } else throw new IllegalArgumentException(msg);
         }
     }
 }
