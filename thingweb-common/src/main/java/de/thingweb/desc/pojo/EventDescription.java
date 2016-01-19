@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("Event")
-@JsonIgnoreProperties(value={"@id"},ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class EventDescription extends InteractionDescription {
     
     @JsonProperty("outputData")

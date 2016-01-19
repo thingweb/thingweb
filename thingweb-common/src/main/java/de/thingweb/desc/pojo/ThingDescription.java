@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Created by Johannes on 02.09.2015.
  */
-@JsonIgnoreProperties(value={"@id"},ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class ThingDescription {
     
     @JsonProperty
@@ -44,16 +44,16 @@ public class ThingDescription {
     
     @JsonCreator
     public ThingDescription(@JsonProperty("metadata") Metadata metadata, @JsonProperty("interactions") List<InteractionDescription> interactions) {
-	this.metadata = metadata;
-	this.interactions = interactions;
+      this.metadata = metadata;
+      this.interactions = interactions;
     }
     
     public Metadata getMetadata() {
-	return metadata;
+      return metadata;
     }
     
     public List<InteractionDescription> getInteractions() {
-	return interactions;
+      return interactions;
     }
     
 }
