@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Created by Johannes on 02.09.2015.
  */
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(value={"@id"},ignoreUnknown=true)
 public class ThingDescription {
     
     @JsonProperty
