@@ -31,6 +31,7 @@ import java.util.Map;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapResponse;
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.MessageObserver;
 import org.eclipse.californium.core.coap.Option;
@@ -67,8 +68,13 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	public void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken) {
+		 put(propertyName, propertyValue, callback, securityAsToken, useValueInUrlFirst);
+	}
+	
+	protected void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken, final boolean useValue) {
 		String uriPart = URI_PART_PROPERTIES;
-		CoapClient coap = new CoapClient(uri + uriPart + propertyName + (useValueStringInGetAndPutUrl ? "/value" : ""));
+		String curi = uri + uriPart + propertyName + (useValue ? VALUE_STRING : "");
+		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP put " + coap.getURI() + " (Security=" + securityAsToken + ")");
 		
@@ -85,16 +91,29 @@ public class CoapClientImpl extends AbstractClientImpl {
 		coap.advanced(new CoapHandler() {
 			@Override
 			public void onLoad(CoapResponse response) {
-				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
-				callback.onPut(propertyName, content);
+				if(ResponseCode.isSuccess(response.getCode()) ) {
+					Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
+					callback.onPut(propertyName, content);
+				} else {
+					error();
+				}
 			}
 
+			void error() {
+				if(useValueInUrlFirst == useValue) {
+					// try the other URL form as well before reporting error
+					log.warn("The PUT uri='" + curi + "' was not successull. Try with /value form next: " + !useValue);
+					put(propertyName, propertyValue, callback, securityAsToken, !useValue);
+				} else {
+					callback.onPutError(propertyName);
+				}
+			}
+			
 			@Override
 			public void onError() {
-				callback.onPutError(propertyName);
+				error();
 			}
-		}, request);
-		
+		}, request);	
 	}
 
 	public void get(String propertyName, Callback callback) {
@@ -102,7 +121,12 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	public void get(String propertyName, Callback callback, String securityAsToken) {
-		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "/value" : ""));
+		get(propertyName, callback, securityAsToken, useValueInUrlFirst);
+	}
+	
+	protected void get(String propertyName, Callback callback, String securityAsToken, final boolean useValue) {
+		String curi = uri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
+		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP get " + coap.getURI() + " (Security=" + securityAsToken + ")");
 		
@@ -116,13 +140,27 @@ public class CoapClientImpl extends AbstractClientImpl {
 		coap.advanced(new CoapHandler() {
 			@Override
 			public void onLoad(CoapResponse response) {
-				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
-				callback.onGet(propertyName, content);
+				if(ResponseCode.isSuccess(response.getCode()) ) {
+					Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
+					callback.onGet(propertyName, content);
+				} else {
+					error();
+				}
+			}
+			
+			void error() {
+				if(useValueInUrlFirst == useValue) {
+					// try the other URL form as well before reporting error
+					log.warn("The GET uri='" + curi + "' was not successull. Try with /value form next: " + !useValue);
+					get(propertyName, callback, securityAsToken, !useValue);
+				} else {
+					callback.onGetError(propertyName);
+				}
 			}
 
 			@Override
 			public void onError() {
-				callback.onGetError(propertyName);
+				error();
 			}
 		}, request);
 	}
@@ -133,7 +171,12 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	public void observe(String propertyName, Callback callback, String securityAsToken) {
-		CoapClient coap = new CoapClient(uri + URI_PART_PROPERTIES + propertyName+ (useValueStringInGetAndPutUrl ? "/value" : ""));
+		observe(propertyName, callback, securityAsToken, useValueInUrlFirst);
+	}
+	
+	protected void observe(String propertyName, Callback callback, String securityAsToken, final boolean useValue) {
+		String curi = uri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
+		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP observe " + coap.getURI() + " (Security=" + securityAsToken + ")");
 		
@@ -147,13 +190,27 @@ public class CoapClientImpl extends AbstractClientImpl {
 		coap.advanced(new CoapHandler() {
 			@Override
 			public void onLoad(CoapResponse response) {
-				Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
-				callback.onObserve(propertyName, content);
+				if(ResponseCode.isSuccess(response.getCode()) ) {
+					Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
+					callback.onObserve(propertyName, content);
+				} else {
+					error();
+				}
+			}
+			
+			void error() {
+				if(useValueInUrlFirst == useValue) {
+					// try the other URL form as well before reporting error
+					log.warn("The OBSERVE uri='" + curi + "' was not successull. Try with /value form next: " + !useValue);
+					observe(propertyName, callback, securityAsToken, !useValue);
+				} else {
+					callback.onObserveError(propertyName);
+				}
 			}
 
 			@Override
 			public void onError() {
-				callback.onObserveError(propertyName);
+				error();
 			}
 		}, request);
 		
@@ -228,7 +285,6 @@ public class CoapClientImpl extends AbstractClientImpl {
 				callback.onActionError(actionName);
 			}
 		}, request);
-		
 	}
 
 

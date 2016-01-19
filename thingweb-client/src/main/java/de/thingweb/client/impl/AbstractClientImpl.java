@@ -47,8 +47,11 @@ public abstract class AbstractClientImpl implements Client {
 	final String URI_PART_ACTIONS = "/";
 	//final String URI_PART_ACTIONS = "/actions/";
 	
-	// TODO remove if settled
-	final boolean useValueStringInGetAndPutUrl = false;
+	/** Note: there has been different understanding whether to use /value in GET/PUT urls
+	 * <p>Therefore we try both variants before reporting an error</p>
+	 */
+	final boolean useValueInUrlFirst = false;
+	final String VALUE_STRING = "/value";
 
 	public AbstractClientImpl(String uri, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
 		this.uri = uri;
