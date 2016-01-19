@@ -86,12 +86,12 @@ public class Action {
         }
 
         public Builder setInputType(String inputType) {
-            this.inputType = inputType;
+            this.inputType = (inputType == null) ? "" : inputType;
             return this;
         }
 
         public Builder setOutputType(String outputType) {
-            this.outputType = outputType;
+            this.outputType = (outputType == null) ? "" : outputType;
             return this;
         }
 

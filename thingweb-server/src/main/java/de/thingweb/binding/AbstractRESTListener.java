@@ -43,7 +43,7 @@ public class AbstractRESTListener extends Observable implements RESTListener {
 	@Override
 	public String validate(String method, String uri, String jwt) throws UnauthorizedException, TokenExpiredException {
 		if (this.validator != null) {
-			return this.validator.checkValidity(method,uri,jwt);
+			return this.validator.checkValidity(jwt,method,uri);
 		}
 
 		return null;

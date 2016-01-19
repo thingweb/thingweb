@@ -28,7 +28,10 @@ package de.thingweb.security;
 
 /**
  * This exception is trown when the token was expired
+ * 
  * Created by Johannes on 23.12.2015.
  */
 public class TokenExpiredException extends Exception {
+
+	private static final long serialVersionUID = 1L;
 }

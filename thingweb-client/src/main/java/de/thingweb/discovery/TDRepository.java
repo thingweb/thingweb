@@ -32,6 +32,7 @@ package de.thingweb.discovery;
 
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 /** Class to interact with a TD repository */
 public class TDRepository {
@@ -55,14 +57,15 @@ public class TDRepository {
 	
 	/**  This method takes a SPARQL query and send it o the TD repository    
 	 * @param search SPARQL query
-	 * @return JSON array of relevant TD files (=empty array means no match)
+	 * @return JSONObject array of relevant TD files (=empty array means no match)
 	 * */
-	public JSONArray tdTripleSearch(String search) throws Exception  {
+	public JSONObject tdTripleSearch(String search) throws Exception  {
 		
 		// if triple search contains spaces, replaces with  %20
-		String search_without_space = search.replace(" ", " %20");
+		//String search_without_space = search.replace(" ", " %20");
+		search = URLEncoder.encode(search, "UTF-8");
 		
-		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search_without_space);
+		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
 		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
 		myURLConnection.setRequestMethod("GET");
 		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -71,34 +74,80 @@ public class TDRepository {
 
 		InputStream in = myURLConnection.getInputStream();
 								
-		JSONArray jsonLDs = new JSONArray(streamToString(in));
+	//	JSONArray jsonLDs = new JSONArray(streamToString(in));
+		
+		JSONObject jsonLDs = new JSONObject(streamToString(in));
 
-		System.out.println(streamToString(in));
+		System.out.println(jsonLDs);
 		
 		return jsonLDs;
 	}
 	
 	/** This method takes a free text search and send it o the TD repository 
 	 * @param search free text search
-	 * @return JSON array of relevant TD files (=empty array means no match)
+	 * @return JSONObject of relevant TD files (=empty array means no match)
 	 * */
-	public JSONArray tdFreeTextSearch(String search) throws Exception  {
+	public JSONObject tdFreeTextSearch(String search) throws Exception  {
 		
-		//TODO: implement method
+		search = URLEncoder.encode(search, "UTF-8");
+		
+		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
+		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
+		myURLConnection.setRequestMethod("GET");
+		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		myURLConnection.setDoInput(true);
+		myURLConnection.setDoOutput(true);
 
-	
-		return null;
+		InputStream in = myURLConnection.getInputStream();
+								
+	//	JSONArray jsonLDs = new JSONArray(streamToString(in));
+		
+		JSONObject jsonLDs = new JSONObject(streamToString(in));
+
+		System.out.println(jsonLDs);
+		
+		return jsonLDs;
 	}
 	
 	/** This method request the TD repository to return the names of all known Things  
-	 * @return String array of Things names (=empty array means no Thing is present in TD repository)
+	 * @return JSONObject array of Things names (=empty array means no Thing is present in TD repository)
 	 * */
-	public String[] nameOfThings() throws Exception  {
+	public JSONObject nameOfThings() throws Exception  {
 		
-		//TODO: implement method
+		//String search = "search = URLEncoder.encode(search, "UTF-8");
+		String search = "{ ?td <http://www.w3c.org/wot/td#hasMetadata> ?m . ?m <http://www.w3c.org/wot/td#name> \"query text\" . }";
 
-	
-		return null;
+		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
+		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
+		myURLConnection.setRequestMethod("GET");
+		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		myURLConnection.setDoInput(true);
+		myURLConnection.setDoOutput(true);
+
+		InputStream in = myURLConnection.getInputStream();
+								
+	//	JSONArray jsonLDs = new JSONArray(streamToString(in));
+		
+		JSONObject jsonLDs = new JSONObject(streamToString(in));
+
+		System.out.println(jsonLDs);
+		
+		return jsonLDs;";
+		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
+		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
+		myURLConnection.setRequestMethod("GET");
+		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		myURLConnection.setDoInput(true);
+		myURLConnection.setDoOutput(true);
+
+		InputStream in = myURLConnection.getInputStream();
+ 
+		JSONObject jsonLDs = new JSONObject(streamToString(in));
+
+		System.out.println(jsonLDs);
+		
+		return jsonLDs;
+ 
 	}
 	
 	

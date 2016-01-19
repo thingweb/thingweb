@@ -94,47 +94,57 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
 		//get result
         try {
+			Response res;
 			switch (session.getMethod()) {
 			    case GET:
 			    	Content resp = listener.onGet();
 			    	// TODO how to handle accepted mimeTypes
 			    	// e.g., accept=text/html,application/xhtml+xml,application/xml;
-			    	return new Response(Status.OK, resp.getMediaType().mediaType,  new ByteArrayInputStream(resp.getContent()));
+			    	res = new Response(Status.OK, resp.getMediaType().mediaType,  new ByteArrayInputStream(resp.getContent()));
+					break;
 			    case PUT:
 			        listener.onPut(getPayload(session));
-			        return new Response(null);
+			        res = new Response(null);
+					break;
 			    case POST:
 			    	resp = listener.onPost(getPayload(session));
-			    	return new Response(Status.OK, MIME_PLAINTEXT, new String(resp.getContent()));
+			    	res = new Response(Status.OK, resp.getMediaType().mediaType, new String(resp.getContent()));
+					break;
 			    case DELETE:
 			        listener.onDelete();
-			        return new Response(null);
+			        res = new Response(null);
+					break;
+				case OPTIONS:
+					res = new Response(null);
+					break;
 			    default:
-			        return new Response(Response.Status.METHOD_NOT_ALLOWED,MIME_PLAINTEXT,"Method not allowed");
+			        res = new Response(Response.Status.METHOD_NOT_ALLOWED,MIME_PLAINTEXT,"Method not allowed");
 			}
+			return addCORSHeaders(res);
 		} catch (UnsupportedOperationException e) {
-			return new Response(Status.METHOD_NOT_ALLOWED, MIME_PLAINTEXT, e.toString());
+			return addCORSHeaders(new Response(Status.METHOD_NOT_ALLOWED, MIME_PLAINTEXT, e.toString()));
 		} catch (IllegalArgumentException e) {
-			return new Response(Status.BAD_REQUEST, MIME_PLAINTEXT, e.toString());
+			return addCORSHeaders(new Response(Status.BAD_REQUEST, MIME_PLAINTEXT, e.toString()));
 		} catch (Exception e) {
 			log.error("callback raised error", e);
-			return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, e.toString());
+			return addCORSHeaders(new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, e.toString()));
 		}
 
 	}
 
-    private boolean authorize(String M) {
-		//to be replaced once tokenverifier is in place
-		return true;
+	private Response addCORSHeaders(Response resp) {
+		// TODO defaulting cors - should be configurable
+		final String DEFAULT_ALLOWED_HEADERS = "origin,accept,content-type";
+		final String ALLOWED_METHODS = "GET, POST, PUT, DELETE, OPTIONS, HEAD";
 
-		//String jwt = null;
-        //String auth = session.getHeaders().get("Authorization");
-        //if(auth != null) {
-        //    if(auth.startsWith("Bearer ")) {
-        //        jwt = auth.substring("Bearer ".length());
-        //    }
-        //return tokenVerifier.isAuthorized(jwt);
-    }
+		resp.addHeader("Access-Control-Allow-Origin","*");
+		resp.addHeader("Access-Control-Allow-Headers", DEFAULT_ALLOWED_HEADERS);
+		resp.addHeader("Access-Control-Allow-Credentials", "true");
+		resp.addHeader("Access-Control-Allow-Methods", ALLOWED_METHODS);
+		//resp.addHeader("Access-Control-Max-Age", "" + MAX_AGE);
+
+		return resp;
+	}
 
     private static Content getPayload(IHTTPSession session) throws IOException {
     	// Daniel: to get rid of socket timeout 

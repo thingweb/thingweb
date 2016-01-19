@@ -29,32 +29,46 @@ package de.thingweb.security;
 import org.jose4j.lang.JoseException;
 
 /**
- *  Validator for securitty tokens
- *  checks signature and validates claims against requirements
+ * Validator for security tokens: it checks the token signature and validates
+ * contained information against expected values
+ * 
+ * Created by Johannes on 23.12.2015.
  */
 public interface SecurityTokenValidator {
-    /**
-     *  Set a new ste of required claims resp. attributes to be checked in the token
-     * @param requirements replacement requirements
-     */
-    void setRequirements(TokenRequirements requirements) throws JoseException;
 
-    /**
-     * Get currents requirements imposed on tokes to validate
-     * @return set of requirements
-     */
-    TokenRequirements getRequirements();
+	/**
+	 * Set the requirements (inputs, expected values) for security token
+	 * validation
+	 * 
+	 * @param requirements
+	 *            the TokenRequirements instance (may be <code>null</code>; in
+	 *            this case defaults are used)
+	 */
+	void setRequirements(TokenRequirements requirements) throws JoseException;
 
-    /**
-     * Check a token if it validates and fulfills the required properties
-     * also checkn if it contains access rights for the given resource and the given method
-     * and return the subject the token was issued for
-     *
-     * @param method the method used for the REST call, e.g. GET, PUT, POST or DELETE
-     * @param resource the relative uri of the accessed resource
-     * @param jwt the JWT that the request contained (base64-encoded String)
-     * @return subject claim if validated, null if not
-     */
-    String checkValidity(String method, String resource, String jwt) throws UnauthorizedException, TokenExpiredException;
+	/**
+	 * Get the requirements (inputs, expected values) for security token
+	 * validation
+	 * 
+	 * @return the TokenRequirements instance
+	 */
+	TokenRequirements getRequirements();
 
+	/**
+	 * Check a security token if it validates and fulfills the required
+	 * properties also check if it contains access rights for the given resource
+	 * and the given method and return the subject the token was issued for
+	 * 
+	 * @param jwt
+	 *            the JWT that is to-be-validated (Base64-encoded String)
+	 * @param method
+	 *            the method used for the REST call, e.g. GET, PUT, POST or
+	 *            DELETE (may be <code>null</code>)
+	 * @param resource
+	 *            the relative URI of the to-be-accessed resource (may be
+	 *            <code>null</code>)
+	 * @return the value subject claim if the JWT is valid
+	 */
+	String checkValidity(String jwt, String method, String resource)
+			throws UnauthorizedException, TokenExpiredException;
 }
