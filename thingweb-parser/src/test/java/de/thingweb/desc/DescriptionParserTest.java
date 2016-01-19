@@ -138,7 +138,9 @@ public class DescriptionParserTest {
         char[] buf = new char [(int) f.length()];
         r.read(buf);
         r.close();
-        DescriptionParser.reshape(new String(buf).getBytes());
+        String jsonld = DescriptionParser.reshape(new String(buf).getBytes());
+        // checks that reshaped jsonld is compliant to description parser's impl.
+        DescriptionParser.fromBytes(jsonld.getBytes());
         // TODO any further checks?
       } catch (Exception e) {
         fail(e.getMessage());
