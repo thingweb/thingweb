@@ -48,7 +48,7 @@ public abstract class AbstractClientImpl implements Client {
 	//final String URI_PART_ACTIONS = "/actions/";
 	
 	// TODO remove if settled
-	final boolean useValueStringInGetAndPutUrl = true;
+	final boolean useValueStringInGetAndPutUrl = false;
 
 	public AbstractClientImpl(String uri, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
 		this.uri = uri;
