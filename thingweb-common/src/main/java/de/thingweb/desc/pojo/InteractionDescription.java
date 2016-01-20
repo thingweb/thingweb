@@ -33,14 +33,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 @JsonTypeInfo(use=Id.NAME, include=As.PROPERTY, property="@type")
 @JsonSubTypes({@JsonSubTypes.Type(PropertyDescription.class), @JsonSubTypes.Type(ActionDescription.class), @JsonSubTypes.Type(EventDescription.class)})
-@JsonIgnoreProperties(value={"@id"},ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public abstract class InteractionDescription {
     
     @JsonProperty
     protected String name;
     
     public String getName() {
-	return name;
+      return name;
     }
 
 }

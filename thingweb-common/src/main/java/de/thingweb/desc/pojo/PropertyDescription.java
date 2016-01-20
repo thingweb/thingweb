@@ -25,31 +25,33 @@
 package de.thingweb.desc.pojo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("Property")
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class PropertyDescription extends InteractionDescription {
 
     @JsonProperty
-    private boolean writable;
+    private Boolean writable;
     
     @JsonProperty("outputData")
     private String outputType;
     
     @JsonCreator
     public PropertyDescription(@JsonProperty("name") String name, @JsonProperty("writable") Boolean writable, @JsonProperty("outputData") String outputType) {
-	this.name = name;
-	this.writable = writable;
-	this.outputType = outputType;
+      this.name = name;
+      this.writable = writable;
+      this.outputType = outputType;
     }
     
     public String getOutputType() {
-	return outputType;
+      return outputType;
     }
     
     public boolean isWritable() {
-	return writable;
+      return writable;
     }
 
 }

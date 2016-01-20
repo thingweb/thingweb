@@ -27,7 +27,9 @@ package de.thingweb.desc;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
@@ -48,8 +50,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class DescriptionParser {
 
@@ -66,29 +71,62 @@ public class DescriptionParser {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    // note: the jsonld-java implementation uses java.util.LinkedHashMap to store JSON objects
-    // see http://wiki.fasterxml.com/JacksonInFiveMinutes
-    private static JSONObject compactJson(Object jsonld) throws IOException {
+    private static Object compactJson(Object jsonld) throws IOException {
         if (context == null) {
             throw new IOException("Default TD context could not be retrieved");
         }
 
         try {
             jsonld = JsonLdProcessor.compact(jsonld, context, new JsonLdOptions());
-            return new JSONObject((Map<String, Object>) jsonld);
+            return jsonld;
         } catch (JsonLdError e) {
             throw new IOException("The input object is not valid JSON-LD", e);
         }
     }
 
+    @SuppressWarnings("unchecked")
+    // note: the jsonld-java implementation uses java.util.LinkedHashMap to store JSON objects
+    // see http://wiki.fasterxml.com/JacksonInFiveMinutes
     private static ThingDescription mapJson(Object jsonld) throws IOException {
         // ensures keys are reduced to those in the default context
-        JSONObject json = compactJson(jsonld);
+        JSONObject json = new JSONObject((Map<String, Object>) compactJson(jsonld));
 
         ObjectMapper mapper = new ObjectMapper();
         ThingDescription td = mapper.readValue(json.toString(), ThingDescription.class);
         return td;
+    }
+
+    @SuppressWarnings("unchecked")
+    // same as for mapJson()
+    private static Object removeBlankNodesRec(Object jsonld) {      
+      if (jsonld instanceof Map) { // JSON object
+        List<String> toRemove = new ArrayList<>();
+        
+        for (Entry<String, Object> e : ((Map<String, Object>) jsonld).entrySet()) {
+          if (e.getKey().equals("@id")) {
+            if (e.getValue().toString().startsWith("_")) { // blank node
+              toRemove.add(e.getKey());
+            }
+          } else {
+            removeBlankNodesRec(e.getValue());
+          }
+        }
+        
+        for (String k : toRemove) {
+          ((Map<String, Object>) jsonld).remove(k);
+        }
+      } else if (jsonld instanceof List) { // JSON array
+        for (Object o : ((List<Object>) jsonld)) {
+          removeBlankNodesRec(o);
+        }
+      }
+      return jsonld;
+    }
+    
+    @SuppressWarnings("unchecked")
+    // same as for mapJson()
+    private static JSONObject removeBlankNodes(Object jsonld) {
+      return new JSONObject((Map<String, Object>) removeBlankNodesRec(jsonld));
     }
 
     public static ThingDescription fromURL(URL url) throws JsonParseException,
@@ -156,7 +194,7 @@ public class DescriptionParser {
         Object frame = om.readValue("{\"http://www.w3c.org/wot/td#hasMetadata\":{}}", HashMap.class);
         
         jsonld = JsonLdProcessor.frame(jsonld, frame, new JsonLdOptions());
-        return compactJson(jsonld).toString();
+        return removeBlankNodes(compactJson(jsonld)).toString();
       } catch (JsonLdError e) {
         throw new IOException("Can't reshape triples", e);
       }

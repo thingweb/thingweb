@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("Action")
-@JsonIgnoreProperties(value={"@id"},ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class ActionDescription extends InteractionDescription {
     
     @JsonProperty("outputData")

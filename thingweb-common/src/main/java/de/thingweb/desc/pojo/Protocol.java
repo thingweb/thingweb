@@ -24,12 +24,20 @@
 
 package de.thingweb.desc.pojo;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-@JsonIgnoreProperties(value={"@id"},ignoreUnknown=true)
-public final class Protocol {
+@JsonIgnoreProperties(ignoreUnknown=true)
+public class Protocol {
     
     @JsonProperty
     public String uri;
@@ -39,16 +47,16 @@ public final class Protocol {
     
     @JsonCreator
     public Protocol(@JsonProperty("uri") String uri, @JsonProperty("priority") Integer priority) {
-	this.uri = uri;
-	this.priority = priority;
+      this.uri = uri;
+      this.priority = priority;
     }
     
     public String getUri() {
-	return uri;
+      return uri;
     }
     
     public Integer getPriority() {
-	return priority;
+      return priority;
     }
     
 }
