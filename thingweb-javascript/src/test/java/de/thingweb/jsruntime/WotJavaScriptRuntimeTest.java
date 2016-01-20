@@ -33,6 +33,7 @@ import org.junit.Test;
  */
 public class WotJavaScriptRuntimeTest {
 
+	/*
     @Test
     public void testRunFile() throws Exception {
         String script = TestTools.readResource("testwot.js");
@@ -43,11 +44,12 @@ public class WotJavaScriptRuntimeTest {
 
         jsrt.runScript(script);
     }
+	*/
 
     public static void main(String[] args) throws Exception {
         //just done to avoid junit-sideffects
         WotJavaScriptRuntimeTest test = new WotJavaScriptRuntimeTest();
-        test.testRunFile();
+        //test.testRunFile();
     }
 
 }

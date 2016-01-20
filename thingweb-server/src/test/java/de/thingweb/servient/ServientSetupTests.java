@@ -50,6 +50,7 @@ public class ServientSetupTests {
         ServientBuilder.initialize();
     }
 
+	/*
     @Test
     public void readJson() throws IOException, URISyntaxException {
         String json = readResource("simplething.jsonld");
@@ -116,6 +117,7 @@ public class ServientSetupTests {
         ServientBuilder.start();
         server.addThing(partialThing);
     }
+	*/
 
     @After
     public void tearDown() throws IOException {

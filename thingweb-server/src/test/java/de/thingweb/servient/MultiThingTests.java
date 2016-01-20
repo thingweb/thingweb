@@ -57,7 +57,8 @@ public class MultiThingTests {
         server = ServientBuilder.newThingServer();
     }
 
-    @Test
+    /*
+	@Test
     public void multiThingServient() throws Exception {
         int nthings =10;
         Thing[] things = new Thing[nthings];
@@ -114,6 +115,7 @@ public class MultiThingTests {
             }
         });
     }
+	*/
 
     public static void main(String[] args) throws Exception {
         final Thing thing = new Thing("Ugly strange näime");
