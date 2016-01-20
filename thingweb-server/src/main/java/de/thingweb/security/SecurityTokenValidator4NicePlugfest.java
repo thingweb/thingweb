@@ -76,7 +76,7 @@ public class SecurityTokenValidator4NicePlugfest implements
 	 * 
 	 * @param requirements
 	 *            the TokenRequirements instance
-	 * @throws JoseException
+	 * @throws JoseException error
 	 */
 	public SecurityTokenValidator4NicePlugfest(TokenRequirements requirements)
 			throws JoseException {

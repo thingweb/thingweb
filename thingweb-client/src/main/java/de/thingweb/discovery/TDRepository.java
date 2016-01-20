@@ -48,7 +48,10 @@ public class TDRepository {
 	private String repository_uri;
 	private int repository_port;
 
-	/** Constructer set up the endpoint address of the TD repository */
+	/** Constructer set up the endpoint address of the TD repository
+	 * @param repository_uri Repository Uri
+	 * @param repository_port Repository Port
+	 */
 	public  TDRepository(String  repository_uri, int repository_port) {
 	 
 		this.repository_uri = repository_uri;
@@ -58,6 +61,7 @@ public class TDRepository {
 	/**  This method takes a SPARQL query and send it o the TD repository    
 	 * @param search SPARQL query
 	 * @return JSONObject array of relevant TD files (=empty array means no match)
+	 * @throws Exception error
 	 * */
 	public JSONObject tdTripleSearch(String search) throws Exception  {
 		
@@ -86,6 +90,7 @@ public class TDRepository {
 	/** This method takes a free text search and send it o the TD repository 
 	 * @param search free text search
 	 * @return JSONObject of relevant TD files (=empty array means no match)
+	 * @throws Exception error
 	 * */
 	public JSONObject tdFreeTextSearch(String search) throws Exception  {
 		
@@ -111,6 +116,7 @@ public class TDRepository {
 	
 	/** This method request the TD repository to return the names of all known Things  
 	 * @return JSONObject array of Things names (=empty array means no Thing is present in TD repository)
+	 * @throws Exception error
 	 * */
 	public JSONObject nameOfThings() throws Exception  {
 		

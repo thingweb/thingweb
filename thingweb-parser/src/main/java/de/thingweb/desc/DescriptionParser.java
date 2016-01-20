@@ -183,7 +183,7 @@ public class DescriptionParser {
      * resource as object root.
      * @param data UTF-8 encoded JSON-LD object
      * @return the reshaped JSON-LD object
-     * @throws IOException
+     * @throws IOException error
      */
     public static String reshape(byte[] data) throws IOException {
       ObjectMapper om = new ObjectMapper();

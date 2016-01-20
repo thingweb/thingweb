@@ -43,6 +43,7 @@ public interface SecurityTokenValidator {
 	 * @param requirements
 	 *            the TokenRequirements instance (may be <code>null</code>; in
 	 *            this case defaults are used)
+	 * @throws JoseException error
 	 */
 	void setRequirements(TokenRequirements requirements) throws JoseException;
 
@@ -68,6 +69,8 @@ public interface SecurityTokenValidator {
 	 *            the relative URI of the to-be-accessed resource (may be
 	 *            <code>null</code>)
 	 * @return the value subject claim if the JWT is valid
+	 * @throws UnauthorizedException Unauthorized error
+	 * @throws TokenExpiredException TokenExpired error
 	 */
 	String checkValidity(String jwt, String method, String resource)
 			throws UnauthorizedException, TokenExpiredException;

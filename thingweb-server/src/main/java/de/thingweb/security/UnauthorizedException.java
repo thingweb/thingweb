@@ -45,7 +45,7 @@ public class UnauthorizedException extends Exception {
 	/**
 	 * Constructor
 	 * 
-	 * @param s
+	 * @param s string
 	 */
 	public UnauthorizedException(String s) {
 		super(s);
