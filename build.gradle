@@ -92,8 +92,12 @@ subprojects { Project subproject ->
       mavenLocal()
     }
 
-    subproject.version = getVersionName()
+    subproject.dependencies {
+        compile 'org.slf4j:slf4j-api:1.7.12'
+        testCompile group: 'junit', name: 'junit', version: '4.11'
+    }
 
+    subproject.version = getVersionName()
     subproject.group = "de.thingweb"
 
  subproject.sourceCompatibility = 1.8
