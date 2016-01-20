@@ -46,6 +46,12 @@
      return stdout.toString().trim()
  }
 
+ repositories {
+   mavenCentral()
+   jcenter()
+   mavenLocal()
+ }
+
 version = getVersionName()
 
 apply plugin: 'java-library-distribution'
