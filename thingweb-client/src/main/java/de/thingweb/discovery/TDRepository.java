@@ -41,6 +41,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
 
 /** Class to interact with a TD repository */
 public class TDRepository {
@@ -184,11 +186,17 @@ public class TDRepository {
 		
 		httpCon.disconnect();
 		
-		String key = new String(baos.toByteArray());
+		String key = ""; // new String(baos.toByteArray());
 		
 		if (responseCode != 201) {
 			// error
 			throw new RuntimeException("ResponseCodeError: " + responseCode);
+		} else {
+			Map<String, List<String>> hf = httpCon.getHeaderFields();
+			List<String> los = hf.get("Location");
+			if(los != null && los.size() > 0) {
+				key = los.get(0);
+			}
 		}
 		
 		return key;
