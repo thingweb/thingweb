@@ -30,32 +30,30 @@
 
 package de.thingweb.discovery;
 
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
 /** Class to interact with a TD repository */
 public class TDRepository {
+	
+	public static final String ETH_URI = "vs0.inf.ethz.ch:8080";
 
 	private String repository_uri;
-	private int repository_port;
 
 	/** Constructer set up the endpoint address of the TD repository
-	 * @param repository_uri Repository Uri
-	 * @param repository_port Repository Port
+	 * @param repository_uri Repository Uri (+Port if needed)
 	 */
-	public  TDRepository(String  repository_uri, int repository_port) {
-	 
+	public  TDRepository(String repository_uri) {
 		this.repository_uri = repository_uri;
-		this.repository_port =repository_port;
 	}
 	
 	/**  This method takes a SPARQL query and send it o the TD repository    
@@ -69,7 +67,7 @@ public class TDRepository {
 		//String search_without_space = search.replace(" ", " %20");
 		search = URLEncoder.encode(search, "UTF-8");
 		
-		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
+		URL myURL = new URL("http://" + repository_uri + "/td?query=" + search);
 		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
 		myURLConnection.setRequestMethod("GET");
 		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -96,7 +94,7 @@ public class TDRepository {
 		
 		search = URLEncoder.encode(search, "UTF-8");
 		
-		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
+		URL myURL = new URL("http://" + repository_uri + "/td?query=" + search);
 		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
 		myURLConnection.setRequestMethod("GET");
 		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -119,26 +117,27 @@ public class TDRepository {
 	 * @throws Exception error
 	 * */
 	public JSONObject nameOfThings() throws Exception  {
+		return tdTripleSearch("?s ?p ?o");
 		
-		//String search = "search = URLEncoder.encode(search, "UTF-8");
-		String search = "{ ?td <http://www.w3c.org/wot/td#hasMetadata> ?m . ?m <http://www.w3c.org/wot/td#name> \"query text\" . }";
-
-		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
-		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
-		myURLConnection.setRequestMethod("GET");
-		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		myURLConnection.setDoInput(true);
-		myURLConnection.setDoOutput(true);
-
-		InputStream in = myURLConnection.getInputStream();
-								
-	//	JSONArray jsonLDs = new JSONArray(streamToString(in));
-		
-		JSONObject jsonLDs = new JSONObject(streamToString(in));
-
-		System.out.println(jsonLDs);
-		
-		return jsonLDs;
+//		//String search = "search = URLEncoder.encode(search, "UTF-8");
+//		String search = "{ ?td <http://www.w3c.org/wot/td#hasMetadata> ?m . ?m <http://www.w3c.org/wot/td#name> \"query text\" . }";
+//
+//		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
+//		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
+//		myURLConnection.setRequestMethod("GET");
+//		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//		myURLConnection.setDoInput(true);
+//		myURLConnection.setDoOutput(true);
+//
+//		InputStream in = myURLConnection.getInputStream();
+//								
+//	//	JSONArray jsonLDs = new JSONArray(streamToString(in));
+//		
+//		JSONObject jsonLDs = new JSONObject(streamToString(in));
+//
+//		System.out.println(jsonLDs);
+//		
+//		return jsonLDs;
 //		";
 //		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
 //		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
@@ -155,6 +154,65 @@ public class TDRepository {
 //		
 //		return jsonLDs;
  
+	}
+	
+	/**
+	 * Adds a ThingDescription to Repository
+	 * 
+	 * @param content
+	 * @return key of entry in repository
+	 * @throws Exception in case of error
+	 */
+	public String addTD(byte[] content) throws Exception {
+		URL url = new URL("http://" + repository_uri  + "/td");
+		HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+		httpCon.setDoOutput(true);
+		httpCon.setRequestProperty("content-type", "application/ld+json");
+		httpCon.setRequestMethod("POST");
+		OutputStream out = httpCon.getOutputStream();
+		out.write(content);
+		out.close();
+		
+		InputStream is = httpCon.getInputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		int b;
+		while ((b = is.read()) != -1) {
+			baos.write(b);
+		}
+		
+		int responseCode = httpCon.getResponseCode();
+		
+		httpCon.disconnect();
+		
+		String key = new String(baos.toByteArray());
+		
+		if (responseCode != 201) {
+			// error
+			throw new RuntimeException("ResponseCodeError: " + responseCode);
+		}
+		
+		return key;
+	}
+	
+	
+	/**
+	 * Deletes repository by using key
+	 * 
+	 * @param key in repository (/td/{id})
+	 * @throws Exception in case of error
+	 */
+	public void deleteTD(String key) throws Exception {
+		URL url = new URL("http://" + repository_uri + key);
+		HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+		httpCon.setDoOutput(true);
+		httpCon.setRequestProperty("content-type", "application/ld+json");
+		httpCon.setRequestMethod("DELETE");
+		// httpCon.connect();
+		int responseCode = httpCon.getResponseCode();
+		if (responseCode != 200) {
+			// error
+			throw new RuntimeException("ResponseCodeError: " + responseCode);
+		}
 	}
 	
 	
