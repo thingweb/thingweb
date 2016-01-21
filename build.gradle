@@ -82,6 +82,7 @@ project.afterEvaluate {
 
 subprojects { Project subproject ->
     subproject.apply plugin: 'java'
+    subproject.apply plugin: 'eclipse'
     subproject.apply plugin: 'maven'
     subproject.apply plugin:'maven-publish'
     subproject.apply plugin: 'com.jfrog.bintray'
