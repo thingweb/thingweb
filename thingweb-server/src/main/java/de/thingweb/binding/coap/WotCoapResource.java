@@ -115,12 +115,20 @@ public class WotCoapResource extends CoapResource implements  Observer{
         if(m_restListener.hasProtection()) {
             Optional<Option> tokenOption = exchange.getRequestOptions().asSortedList()
                     .parallelStream()
-                    .filter(option -> option.getNumber() == 6500)
+                    .filter(option -> option.getNumber() == 65000)
                     .findFirst();
 
             if (tokenOption.isPresent()) {
-                String jwt = tokenOption.get().getStringValue();
-                m_restListener.validate(method.toUpperCase(), this.getPath(), jwt);
+                String auth = tokenOption.get().getStringValue();
+                String jwt = null;
+                if (auth != null) {
+                    if (auth.startsWith("Bearer ")) {
+                        jwt = auth.substring("Bearer ".length());
+                    }
+                }
+                m_restListener.validate(method.toUpperCase(), this.getURI(), jwt);
+            } else {
+                throw new UnauthorizedException("No security token found");
             }
         }
     }

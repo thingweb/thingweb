@@ -64,6 +64,7 @@ public class SecurityTokenValidator4NicePlugfest implements
 
 	// The keyword word the method abstraction in an 'aci' claim
 	private final static String ACI_MTH = "mth";
+	private static final String MIN_TOKEN_TYPE = "org:w3:wot:jwt:as:min";
 
 	// The TokenRequirements instance
 	private TokenRequirements requirements;
@@ -108,7 +109,8 @@ public class SecurityTokenValidator4NicePlugfest implements
 		if (requirements.validateExpiration()) {
 			jwtConsumerBuilder.setRequireExpirationTime()
 					.setAllowedClockSkewInSeconds(
-							(int) requirements.getAllowedClockDriftSecs());
+							(int) requirements.getAllowedClockDriftSecs())
+					.setRequireIssuedAt();
 		}
 		if (requirements.checkAudience()) {
 			jwtConsumerBuilder.setExpectedAudience(requirements.getAudience());
@@ -160,7 +162,11 @@ public class SecurityTokenValidator4NicePlugfest implements
 			}
 		}
 		if (method != null && resource != null) {
-			List<Map> aci = (List<Map>) claims.getClaimValue(CLAIM_ACI);
+			// Skip the following check in case of 'minimal' tokens - they do
+// not contain an ACI that could be checked
+			if (!MIN_TOKEN_TYPE.equals(claims.getClaimValue(CLAIM_TYP))) {
+
+				List<Map> aci = (List<Map>) claims.getClaimValue(CLAIM_ACI);
 			if (aci == null || aci.size() == 0) {
 				throw new UnauthorizedException("No ACI claims in token");
 			} else {
@@ -178,6 +184,7 @@ public class SecurityTokenValidator4NicePlugfest implements
 					throw new UnauthorizedException(
 							"Resource/method is not in ACI");
 				}
+			}
 			}
 		}
 		// Return the subject claim value
