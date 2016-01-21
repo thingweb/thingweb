@@ -124,7 +124,16 @@ public class ClientFactory {
 			} else if(id instanceof PropertyDescription) {
 				PropertyDescription pd = (PropertyDescription) id;
 				log.debug("\toutput: " + pd.getOutputType());
-				log.debug("\twritable: " + pd.isWritable());
+				boolean isWritable = true;
+				try {
+					// @Workaround repository
+					isWritable = pd.isWritable();
+				} catch (Exception e) {
+					// PropertyDescription coming from discovery seems to be different and causes issues
+					log.warn("Workaround for isWritable issue kicked in. Writable set by default to " + isWritable);
+					pd = new PropertyDescription(pd.getName(), isWritable, pd.getOutputType());
+				}
+				log.debug("\twritable: " + isWritable);
 				properties.add(pd);
 			} else if(id instanceof EventDescription) {
 				EventDescription ed = (EventDescription) id;
@@ -139,6 +148,13 @@ public class ClientFactory {
 		log.debug("# Metadata " + metadata.getName());
 		log.debug("# Encodings");
 		List<String> encs = metadata.getEncodings();
+		// @Workaround repository
+		if(encs == null) {
+			// Information coming from discovery seems to be different and causes issues
+			log.warn("Workaround for TD encodings issue kicked in. Encoding set to " + "JSON");
+			encs = new ArrayList<>();
+			encs.add("JSON");
+		}
 		for(String enc : encs) {
 			log.debug(enc);
 			encodings.add(enc);
@@ -148,6 +164,13 @@ public class ClientFactory {
 		for(String ps : prots.keySet()) {
 			log.debug(ps);
 			Protocol p = prots.get(ps);
+			// @Workaround repository
+			if(p.getPriority() == null) {
+				// Information coming from discovery seems to be different and causes issues
+				log.warn("Workaround for TD property issue kicked in. Priority set to " + 1);
+				p.priority = 1;
+			}
+			
 			protocols.add(p);
 			log.debug("\t" + p.getUri());
 			// clean-up URI (remove appended URI slash if any)
