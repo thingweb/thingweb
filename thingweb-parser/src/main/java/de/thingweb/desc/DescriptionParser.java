@@ -25,22 +25,14 @@
 package de.thingweb.desc;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
-import com.github.jsonldjava.core.JsonLdUtils;
 import com.github.jsonldjava.utils.JsonUtils;
 import com.siemens.ct.exi.exceptions.EXIException;
-
 import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.encoding.json.exi.EXI4JSONParser;
-
 import org.json.JSONObject;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -87,7 +79,7 @@ public class DescriptionParser {
     @SuppressWarnings("unchecked")
     // note: the jsonld-java implementation uses java.util.LinkedHashMap to store JSON objects
     // see http://wiki.fasterxml.com/JacksonInFiveMinutes
-    private static ThingDescription mapJson(Object jsonld) throws IOException {
+    public static ThingDescription mapJson(Object jsonld) throws IOException {
         // ensures keys are reduced to those in the default context
         JSONObject json = new JSONObject((Map<String, Object>) compactJson(jsonld));
 
