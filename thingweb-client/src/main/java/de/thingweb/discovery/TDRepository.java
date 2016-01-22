@@ -44,7 +44,9 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
-/** Class to interact with a TD repository */
+/** Class to interact with a TD repository
+ * <p>https://github.com/thingweb/thingweb-repository</p>
+ *  */
 public class TDRepository {
 	
 	public static final String ETH_URI = "vs0.inf.ethz.ch:8080";
@@ -161,7 +163,7 @@ public class TDRepository {
 	/**
 	 * Adds a ThingDescription to Repository
 	 * 
-	 * @param content
+	 * @param content JSON-LD
 	 * @return key of entry in repository
 	 * @throws Exception in case of error
 	 */
@@ -200,6 +202,41 @@ public class TDRepository {
 		}
 		
 		return key;
+	}
+	
+	/**
+	 * Update existing TD
+	 * 
+	 * @param key in repository (/td/{id})
+	 * @param content JSON-LD
+	 * @throws Exception in case of error
+	 */
+	public void updateTD(String key, byte[] content) throws Exception {
+		URL url = new URL("http://" + repository_uri  + key);
+		HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+		httpCon.setDoOutput(true);
+		httpCon.setRequestProperty("content-type", "application/ld+json");
+		httpCon.setRequestMethod("PUT");
+		OutputStream out = httpCon.getOutputStream();
+		out.write(content);
+		out.close();
+		
+		
+//		InputStream is = httpCon.getInputStream();
+//		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//		int b;
+//		while ((b = is.read()) != -1) {
+//			baos.write(b);
+//		}
+		
+		int responseCode = httpCon.getResponseCode();
+
+		httpCon.disconnect();
+		
+		if (responseCode != 200) {
+			// error
+			throw new RuntimeException("ResponseCodeError: " + responseCode);
+		}
 	}
 	
 	
