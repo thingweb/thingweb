@@ -98,8 +98,8 @@ public final class Thing {
         }
     }
 
-    public void addInteractions(InteractionDescription interactionDescription) {
-        m_td.getInteractions().add(interactionDescription);
+    public void addInteractions(List<InteractionDescription> interactionDescriptions) {
+        m_td.getInteractions().addAll(interactionDescriptions);
     }
 
     public String getName() {
