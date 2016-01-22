@@ -74,7 +74,7 @@ public class TDRepository {
 		URL myURL = new URL("http://" + repository_uri + "/td?query=" + search);
 		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
 		myURLConnection.setRequestMethod("GET");
-		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		myURLConnection.setRequestProperty("Content-Type", "application/ld+json");
 		myURLConnection.setDoInput(true);
 		myURLConnection.setDoOutput(true);
 
@@ -96,12 +96,12 @@ public class TDRepository {
 	 * */
 	public JSONObject tdFreeTextSearch(String search) throws Exception  {
 		
-		search = URLEncoder.encode(search, "UTF-8");
+		search = URLEncoder.encode("?s <http://www.w3c.org/wot/td#name> \"" + search + "\"", "UTF-8");
 		
 		URL myURL = new URL("http://" + repository_uri + "/td?query=" + search);
 		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
 		myURLConnection.setRequestMethod("GET");
-		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		myURLConnection.setRequestProperty("Content-Type", "application/ld+json");
 		myURLConnection.setDoInput(true);
 		myURLConnection.setDoOutput(true);
 
@@ -123,41 +123,7 @@ public class TDRepository {
 	public JSONObject nameOfThings() throws Exception  {
 		return tdTripleSearch("?s ?p ?o");
 		
-//		//String search = "search = URLEncoder.encode(search, "UTF-8");
-//		String search = "{ ?td <http://www.w3c.org/wot/td#hasMetadata> ?m . ?m <http://www.w3c.org/wot/td#name> \"query text\" . }";
-//
-//		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
-//		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
-//		myURLConnection.setRequestMethod("GET");
-//		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//		myURLConnection.setDoInput(true);
-//		myURLConnection.setDoOutput(true);
-//
-//		InputStream in = myURLConnection.getInputStream();
-//								
-//	//	JSONArray jsonLDs = new JSONArray(streamToString(in));
-//		
-//		JSONObject jsonLDs = new JSONObject(streamToString(in));
-//
-//		System.out.println(jsonLDs);
-//		
-//		return jsonLDs;
-//		";
-//		URL myURL = new URL("http://"+repository_uri+":"+repository_port+"/td?query="+search);
-//		HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
-//		myURLConnection.setRequestMethod("GET");
-//		myURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//		myURLConnection.setDoInput(true);
-//		myURLConnection.setDoOutput(true);
-//
-//		InputStream in = myURLConnection.getInputStream();
-// 
-//		JSONObject jsonLDs = new JSONObject(streamToString(in));
-//
-//		System.out.println(jsonLDs);
-//		
-//		return jsonLDs;
- 
+
 	}
 	
 	/**
@@ -212,7 +178,7 @@ public class TDRepository {
 	 * @throws Exception in case of error
 	 */
 	public void updateTD(String key, byte[] content) throws Exception {
-		URL url = new URL("http://" + repository_uri  + key);
+		URL url = new URL("http://" + repository_uri + "/td/"  + key); // fixed URI address
 		HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 		httpCon.setDoOutput(true);
 		httpCon.setRequestProperty("content-type", "application/ld+json");
