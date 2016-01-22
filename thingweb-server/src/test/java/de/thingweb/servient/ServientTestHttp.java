@@ -66,7 +66,6 @@ public class ServientTestHttp {
         ServientBuilder.start();
     }
 
-	/*
     @Test
     public void ensureThingIsReturned() {
         ThingInterface simpleThing = server.getThing("SimpleThing");
@@ -142,7 +141,6 @@ public class ServientTestHttp {
 
         assertThat(ContentHelper.getJsonMapper().valueToTree(td),equalTo(ContentHelper.getJsonMapper().valueToTree(reference)));
     }
-	*/
 
     @After
     public void tearDown() throws IOException {
