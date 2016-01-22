@@ -122,8 +122,6 @@ public class TDRepository {
 	 * */
 	public JSONObject nameOfThings() throws Exception  {
 		return tdTripleSearch("?s ?p ?o");
-		
-
 	}
 	
 	/**
@@ -178,7 +176,7 @@ public class TDRepository {
 	 * @throws Exception in case of error
 	 */
 	public void updateTD(String key, byte[] content) throws Exception {
-		URL url = new URL("http://" + repository_uri + "/td/"  + key); // fixed URI address
+		URL url = new URL("http://" + repository_uri + key);
 		HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 		httpCon.setDoOutput(true);
 		httpCon.setRequestProperty("content-type", "application/ld+json");
