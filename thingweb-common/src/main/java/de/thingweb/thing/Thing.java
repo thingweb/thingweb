@@ -98,6 +98,10 @@ public final class Thing {
         }
     }
 
+    public void addInteractions(InteractionDescription interactionDescription) {
+        m_td.getInteractions().add(interactionDescription);
+    }
+
     public String getName() {
         return m_name;
     }
