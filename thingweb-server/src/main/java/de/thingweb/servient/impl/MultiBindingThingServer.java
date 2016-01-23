@@ -185,7 +185,7 @@ public class MultiBindingThingServer implements ThingServer {
 
         final List<HyperMediaLink> interactionLinks = new LinkedList<>();
         final Map<String, RESTListener> interactionListeners = new HashMap<>();
-        final String thingurl = Defines.BASE_THING_URL + thingModel.getName();
+        final String thingurl = Defines.BASE_THING_URL + thingModel.getName().toLowerCase();
 
         // collect properties
         for (Property property : properties) {
