@@ -83,6 +83,8 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 					if (auth.startsWith("Bearer ")) {
 						jwt = auth.substring("Bearer ".length());
 					}
+				} else {
+					return new Response(Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "Empty or not present authorization header");
 				}
 				listener.validate(session.getMethod().name(), uri, jwt);
 			} catch (TokenExpiredException e) {

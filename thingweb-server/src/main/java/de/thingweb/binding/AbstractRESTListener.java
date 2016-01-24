@@ -35,7 +35,7 @@ import de.thingweb.thing.Content;
 import java.util.Observable;
 
 public class AbstractRESTListener extends Observable implements RESTListener {
-	protected boolean protection = true;
+	protected boolean protection = false;
 
 	private SecurityTokenValidator validator;
 	public static TokenRequirements requirements;
