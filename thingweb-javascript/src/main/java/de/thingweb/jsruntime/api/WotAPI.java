@@ -84,4 +84,8 @@ public class WotAPI {
             throw new RuntimeException(e);
         }
     }
+
+    public ExposedThing getLocalThing(String name) {
+        return ExposedThing.from(getThingServer().getThing(name));
+    }
 }

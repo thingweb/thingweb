@@ -17,7 +17,7 @@ public class ExposedThing {
 
     private final ThingInterface thing;
 
-    private ExposedThing(ThingInterface thing) {
+    protected ExposedThing(ThingInterface thing) {
         this.thing = thing;
     }
 
