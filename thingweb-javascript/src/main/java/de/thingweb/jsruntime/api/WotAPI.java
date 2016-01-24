@@ -33,8 +33,8 @@ public class WotAPI {
         return cf;
     }
 
-    private static ThingServer thingServer;
-    private static ThingServer getThingServer() {
+    private ThingServer thingServer;
+    private ThingServer getThingServer() {
         if(thingServer == null) {
             try {
                 thingServer = ServientBuilder.newThingServer();
@@ -44,6 +44,14 @@ public class WotAPI {
             }
         }
         return thingServer;
+    }
+
+    public WotAPI() {
+
+    }
+
+    public WotAPI(ThingServer thingServer) {
+        this.thingServer = thingServer;
     }
 
     public ExposedThing exposeFromUri(String uri) {
