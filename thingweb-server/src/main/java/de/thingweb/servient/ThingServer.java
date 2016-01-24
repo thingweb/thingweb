@@ -45,7 +45,7 @@ public interface ThingServer {
 
     ThingInterface getThing(String thingName);
 
-    Set<ThingInterface> getThings(String thingName);
+    Set<ThingInterface> getThings();
 
     void setTokenRequirements(TokenRequirements tokenRequirements);
 }

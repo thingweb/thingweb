@@ -150,7 +150,7 @@ public class MultiBindingThingServer implements ThingServer {
     }
 
     @Override
-    public Set<ThingInterface> getThings(String thingName) {
+    public Set<ThingInterface> getThings() {
         Set<ThingInterface> thingInterfaces = things.values().stream().map(thing -> (ThingInterface) thing).collect(Collectors.toSet());
         return thingInterfaces;
     }
