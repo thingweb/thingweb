@@ -31,6 +31,9 @@ import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.security.TokenRequirements;
 import de.thingweb.thing.Thing;
 
+import java.util.Collection;
+import java.util.Set;
+
 /**
  * The ThingServer is thread safe.
  */
@@ -41,6 +44,8 @@ public interface ThingServer {
     ThingInterface addThing(ThingDescription thingDescription);
 
     ThingInterface getThing(String thingName);
+
+    Set<ThingInterface> getThings(String thingName);
 
     void setTokenRequirements(TokenRequirements tokenRequirements);
 }

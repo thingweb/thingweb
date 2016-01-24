@@ -150,6 +150,12 @@ public class MultiBindingThingServer implements ThingServer {
     }
 
     @Override
+    public Set<ThingInterface> getThings(String thingName) {
+        Set<ThingInterface> thingInterfaces = things.values().stream().map(thing -> (ThingInterface) thing).collect(Collectors.toSet());
+        return thingInterfaces;
+    }
+
+    @Override
     public void setTokenRequirements(TokenRequirements tokenRequirements) {
         this.tokenRequirements = tokenRequirements;
         this.validator = null;
