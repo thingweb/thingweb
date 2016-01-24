@@ -31,7 +31,6 @@ import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.security.TokenRequirements;
 import de.thingweb.thing.Thing;
 
-import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -45,7 +44,7 @@ public interface ThingServer {
 
     ThingInterface getThing(String thingName);
 
-    Set<ThingInterface> getThings();
+    Set<Thing> getThings();
 
     void setTokenRequirements(TokenRequirements tokenRequirements);
 }
