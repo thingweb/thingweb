@@ -71,7 +71,7 @@ public class ActionListener extends AbstractRESTListener {
     public Content onPost(Content data) {
         Object param = null;
         if(data.getMediaType().equals(MediaType.APPLICATION_JSON)) {
-            ContentHelper.getValueFromJson(data);
+            param = ContentHelper.getValueFromJson(data);
         } else if(data.getMediaType().equals(MediaType.TEXT_PLAIN)) {
             param = new String(data.getContent());
         }
