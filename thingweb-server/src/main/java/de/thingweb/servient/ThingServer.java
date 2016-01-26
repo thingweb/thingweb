@@ -40,6 +40,8 @@ public interface ThingServer {
 
     ThingInterface addThing(Thing thing);
 
+    void rebind(String name);
+
     ThingInterface addThing(ThingDescription thingDescription);
 
     ThingInterface getThing(String thingName);
