@@ -40,7 +40,7 @@ public interface ThingServer {
 
     ThingInterface addThing(Thing thing);
 
-    void rebind(String name);
+    void rebindSec(String name, boolean enabled);
 
     ThingInterface addThing(ThingDescription thingDescription);
 
