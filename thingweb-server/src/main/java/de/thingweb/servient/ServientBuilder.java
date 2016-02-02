@@ -34,15 +34,22 @@ import de.thingweb.thing.Thing;
 
 import java.io.IOException;
 
-
+//needs to be refactored
 public final class ServientBuilder {
     private static final CoapBinding m_coapBinding = new CoapBinding();
     private static final HttpBinding m_httpBinding = new HttpBinding();
-
     private static boolean initialized = false;
 
     private ServientBuilder() {
         /* pure static class */
+    }
+
+    public static HttpBinding getHttpBinding() {
+        return m_httpBinding;
+    }
+
+    public static CoapBinding getCoapBinding() {
+        return m_coapBinding;
     }
 
     /**
@@ -51,21 +58,24 @@ public final class ServientBuilder {
      * @param thing the thing model, must not be null
      * @return the server, never null
      */
-    public static ThingServer newThingServer(Thing thing) {
+    public static ThingServer newThingServer(Thing thing) throws Exception {
+        if(!initialized) initialize();
         return new MultiBindingThingServer(thing,
                 m_coapBinding.getResourceBuilder(),
                 m_httpBinding.getResourceBuilder()
         );
     }
 
-    public static ThingServer newThingServer(TokenRequirements tokenRequirements, Thing thing) {
+    public static ThingServer newThingServer(TokenRequirements tokenRequirements, Thing thing) throws Exception {
+        if(!initialized) initialize();
         return new MultiBindingThingServer(tokenRequirements, thing,
                 m_coapBinding.getResourceBuilder(),
                 m_httpBinding.getResourceBuilder()
         );
     }
 
-    public static ThingServer newThingServer(TokenRequirements tokenRequirements) {
+    public static ThingServer newThingServer(TokenRequirements tokenRequirements) throws Exception {
+        if(!initialized) initialize();
         return new MultiBindingThingServer( tokenRequirements,
                 m_coapBinding.getResourceBuilder(),
                 m_httpBinding.getResourceBuilder()

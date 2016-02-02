@@ -34,7 +34,7 @@ public class HttpBinding implements Binding {
 
 	@Override
 	public void initialize() throws IOException {
-			m_server = new NanoHttpServer();
+			m_server = new NanoHttpServer(port);
 	}
 	
 	@Override
@@ -52,6 +52,13 @@ public class HttpBinding implements Binding {
 		m_server.stop();
 	}
 
-
 	private NanoHttpServer m_server;
+
+	public HttpBinding setPort(int port) {
+		this.port = port;
+		return this;
+	}
+
+	private int port = 8080;
+
 }

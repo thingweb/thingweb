@@ -48,16 +48,22 @@ import java.util.stream.Collectors;
 
 public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
-	public static final int PORT = 8080;
+	public static final int DEFAULT_PORT = 8080;
 	private final Map<String,RESTListener> resmap = new LinkedHashMap<>();
 	private Logger log = LoggerFactory.getLogger(NanoHttpServer.class);
 	private final String baseuri;
 
 	public NanoHttpServer() throws IOException {
-        super(PORT);
+        super(DEFAULT_PORT);
 		String hostname = InetAddress.getLocalHost().getHostName();
-		baseuri = String.format("http://%s:%s",hostname,PORT);
+		baseuri = String.format("http://%s:%s",hostname, DEFAULT_PORT);
     }
+
+	public NanoHttpServer(int port) throws IOException {
+		super(port);
+		String hostname = InetAddress.getLocalHost().getHostName();
+		baseuri = String.format("http://%s:%s",hostname, port);
+	}
 
     @Override
     public Response serve(IHTTPSession session) {
