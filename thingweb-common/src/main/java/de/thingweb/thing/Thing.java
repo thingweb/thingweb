@@ -209,6 +209,10 @@ public final class Thing {
         notifyListeners();
     }
 
+    public void addProperties(Property... properties) {
+        Arrays.asList(properties).forEach(this::addProperty);
+    }
+
     public void addAction(Action action) {
         if (null == action) {
             throw new IllegalArgumentException("action must not be null");
@@ -229,6 +233,11 @@ public final class Thing {
         m_td.getInteractions().add(adesc);
 
         notifyListeners();
+    }
+
+
+    public void addActions(Action... actions) {
+        Arrays.asList(actions).forEach(this::addAction);
     }
 
     private void notifyListeners() {

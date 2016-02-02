@@ -113,7 +113,7 @@ public class Action {
          * @return the constructed Action
          */
         public Action build() {
-            if(params == null)
+            if(params.size() == 0)
                     return new Action(name,inputType,outputType);
                else
                        return new Action(name,params);
