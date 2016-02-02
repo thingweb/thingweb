@@ -97,6 +97,16 @@ public class CoapBinding implements Binding {
                 }
 
                 current.add(newRes);
+
+                // weird bug(?) in californium
+                if(lastPart.contains(" ")) {
+                    WotCoapResource escaped = new WotCoapResource(lastPart.replace(" ","%20"), restListener);
+                    if(existing != null) {
+                        Collection<Resource> children = existing.getChildren();
+                        children.forEach(escaped::add);
+                    }
+                    current.add(escaped);
+                }
             }
 
             @Override

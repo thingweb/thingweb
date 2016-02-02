@@ -41,10 +41,9 @@ import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.*;
 import de.thingweb.util.encoding.ContentHelper;
+import de.thingweb.util.encoding.UriEncodingHelper;
 import org.jose4j.lang.JoseException;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -87,21 +86,6 @@ public class MultiBindingThingServer implements ThingServer {
         this.tokenRequirements = tokenRequirements;
         init(bindings);
         addThing(thingModel);
-    }
-
-    //Better move these urlize-methods to a helper class
-    private static String urlizeTokens(String url) {
-        return Arrays.stream(url.split("/"))
-                .map(MultiBindingThingServer::urlize)
-                .collect(Collectors.joining("/"));
-    }
-
-    private static String urlize(String name) {
-        try {
-            return URLEncoder.encode(name,"UTF-8").toLowerCase();
-        } catch (UnsupportedEncodingException e) {
-            return URLEncoder.encode(name).toLowerCase();
-        }
     }
 
     protected void init(ResourceBuilder[] bindings) {
@@ -173,7 +157,7 @@ public class MultiBindingThingServer implements ThingServer {
     private void createBindings(ServedThing thingModel, boolean isProtected) {
         final List<HyperMediaLink> thinglinks = things.keySet().stream()
                 .sorted()
-                .map(name -> new HyperMediaLink("thing", Defines.BASE_THING_URL + urlize(name)))
+                .map(name -> new HyperMediaLink("thing", Defines.BASE_THING_URL + UriEncodingHelper.urlize(name)))
                 .collect(Collectors.toList());
 
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);
@@ -185,7 +169,7 @@ public class MultiBindingThingServer implements ThingServer {
             // update/create HATEOAS links to things
             binding.newResource(Defines.BASE_THING_URL, thingIndex);
             createBinding(binding, thingModel,isProtected);
-            final Protocol protocol = new Protocol(binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()),prio++);
+            final Protocol protocol = new Protocol(binding.getBase() + Defines.BASE_THING_URL + UriEncodingHelper.urlize(thingModel.getName()),prio++);
             protocols.put(binding.getIdentifier(),protocol);
         }
 
@@ -217,7 +201,7 @@ public class MultiBindingThingServer implements ThingServer {
 //            ));
 
             interactionListeners.put(url + "/value", propertyListener);
-            interactionLinks.add(new HyperMediaLink("property", urlizeTokens(url)));
+            interactionLinks.add(new HyperMediaLink("property", UriEncodingHelper.urlizeTokens(url)));
         }
 
         // collect actions
@@ -227,12 +211,12 @@ public class MultiBindingThingServer implements ThingServer {
             final ActionListener actionListener = new ActionListener(servedThing, action);
             if(isProtected) actionListener.protectWith(getValidator());
             interactionListeners.put(url, actionListener);
-            interactionLinks.add(new HyperMediaLink("action", urlizeTokens(url)));
+            interactionLinks.add(new HyperMediaLink("action", UriEncodingHelper.urlizeTokens(url)));
         }
 
         //add listener for thing description
         String tdUrl = thingurl + "/.td";
-        interactionLinks.add(new HyperMediaLink("description",urlizeTokens(tdUrl)));
+        interactionLinks.add(new HyperMediaLink("description", UriEncodingHelper.urlizeTokens(tdUrl)));
         interactionListeners.put(tdUrl,
                 new AbstractRESTListener() {
                     @Override
