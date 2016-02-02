@@ -29,6 +29,7 @@ package de.thingweb.binding.coap;
 import de.thingweb.binding.Binding;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
+import de.thingweb.util.encoding.UriEncodingHelper;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.server.resources.Resource;
@@ -98,9 +99,10 @@ public class CoapBinding implements Binding {
 
                 current.add(newRes);
 
-                // weird bug(?) in californium
+                // workaround for weird bug(?) in copper/californium: cf does not urldecode, cu does not properly encode
                 if(lastPart.contains(" ")) {
-                    WotCoapResource escaped = new WotCoapResource(lastPart.replace(" ","%20"), restListener);
+                    final String insanitized = UriEncodingHelper.urlize(lastPart).replace("+", "%20");
+                    WotCoapResource escaped = new WotCoapResource(insanitized, restListener);
                     if(existing != null) {
                         Collection<Resource> children = existing.getChildren();
                         children.forEach(escaped::add);
