@@ -30,3 +30,6 @@ dependencies {
     compile project(":thingweb-common")
     runtime files("../lib/jsonld-context.jar")
 }
+
+/* allow for Android apps */
+sourceCompatibility = 1.7

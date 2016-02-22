@@ -29,3 +29,6 @@ dependencies {
 
     compile 'org.eclipse.californium:californium-core:1.0.0-M3'
 }
+
+/* allow for Android apps */
+sourceCompatibility = 1.7

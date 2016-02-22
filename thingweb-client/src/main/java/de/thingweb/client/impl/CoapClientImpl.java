@@ -71,9 +71,9 @@ public class CoapClientImpl extends AbstractClientImpl {
 		 put(propertyName, propertyValue, callback, securityAsToken, useValueInUrlFirst);
 	}
 	
-	protected void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken, final boolean useValue) {
+	protected void put(final String propertyName, final Content propertyValue, final Callback callback, final String securityAsToken, final boolean useValue) {
 		String uriPart = URI_PART_PROPERTIES;
-		String curi = uri + uriPart + propertyName + (useValue ? VALUE_STRING : "");
+		final String curi = uri + uriPart + propertyName + (useValue ? VALUE_STRING : "");
 		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP put " + coap.getURI() + " (Security=" + securityAsToken + ")");
@@ -124,8 +124,8 @@ public class CoapClientImpl extends AbstractClientImpl {
 		get(propertyName, callback, securityAsToken, useValueInUrlFirst);
 	}
 	
-	protected void get(String propertyName, Callback callback, String securityAsToken, final boolean useValue) {
-		String curi = uri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
+	protected void get(final String propertyName, final Callback callback, final String securityAsToken, final boolean useValue) {
+		final String curi = uri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
 		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP get " + coap.getURI() + " (Security=" + securityAsToken + ")");
@@ -174,8 +174,8 @@ public class CoapClientImpl extends AbstractClientImpl {
 		observe(propertyName, callback, securityAsToken, useValueInUrlFirst);
 	}
 	
-	protected void observe(String propertyName, Callback callback, String securityAsToken, final boolean useValue) {
-		String curi = uri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
+	protected void observe(final String propertyName, final Callback callback, final String securityAsToken, final boolean useValue) {
+		final String curi = uri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
 		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP observe " + coap.getURI() + " (Security=" + securityAsToken + ")");
@@ -257,7 +257,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 		action(actionName, actionValue, callback, null);
 	}
 	
-	public void action(String actionName, Content actionValue, Callback callback, String securityAsToken) {
+	public void action(final String actionName, Content actionValue, final Callback callback, String securityAsToken) {
 		final String uriPart = URI_PART_ACTIONS;
 		CoapClient coap = new CoapClient(uri + uriPart + actionName);
 		

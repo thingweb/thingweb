@@ -210,7 +210,10 @@ public final class Thing {
     }
 
     public void addProperties(Property... properties) {
-        Arrays.asList(properties).forEach(this::addProperty);
+        // Arrays.asList(properties).forEach(this::addProperty); // java source 1.8
+        for(Property p: properties) {
+        	this.addProperty(p);
+        }
     }
 
     public void addAction(Action action) {
@@ -237,7 +240,10 @@ public final class Thing {
 
 
     public void addActions(Action... actions) {
-        Arrays.asList(actions).forEach(this::addAction);
+        // Arrays.asList(actions).forEach(this::addAction);  // java source 1.8
+        for(Action a: actions) {
+        	this.addAction(a);
+        }
     }
 
     private void notifyListeners() {
