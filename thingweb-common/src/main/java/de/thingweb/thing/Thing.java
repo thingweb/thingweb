@@ -203,7 +203,9 @@ public final class Thing {
         PropertyDescription pdesc = new PropertyDescription(
                 property.getName()
                 , property.isWriteable()
-                , property.getXsdType());
+                , property.getXsdType()
+                , property.getHrefs()
+                , property.getPropertyType());
         m_td.getInteractions().add(pdesc);
 
         notifyListeners();

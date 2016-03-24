@@ -111,7 +111,7 @@ public class ServientTestHttp {
     @Test
     public void attachListenerAndsetDirectly() throws Exception {
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        thing.onInvoke("testaction", (nv) -> {
+        thing.onActionInvoke("testaction", (nv) -> {
             Integer newVal = ContentHelper.ensureClass(nv,Integer.class);
             future.complete(newVal);
             return null;

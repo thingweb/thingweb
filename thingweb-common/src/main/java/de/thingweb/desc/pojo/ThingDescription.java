@@ -25,9 +25,13 @@
 package de.thingweb.desc.pojo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,13 +43,52 @@ public class ThingDescription {
     @JsonProperty
     private Metadata metadata;
 
-    @JsonProperty
+    //No longer a Json property
+    @JsonIgnore
     private List<InteractionDescription> interactions;
     
-    @JsonCreator
-    public ThingDescription(@JsonProperty("metadata") Metadata metadata, @JsonProperty("interactions") List<InteractionDescription> interactions) {
+    @JsonProperty
+    @JsonInclude(Include.NON_NULL)
+    private List<PropertyDescription> properties;
+    
+    @JsonProperty
+    @JsonInclude(Include.NON_NULL)
+    private List<ActionDescription> actions;
+    
+    @JsonProperty
+    @JsonInclude(Include.NON_NULL)
+    private List<EventDescription> events;    
+    
+    
+    public ThingDescription(@JsonProperty("metadata") Metadata metadata, List<InteractionDescription> interactions) {
       this.metadata = metadata;
-      this.interactions = interactions;
+      this.interactions = interactions;  
+      
+      for(InteractionDescription id : interactions){
+    	  if(id instanceof PropertyDescription){
+    		  if(properties == null)
+    			  properties = new ArrayList<>();
+    		  properties.add((PropertyDescription)id);
+    	  }
+    	  else if(id instanceof ActionDescription){
+    		  if(actions == null)
+    			  actions = new ArrayList<>();
+    		  actions.add((ActionDescription)id);
+    	  }
+    	  else if(id instanceof EventDescription){
+    		  if(events == null)
+    			  events = new ArrayList<>();
+    		  events.add((EventDescription)id);
+    	  }
+      }
+    }
+    
+    @JsonCreator
+    public ThingDescription(@JsonProperty("metadata") Metadata metadata, @JsonProperty("properties") List<PropertyDescription> properties, @JsonProperty("actions") List<ActionDescription> actions, @JsonProperty("properties") List<EventDescription> events){
+        this.metadata = metadata;
+        this.properties = properties;
+        this.actions = actions;
+        this.events = events;
     }
     
     public Metadata getMetadata() {
@@ -56,4 +99,15 @@ public class ThingDescription {
       return interactions;
     }
     
+    public List<PropertyDescription> getProperties() {
+        return properties;
+      }
+    
+    public List<ActionDescription> getActions() {
+        return actions;
+      }    
+  
+    public List<EventDescription> getEvents() {
+        return events;
+      }      
 }

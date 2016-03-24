@@ -89,14 +89,14 @@ public class ServientLauncher {
         serverInterface.setProperty("numberOfThings", server.getThings().size());
         serverInterface.setProperty("securityEnabled", false);
 
-        serverInterface.onUpdate("securityEnabled", (nV) -> {
+        serverInterface.onPropertyUpdate("securityEnabled", (nV) -> {
             final Boolean protectionEnabled = ContentHelper.ensureClass(nV, Boolean.class);
             server.getThings().stream()
                     .filter((thing1 -> !thing1.equals(srvThing)))
                     .forEach(thing -> thing.setProtection(protectionEnabled));
         });
 
-        serverInterface.onInvoke("createThing", (data) -> {
+        serverInterface.onActionInvoke("createThing", (data) -> {
             final LinkedHashMap jsonld = ContentHelper.ensureClass(data, LinkedHashMap.class);
 
             try {
@@ -111,7 +111,7 @@ public class ServientLauncher {
             }
         });
 
-        serverInterface.onInvoke("addScript", (data) -> {
+        serverInterface.onActionInvoke("addScript", (data) -> {
             final String script = ContentHelper.ensureClass(data, String.class);
 
             try {

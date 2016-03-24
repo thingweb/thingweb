@@ -49,6 +49,7 @@ public class ServedThing implements ThingInterface {
     private final Object m_stateSync = new Object();
     private final Thing m_thingModel;
     private final StateContainer m_state;
+    private Consumer<Object> m_propertyGetCallback;
 
     public ServedThing(Thing thing) {
         this.m_thingModel = thing;
@@ -101,6 +102,9 @@ public class ServedThing implements ThingInterface {
                     "property does not belong to served thing");
         }
 
+        if(m_propertyGetCallback != null)
+        	m_propertyGetCallback.accept(property);
+        
         synchronized (m_stateSync) {
             return m_state.getProperty(property);
         }
@@ -141,7 +145,7 @@ public class ServedThing implements ThingInterface {
     }
 
     @Override
-    public void onUpdate(String propertyName, Consumer<Object> callback) {
+    public void onPropertyUpdate(String propertyName, Consumer<Object> callback) {
         Property property = m_thingModel.getProperty(propertyName);
         if (property == null) {
             log.warn("property {} not found in thing {}", propertyName, m_thingModel.getName());
@@ -150,10 +154,15 @@ public class ServedThing implements ThingInterface {
             m_state.addUpdateHandler(property, callback);
         }
     }
-
+    
+    @Override
+    public void onPropertyRead(Consumer<Object> callback) {
+    	m_propertyGetCallback = callback;
+    }
+    
     //TODO overloads for void
     @Override
-    public void onInvoke(String actionName, Function<Object, Object> callback) {
+    public void onActionInvoke(String actionName, Function<Object, Object> callback) {
         Action action = m_thingModel.getAction(actionName);
         if (action == null) {
             log.warn("onInvoke for actionName '" + actionName + "' not found in thing model");

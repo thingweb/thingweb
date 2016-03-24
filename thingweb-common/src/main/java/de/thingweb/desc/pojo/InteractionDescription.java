@@ -24,6 +24,8 @@
 
 package de.thingweb.desc.pojo;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -31,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-@JsonTypeInfo(use=Id.NAME, include=As.PROPERTY, property="@type")
+//@JsonTypeInfo(use=Id.NAME, include=As.PROPERTY, property="@type")
 @JsonSubTypes({@JsonSubTypes.Type(PropertyDescription.class), @JsonSubTypes.Type(ActionDescription.class), @JsonSubTypes.Type(EventDescription.class)})
 @JsonIgnoreProperties(ignoreUnknown=true)
 public abstract class InteractionDescription {
@@ -39,8 +41,23 @@ public abstract class InteractionDescription {
     @JsonProperty
     protected String name;
     
+    @JsonProperty("@type")
+    protected String propertyType;
+    
+    @JsonProperty("hrefs")
+    protected List<String> hrefs;    
+    
     public String getName() {
       return name;
     }
+    
+    public String getPropertyType() {
+        return propertyType;
+    }
+
+    public List<String> getHrefs(){
+    	return hrefs;
+    }
+
 
 }

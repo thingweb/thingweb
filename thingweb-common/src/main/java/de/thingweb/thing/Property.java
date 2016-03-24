@@ -27,6 +27,8 @@
 package de.thingweb.thing;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 /**
@@ -39,20 +41,24 @@ public class Property extends Observable {
 	 */
 
 	private final String m_name;
-	private final String xsdType;
+	private final String m_propertyType;
+	private final String m_valueType;
 	private final boolean m_isReadable;
 	private final boolean m_isWriteable;
+	private final List<String> m_hrefs;
 
 	
-	protected Property(String name, String xsdType, boolean isReadable, boolean isWriteable) {
+	protected Property(String name, String xsdType, boolean isReadable, boolean isWriteable, String propertyType, List<String> hrefs) {
 		if (null == name) {
 			throw new IllegalArgumentException("name must not be null");
 		}
-
-		this.xsdType = xsdType;
+		
+		this.m_valueType = xsdType;
 		m_name = name;
 		m_isReadable = isReadable;
 		m_isWriteable = isWriteable;
+		m_propertyType = propertyType;
+		m_hrefs = hrefs;
 	}
 
 	public static Property.Builder getBuilder(String name) {
@@ -77,7 +83,15 @@ public class Property extends Observable {
 	}
 
 	public String getXsdType() {
-		return xsdType;
+		return m_valueType;
+	}
+	
+	public String getPropertyType(){
+		return m_propertyType;
+	}
+	
+	public List<String> getHrefs(){
+		return m_hrefs;
 	}
 
 	public static class Builder {
@@ -85,6 +99,8 @@ public class Property extends Observable {
 		private boolean isReadable = true;
 		private boolean isWriteable = false;
 		private String xsdType = "xsd:string";
+		private String propertyType = null;
+		private List<String> hrefs = new ArrayList<>();
 
 		public Builder(String name) {
 			this.name = name;
@@ -92,6 +108,15 @@ public class Property extends Observable {
 
 		public Builder setXsdType(String xsdType) {
 			this.xsdType = xsdType;
+			return this;
+		}
+		
+		public Builder setPropertyType(String propertyType) {
+			this.propertyType = propertyType;
+			return this;
+		}
+		public Builder setHrefs(List<String> hrefs) {
+			this.hrefs = hrefs;
 			return this;
 		}
 
@@ -111,7 +136,7 @@ public class Property extends Observable {
 		}
 
 		public Property build() {
-			return new Property(name, xsdType, isReadable, isWriteable);
+			return new Property(name, xsdType, isReadable, isWriteable, propertyType, hrefs);
 		}
 	}
 }

@@ -71,7 +71,9 @@ public interface ThingInterface {
 
     Object invokeAction(Action action, Object parameter);
 
-    void onInvoke(String actionName, Function<Object, Object> callback);
+    void onActionInvoke(String actionName, Function<Object, Object> callback);
 
-    void onUpdate(String propertyName, Consumer<Object> callback);
+    void onPropertyUpdate(String propertyName, Consumer<Object> callback);
+
+	void onPropertyRead(Consumer<Object> callback);
 }
