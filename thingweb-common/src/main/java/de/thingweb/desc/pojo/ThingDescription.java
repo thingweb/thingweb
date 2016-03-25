@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sun.tools.javac.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,12 +41,19 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class ThingDescription {
     
-    @JsonProperty
+	@JsonIgnore
     private Metadata metadata;
+	
+    @JsonProperty("@type")
+    @JsonInclude(Include.NON_NULL)
+    protected String thingType;
 
     //No longer a Json property
     @JsonIgnore
     private List<InteractionDescription> interactions;
+    
+    @JsonIgnore
+    private List<Pair<String,String>> additionalContexts;
     
     @JsonProperty
     @JsonInclude(Include.NON_NULL)
@@ -57,11 +65,38 @@ public class ThingDescription {
     
     @JsonProperty
     @JsonInclude(Include.NON_NULL)
-    private List<EventDescription> events;    
+    private List<EventDescription> events;
     
+    @JsonProperty
+    private String name;
     
-    public ThingDescription(@JsonProperty("metadata") Metadata metadata, List<InteractionDescription> interactions) {
+    @JsonProperty
+    @JsonInclude(Include.NON_NULL)
+    private Object security;
+
+    @JsonProperty
+    private List<String> uris;
+
+    @JsonProperty
+    private List<String> encodings;
+    
+
+    
+    @JsonIgnore
+    public static final String WOT_TD_CONTEXT = "http://w3c.github.io/wot/w3c-wot-td-context.jsonld";
+    
+    public ThingDescription(Metadata metadata, List<InteractionDescription> interactions, String type){
+    	this(metadata, interactions);
+    	this.thingType = type;
+    }
+    
+    public ThingDescription(Metadata metadata, List<InteractionDescription> interactions) {
       this.metadata = metadata;
+      this.name = metadata.getName();
+      this.security = metadata.getSecurityDescription();
+      this.uris = metadata.getProtocols();
+      this.encodings = metadata.getEncodings();
+      
       this.interactions = interactions;  
       
       for(InteractionDescription id : interactions){
@@ -84,11 +119,15 @@ public class ThingDescription {
     }
     
     @JsonCreator
-    public ThingDescription(@JsonProperty("metadata") Metadata metadata, @JsonProperty("properties") List<PropertyDescription> properties, @JsonProperty("actions") List<ActionDescription> actions, @JsonProperty("properties") List<EventDescription> events){
-        this.metadata = metadata;
+    public ThingDescription(@JsonProperty("name") String name, @JsonProperty("@type") String type, @JsonProperty("uris") List<String> protocols, @JsonProperty("encodings") List<String> encodings, @JsonProperty("security") Object security, @JsonProperty("properties") List<PropertyDescription> properties, @JsonProperty("actions") List<ActionDescription> actions, @JsonProperty("properties") List<EventDescription> events){
+        this.name = name;
+        this.encodings = encodings;
+        this.uris = protocols;
+        this.security = security;
         this.properties = properties;
         this.actions = actions;
         this.events = events;
+        this.thingType = type;
     }
     
     public Metadata getMetadata() {
@@ -109,5 +148,13 @@ public class ThingDescription {
   
     public List<EventDescription> getEvents() {
         return events;
-      }      
+      }  
+    
+    public List<Pair<String,String>> getAdditionalContexts(){
+    	return additionalContexts;
+    }
+    
+    public void setAdditionalContexts(List<Pair<String,String>> contexts){
+    	additionalContexts = contexts;
+    }
 }

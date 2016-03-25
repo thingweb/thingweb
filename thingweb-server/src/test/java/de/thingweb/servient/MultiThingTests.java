@@ -29,6 +29,8 @@ package de.thingweb.servient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import de.thingweb.desc.pojo.PropertyDescription;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
@@ -63,7 +65,8 @@ public class MultiThingTests {
         Thing[] things = new Thing[nthings];
 
         Action testAction = Action.getBuilder("testAction").build();
-        Property testProp = Property.getBuilder("testProp").setXsdType("xsd:string").setWriteable(true).build();
+        PropertyDescription pd = new PropertyDescription("testProp", true, "xsd:string");
+        Property testProp = new Property(pd);
 
         for(int i = 0; i<nthings; i++) {
             things[i] = new Thing("thing" + i);
@@ -90,7 +93,8 @@ public class MultiThingTests {
     @Test
     public void notUrlConformNames() throws Exception {
         final Thing thing = new Thing("Ugly strange näime");
-        thing.addProperty(Property.getBuilder("not url kompätibel").build());
+        thing.addProperty(new Property(new PropertyDescription("not url kompätibel")));
+
         thing.addAction(Action.getBuilder("wierdly named äktschn").build());
 
         server.addThing(thing);
@@ -117,7 +121,7 @@ public class MultiThingTests {
 
     public static void main(String[] args) throws Exception {
         final Thing thing = new Thing("Ugly strange näime");
-        thing.addProperty(Property.getBuilder("not url kompätibel").build());
+        thing.addProperty(new Property(new PropertyDescription("not url kompätibel")));
         thing.addAction(Action.getBuilder("wierdly named äktschn").build());
 
         ServientBuilder.initialize();

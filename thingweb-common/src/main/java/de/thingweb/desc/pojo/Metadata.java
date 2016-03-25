@@ -29,6 +29,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+
 
 import java.util.List;
 import java.util.Map;
@@ -38,19 +44,24 @@ public class Metadata {
     
   @JsonProperty
   private String name;
+  
+  @JsonProperty
+  @JsonInclude(Include.NON_NULL)
+  private Object security;
 
   @JsonProperty
-  private Map<String, Protocol> protocols;
+  private List<String> uris;
 
   @JsonProperty
   private List<String> encodings;
 
   @JsonCreator
-  public Metadata(@JsonProperty("name") String name, @JsonProperty("protocols") Map<String, Protocol> protocols, @JsonProperty("encodings") List<String> encodings)
+  public Metadata(@JsonProperty("name") String name, @JsonProperty("uris") List<String> protocols, @JsonProperty("encodings") List<String> encodings, @JsonProperty("security") Object security )
   {
     this.name = name;
     this.encodings = encodings;
-    this.protocols = protocols;
+    this.uris = protocols;
+    this.security = security;
   }
 
   public String getName()
@@ -58,9 +69,13 @@ public class Metadata {
     return name;
   }
 
-  public Map<String, Protocol> getProtocols()
+  public List<String> getProtocols()
   {
-    return protocols;
+    return uris;
+  }
+  
+  public Object getSecurityDescription(){
+	  return security;
   }
 
   public List<String> getEncodings()

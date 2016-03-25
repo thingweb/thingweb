@@ -131,7 +131,7 @@ public class ClientFactory {
 				} catch (Exception e) {
 					// PropertyDescription coming from discovery seems to be different and causes issues
 					log.warn("Workaround for isWritable issue kicked in. Writable set by default to " + isWritable);
-					pd = new PropertyDescription(pd.getName(), isWritable, pd.getOutputType(), pd.getHrefs(), pd.getPropertyType());
+					pd = new PropertyDescription(pd.getName(), null, isWritable, pd.getOutputType(), pd.getHrefs(), pd.getInteractionType());
 				}
 				log.debug("\twritable: " + isWritable);
 				properties.add(pd);
@@ -160,10 +160,11 @@ public class ClientFactory {
 			encodings.add(enc);
 		}
 		log.debug("# Encodings");
-		Map<String,Protocol> prots = metadata.getProtocols();
-		for(String ps : prots.keySet()) {
-			log.debug(ps);
-			Protocol p = prots.get(ps);
+		List<String> uris = metadata.getProtocols();
+		int i=1;
+		for(String uri : uris) {
+			log.debug(uri);
+			Protocol p = new Protocol(uri,i++);
 			// @Workaround repository
 			if(p.getPriority() == null) {
 				// Information coming from discovery seems to be different and causes issues
@@ -174,7 +175,6 @@ public class ClientFactory {
 			protocols.add(p);
 			log.debug("\t" + p.getUri());
 			// clean-up URI (remove appended URI slash if any)
-			String uri = p.getUri();
 			if(uri.endsWith("/")) {
 				uri = uri.substring(0, uri.length()-1);
 				p.uri = uri;

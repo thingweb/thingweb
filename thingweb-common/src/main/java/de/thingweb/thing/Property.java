@@ -31,6 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
+import de.thingweb.desc.pojo.InteractionDescription;
+import de.thingweb.desc.pojo.PropertyDescription;
+
 /**
  * This class is immutable.
  */
@@ -39,13 +42,30 @@ public class Property extends Observable {
 	 * Implementation Note:
 	 * Thing relies on this class to be immutable for synchronization purposes!
 	 */
-
+	private final PropertyDescription m_propertyDescription;
+	
+	public Property(PropertyDescription propertyDescription){
+		m_propertyDescription = propertyDescription;
+	}
+	
+	public PropertyDescription getDescription(){
+		return m_propertyDescription;
+	}
+	
+	@Override
+	public synchronized void setChanged() {
+		super.setChanged();
+	}
+	
+	/*
 	private final String m_name;
 	private final String m_propertyType;
 	private final String m_valueType;
 	private final boolean m_isReadable;
 	private final boolean m_isWriteable;
 	private final List<String> m_hrefs;
+	
+	
 
 	
 	protected Property(String name, String xsdType, boolean isReadable, boolean isWriteable, String propertyType, List<String> hrefs) {
@@ -139,4 +159,5 @@ public class Property extends Observable {
 			return new Property(name, xsdType, isReadable, isWriteable, propertyType, hrefs);
 		}
 	}
+	*/
 }

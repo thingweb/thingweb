@@ -66,11 +66,11 @@ public final class Thing {
         m_name = name;
 
         List<InteractionDescription> interactions = new ArrayList<>();
-        Map<String, Protocol> protocols = new LinkedHashMap<>();
+        List<String> protocols = new ArrayList<>();
         //TODO hardcoded JSON for now, retrieve list from ContentHelper
         List<String> encodings = Arrays.asList("JSON");
 
-        Metadata metas = new Metadata(name, protocols,encodings);
+        Metadata metas = new Metadata(name, protocols,encodings, null);
         m_td = new ThingDescription(metas,interactions);
     }
 
@@ -81,11 +81,7 @@ public final class Thing {
         for (InteractionDescription i : desc.getInteractions()) {
             if (i instanceof PropertyDescription) {
                 PropertyDescription pd = (PropertyDescription) i;
-                Property p = Property.getBuilder(i.getName())
-                        .setReadable(true)
-                        .setWriteable(pd.isWritable())
-                        .setXsdType(pd.getOutputType())
-                        .build();
+                Property p = new Property(pd);
                 m_properties.add(p);
             } else if (i instanceof ActionDescription) {
                 ActionDescription ad = (ActionDescription) i;
@@ -133,7 +129,7 @@ public final class Thing {
         }
 
         for (Property property : m_properties) {
-            if (property.getName().equals(propertyName)) {
+            if (property.getDescription().getName().equals(propertyName)) {
                 return property;
             }
         }
@@ -193,19 +189,14 @@ public final class Thing {
             throw new IllegalArgumentException("property must not be null");
         }
 
-        if (getProperty(property.getName()) != null) {
+        if (getProperty(property.getDescription().getName()) != null) {
             throw new IllegalArgumentException("duplicate property: " +
-                    property.getName());
+                    property.getDescription().getName());
         }
 
         m_properties.add(property);
 
-        PropertyDescription pdesc = new PropertyDescription(
-                property.getName()
-                , property.isWriteable()
-                , property.getXsdType()
-                , property.getHrefs()
-                , property.getPropertyType());
+        PropertyDescription pdesc = property.getDescription();
         m_td.getInteractions().add(pdesc);
 
         notifyListeners();

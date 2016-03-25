@@ -26,7 +26,10 @@
 
 package de.thingweb.servient.impl;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sun.tools.javac.util.Pair;
+
 import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
@@ -178,7 +181,7 @@ public class MultiBindingThingServer implements ThingServer {
 
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);
 
-        final Map<String, Protocol> protocols = thingModel.getThingModel().getThingDescription().getMetadata().getProtocols();
+        final List<String> protocols = thingModel.getThingModel().getThingDescription().getMetadata().getProtocols();
 
         int prio=1;
         for (ResourceBuilder binding : m_bindings) {
@@ -186,7 +189,7 @@ public class MultiBindingThingServer implements ThingServer {
             binding.newResource(Defines.BASE_THING_URL, thingIndex);
             createBinding(binding, thingModel,isProtected);
             final Protocol protocol = new Protocol(binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()),prio++);
-            protocols.put(binding.getIdentifier(),protocol);
+            protocols.add(protocol.uri);
         }
 
 
@@ -204,7 +207,7 @@ public class MultiBindingThingServer implements ThingServer {
 
         // collect properties
         for (Property property : properties) {
-            String url = thingurl + "/" + property.getName();
+            String url = thingurl + "/" + property.getDescription().getName();
 
             final PropertyListener propertyListener = new PropertyListener(servedThing, property);
             if(isProtected) propertyListener.protectWith(getValidator());
@@ -242,7 +245,17 @@ public class MultiBindingThingServer implements ThingServer {
 
                         //manually adding the context
                         ObjectNode json = ContentHelper.getJsonMapper().valueToTree(td);
-                        json.put("@context", "http://w3c.github.io/wot/w3c-wot-td-context.jsonld");
+                        ArrayNode contextNode = json.putArray("@context");
+                        contextNode.add(ThingDescription.WOT_TD_CONTEXT);
+                        if(td.getAdditionalContexts() != null){
+	                        for(Pair<String,String> contextEntry : td.getAdditionalContexts()){
+	                        	ObjectNode on = ContentHelper.getJsonMapper().createObjectNode();
+	                        	on.put(contextEntry.fst, contextEntry.snd);
+	                        	contextNode.add(on);
+	                        }
+                        }
+
+                        //json.put("@context", "http://w3c.github.io/wot/w3c-wot-td-context.jsonld");
 
                         return ContentHelper.wrap(json,
                                 MediaType.APPLICATION_JSON);

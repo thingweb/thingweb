@@ -27,6 +27,7 @@
 package de.thingweb.jsruntime;
 
 import de.thingweb.desc.DescriptionParser;
+import de.thingweb.desc.pojo.PropertyDescription;
 import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.servient.ServientBuilder;
 import de.thingweb.servient.ThingInterface;
@@ -75,8 +76,8 @@ public class ServientLauncher {
         Thing srvThing = new Thing("servient");
 
         srvThing.addProperties(
-            Property.getBuilder("numberOfThings").setXsdType("xsd:int").build(),
-            Property.getBuilder("securityEnabled").setWriteable(true).setXsdType("xsd:boolean").build()
+        	new Property(new PropertyDescription("numberOfThings", false, "xsd:int")),
+        	new Property(new PropertyDescription("securityEnabled", true, "xsd:boolean"))
         );
 
         srvThing.addActions(

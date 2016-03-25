@@ -24,6 +24,7 @@
 
 package de.thingweb.desc.pojo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -38,8 +39,6 @@ public class PropertyDescription extends InteractionDescription {
     @JsonProperty
     private Boolean writable;
     
-
-    
     @JsonProperty("valueType")
     private String valueType;
     
@@ -51,14 +50,22 @@ public class PropertyDescription extends InteractionDescription {
     //}
     
     @JsonCreator
-    public PropertyDescription(@JsonProperty("name") String name, @JsonProperty("writable") Boolean writable, @JsonProperty("valueType") String outputType, @JsonProperty("hrefs")List<String> hrefs, @JsonProperty("@type") String propertyType) {
+    public PropertyDescription(@JsonProperty("name") String name, @JsonProperty("@id") String id, @JsonProperty("writable") Boolean writable, @JsonProperty("valueType") String outputType, @JsonProperty("hrefs")List<String> hrefs, @JsonProperty("@type") String propertyType) {
       this.name = name;
       this.writable = writable;
       this.valueType = outputType;
-      this.propertyType = propertyType;
+      this.interactionType = propertyType;
       this.hrefs = hrefs;
+      this.id = id;
     }
     
+    public PropertyDescription(String name, Boolean writeable, String valueType){
+    	this(name, null, writeable, valueType, null, null);
+    }
+    
+    public PropertyDescription(String name){
+    	this(name, null, false, "xsd:string", null, null);
+    }
 
     
     public String getOutputType() {
@@ -68,6 +75,61 @@ public class PropertyDescription extends InteractionDescription {
     public boolean isWritable() {
       return writable;
     }
+
+    public boolean isReadable() {
+        return true; //TODO: is this a part of TD?
+      }
     
+    public static class Builder {
+		private String name;
+		private String id;
+		private boolean isReadable = true;
+		private boolean isWriteable = false;
+		private String valueType = "xsd:string";
+		private String propertyType = null;
+		private List<String> hrefs = new ArrayList<>();
+
+		public Builder(String name) {
+			this.name = name;
+		}
+
+		public Builder setValueType(String valueType) {
+			this.valueType = valueType;
+			return this;
+		}
+		
+		public Builder setPropertyType(String propertyType) {
+			this.propertyType = propertyType;
+			return this;
+		}
+		public Builder setHrefs(List<String> hrefs) {
+			this.hrefs = hrefs;
+			return this;
+		}
+
+		public PropertyDescription.Builder setName(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public PropertyDescription.Builder setReadable(boolean isReadable) {
+			this.isReadable = isReadable;
+			return this;
+		}
+
+		public PropertyDescription.Builder setWriteable(boolean isWriteable) {
+			this.isWriteable = isWriteable;
+			return this;
+		}
+		
+		public PropertyDescription.Builder setId(String id) {
+			this.id = id;
+			return this;
+		}
+		 
+		public PropertyDescription build() {
+			return new PropertyDescription(name, id, isWriteable, valueType, hrefs, propertyType);
+		}
+	}    
 
 }
