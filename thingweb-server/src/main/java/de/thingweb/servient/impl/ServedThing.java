@@ -26,6 +26,8 @@
 
 package de.thingweb.servient.impl;
 
+import de.thingweb.desc.pojo.InteractionDescription;
+import de.thingweb.desc.pojo.PropertyDescription;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
@@ -48,12 +50,12 @@ public class ServedThing implements ThingInterface {
      */
     private final Object m_stateSync = new Object();
     private final Thing m_thingModel;
-    private final StateContainer m_state;
+    private final StateContainer m_stateContainer;
     private Consumer<Object> m_propertyGetCallback;
 
     public ServedThing(Thing thing) {
         this.m_thingModel = thing;
-        this.m_state = new StateContainer(thing);
+        this.m_stateContainer = new StateContainer(thing);
     }
 
     public Thing getThingModel() {
@@ -71,8 +73,8 @@ public class ServedThing implements ThingInterface {
         }
 
         synchronized (m_stateSync) {
-            m_state.setProperty(property, value);
-            m_state.getUpdateHandlers(property)
+            m_stateContainer.setProperty(property, value);
+            m_stateContainer.getUpdateHandlers(property)
                     .parallelStream()
                     .forEach(handler -> handler.accept(value));
 
@@ -106,7 +108,7 @@ public class ServedThing implements ThingInterface {
         	m_propertyGetCallback.accept(property);
         
         synchronized (m_stateSync) {
-            return m_state.getProperty(property);
+            return m_stateContainer.getProperty(property);
         }
 
     }
@@ -136,7 +138,7 @@ public class ServedThing implements ThingInterface {
 
     @Override
     public Object invokeAction(Action action, Object parameter) {
-        Function<?, ?> handler = m_state.getHandler(action);
+        Function<?, ?> handler = m_stateContainer.getHandler(action);
 
         Function<Object, Object> objectHandler = (Function<Object, Object>) handler;
         Object result = objectHandler.apply(parameter);
@@ -151,7 +153,7 @@ public class ServedThing implements ThingInterface {
             log.warn("property {} not found in thing {}", propertyName, m_thingModel.getName());
             throw new IllegalArgumentException(propertyName);
         } else {
-            m_state.addUpdateHandler(property, callback);
+            m_stateContainer.addUpdateHandler(property, callback);
         }
     }
     
@@ -167,11 +169,17 @@ public class ServedThing implements ThingInterface {
         if (action == null) {
             log.warn("onInvoke for actionName '" + actionName + "' not found in thing model");
         } else {
-            m_state.addHandler(action, callback);
+            m_stateContainer.addHandler(action, callback);
         }
     }
 
     public String getName() {
         return m_thingModel.getName();
+    }
+    
+ // TODO This should perhaps be a generic add interaction. But wait and watch how proposals develop.
+    public void addProperty(PropertyDescription description){
+    	m_thingModel.addProperty(description);
+    	m_stateContainer.updateHandlers();
     }
 }

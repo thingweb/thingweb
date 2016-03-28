@@ -28,7 +28,6 @@ package de.thingweb.servient.impl;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.sun.tools.javac.util.Pair;
 
 import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.binding.RESTListener;
@@ -44,6 +43,8 @@ import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.*;
 import de.thingweb.util.encoding.ContentHelper;
+import javafx.util.Pair;
+
 import org.jose4j.lang.JoseException;
 
 import java.io.UnsupportedEncodingException;
@@ -194,7 +195,7 @@ public class MultiBindingThingServer implements ThingServer {
 
 
     }
-
+    
     private void createBinding(ResourceBuilder resources, ServedThing servedThing, boolean isProtected) {
         final Thing thingModel = servedThing.getThingModel();
 
@@ -250,7 +251,7 @@ public class MultiBindingThingServer implements ThingServer {
                         if(td.getAdditionalContexts() != null){
 	                        for(Pair<String,String> contextEntry : td.getAdditionalContexts()){
 	                        	ObjectNode on = ContentHelper.getJsonMapper().createObjectNode();
-	                        	on.put(contextEntry.fst, contextEntry.snd);
+	                        	on.put(contextEntry.getKey(), contextEntry.getValue());
 	                        	contextNode.add(on);
 	                        }
                         }

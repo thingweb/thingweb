@@ -131,7 +131,7 @@ public class ClientFactory {
 				} catch (Exception e) {
 					// PropertyDescription coming from discovery seems to be different and causes issues
 					log.warn("Workaround for isWritable issue kicked in. Writable set by default to " + isWritable);
-					pd = new PropertyDescription(pd.getName(), null, isWritable, pd.getOutputType(), pd.getHrefs(), pd.getInteractionType());
+					pd = new PropertyDescription(pd.getName(), null, isWritable, pd.getOutputType(), pd.getHrefs(), pd.getInteractionType(), pd.getStability());
 				}
 				log.debug("\twritable: " + isWritable);
 				properties.add(pd);

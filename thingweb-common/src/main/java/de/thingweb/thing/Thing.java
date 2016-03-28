@@ -48,6 +48,8 @@ public final class Thing {
 	 * broken by subclasses. 
 	 */
 
+    private final String m_name;
+    private ThingDescription m_td;
 
     /**
      * Creates a new thing model.
@@ -94,6 +96,12 @@ public final class Thing {
         }
     }
 
+    public void addProperty(PropertyDescription pd){
+        Property p = new Property(pd);
+        m_properties.add(p);
+        m_td.getInteractions().add(pd);
+    }
+    
     public void addInteractions(List<InteractionDescription> interactionDescriptions) {
         m_td.getInteractions().addAll(interactionDescriptions);
     }
@@ -244,12 +252,6 @@ public final class Thing {
             listener.onChange(this);
         }
     }
-
-
-    private final String m_name;
-
-
-    private ThingDescription m_td;
 
     public boolean isProtected() {
         return protection;

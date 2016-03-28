@@ -52,7 +52,11 @@ public abstract class InteractionDescription {
     protected String id;
     
     @JsonProperty("hrefs")
-    protected List<String> hrefs;    
+    protected List<String> hrefs;  
+    
+    @JsonProperty
+    @JsonInclude(Include.NON_NULL)
+    private Object security;
     
     public String getName() {
       return name;

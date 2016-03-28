@@ -29,8 +29,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonTypeName("Property")
 @JsonIgnoreProperties(ignoreUnknown=true)
@@ -42,7 +44,9 @@ public class PropertyDescription extends InteractionDescription {
     @JsonProperty("valueType")
     private String valueType;
     
-
+    @JsonProperty
+    @JsonInclude(Include.NON_NULL)
+    private Integer stability;
     
     //@JsonCreator
     //public PropertyDescription(@JsonProperty("name") String name, @JsonProperty("writable") Boolean writable, @JsonProperty("valueType") String outputType) {
@@ -50,21 +54,22 @@ public class PropertyDescription extends InteractionDescription {
     //}
     
     @JsonCreator
-    public PropertyDescription(@JsonProperty("name") String name, @JsonProperty("@id") String id, @JsonProperty("writable") Boolean writable, @JsonProperty("valueType") String outputType, @JsonProperty("hrefs")List<String> hrefs, @JsonProperty("@type") String propertyType) {
+    public PropertyDescription(@JsonProperty("name") String name, @JsonProperty("@id") String id, @JsonProperty("writable") Boolean writable, @JsonProperty("valueType") String outputType, @JsonProperty("hrefs")List<String> hrefs, @JsonProperty("@type") String propertyType, @JsonProperty("@stability") Integer stability) {
       this.name = name;
       this.writable = writable;
       this.valueType = outputType;
       this.interactionType = propertyType;
       this.hrefs = hrefs;
       this.id = id;
+      this.stability = stability;
     }
     
     public PropertyDescription(String name, Boolean writeable, String valueType){
-    	this(name, null, writeable, valueType, null, null);
+    	this(name, null, writeable, valueType, null, null, null);
     }
     
     public PropertyDescription(String name){
-    	this(name, null, false, "xsd:string", null, null);
+    	this(name, null, false, "xsd:string", null, null, null);
     }
 
     
@@ -80,6 +85,14 @@ public class PropertyDescription extends InteractionDescription {
         return true; //TODO: is this a part of TD?
       }
     
+    public Integer getStability(){
+    	return stability;
+    }
+    
+    public PropertyDescription clone(){
+    	return new PropertyDescription(name, id, writable, valueType, hrefs, interactionType, stability);
+    }
+    
     public static class Builder {
 		private String name;
 		private String id;
@@ -88,6 +101,7 @@ public class PropertyDescription extends InteractionDescription {
 		private String valueType = "xsd:string";
 		private String propertyType = null;
 		private List<String> hrefs = new ArrayList<>();
+		private Integer stability = null;
 
 		public Builder(String name) {
 			this.name = name;
@@ -126,9 +140,14 @@ public class PropertyDescription extends InteractionDescription {
 			this.id = id;
 			return this;
 		}
+		
+		public PropertyDescription.Builder setStability(Integer stability) {
+			this.stability = stability;
+			return this;
+		}
 		 
 		public PropertyDescription build() {
-			return new PropertyDescription(name, id, isWriteable, valueType, hrefs, propertyType);
+			return new PropertyDescription(name, id, isWriteable, valueType, hrefs, propertyType, stability);
 		}
 	}    
 

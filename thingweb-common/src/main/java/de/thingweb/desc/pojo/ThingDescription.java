@@ -30,7 +30,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sun.tools.javac.util.Pair;
+
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,7 +120,7 @@ public class ThingDescription {
     }
     
     @JsonCreator
-    public ThingDescription(@JsonProperty("name") String name, @JsonProperty("@type") String type, @JsonProperty("uris") List<String> protocols, @JsonProperty("encodings") List<String> encodings, @JsonProperty("security") Object security, @JsonProperty("properties") List<PropertyDescription> properties, @JsonProperty("actions") List<ActionDescription> actions, @JsonProperty("properties") List<EventDescription> events){
+    public ThingDescription(@JsonProperty("name") String name, @JsonProperty("@type") String type, @JsonProperty("uris") List<String> protocols, @JsonProperty("encodings") List<String> encodings, @JsonProperty("security") Object security, @JsonProperty("properties") List<PropertyDescription> properties, @JsonProperty("actions") List<ActionDescription> actions, @JsonProperty("events") List<EventDescription> events){
         this.name = name;
         this.encodings = encodings;
         this.uris = protocols;

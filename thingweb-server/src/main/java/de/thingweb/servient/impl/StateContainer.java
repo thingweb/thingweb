@@ -43,21 +43,31 @@ import java.util.function.Function;
 public class StateContainer {
 
     protected static final Logger log = LoggerFactory.getLogger(StateContainer.class);
-    private final Map<Property, Object> m_values = new HashMap<>();
-    private final Map<Property, List<Consumer<Object>>> m_updateHandlers = new HashMap<>();
-    private final Map<Action, Function<?, ?>> m_handlers = new HashMap<>();
-
+    private final Map<Property, Object> m_propertyValues = new HashMap<>();
+    private final Map<Property, List<Consumer<Object>>> m_propertyUpdateHandlers = new HashMap<>();
+    private final Map<Action, Function<?, ?>> m_actionInvokeHandlers = new HashMap<>();
+    private Thing m_thing;
+    
     public StateContainer(Thing thingModel) {
-        for (Property property : thingModel.getProperties()) {
-            m_values.put(property, new Content(new byte[0], MediaType.TEXT_PLAIN));
-            m_updateHandlers.put(property, new LinkedList<>());
+    	m_thing = thingModel;
+    	updateHandlers();
+    }
+    
+    protected void updateHandlers(){
+        for (Property property : m_thing.getProperties()) {
+        	if(!m_propertyValues.containsKey(property)){
+        		m_propertyValues.put(property, new Content(new byte[0], MediaType.TEXT_PLAIN));
+        		m_propertyUpdateHandlers.put(property, new LinkedList<>());
+        	}
         }
 
-        for (Action action : thingModel.getActions()) {
-            m_handlers.put(action, Void -> {
-                log.info("unhandled action " + action.getName() + " called");
-                return Void;
-            });
+        for (Action action : m_thing.getActions()) {
+        	if(!m_actionInvokeHandlers.containsKey(action)){
+	            m_actionInvokeHandlers.put(action, Void -> {
+	                log.info("unhandled action " + action.getName() + " called");
+	                return Void;
+	            });
+        	}
         }
     }
 
@@ -68,25 +78,25 @@ public class StateContainer {
         if (null == value) {
             throw new IllegalArgumentException("value must not be null");
         }
-        if (!m_values.containsKey(property)) {
+        if (!m_propertyValues.containsKey(property)) {
             throw new IllegalArgumentException("Unknown property: " + property);
         }
 
         // FIXME: add type / compatibility check between value and type info
         // from property
 
-        m_values.put(property, value);
+        m_propertyValues.put(property, value);
     }
 
     public Object getProperty(Property property) {
         if (null == property) {
             throw new IllegalArgumentException("property must not be null");
         }
-        if (!m_values.containsKey(property)) {
+        if (!m_propertyValues.containsKey(property)) {
             throw new IllegalArgumentException("Unknown property: " + property);
         }
 
-        return m_values.get(property);
+        return m_propertyValues.get(property);
     }
 
     public void addHandler(Action action, Function<?, ?> handler) {
@@ -96,47 +106,47 @@ public class StateContainer {
         if (null == handler) {
             throw new IllegalArgumentException("handler must not be null");
         }
-        if (!m_handlers.containsKey(action)) {
+        if (!m_actionInvokeHandlers.containsKey(action)) {
             throw new IllegalArgumentException("Unknown action: " + action);
         }
 
-        Function<?, ?> oldhandler = m_handlers.get(action);
+        Function<?, ?> oldhandler = m_actionInvokeHandlers.get(action);
         if (oldhandler != null) {
             log.info("replacing existing handler.");
         }
-        m_handlers.put(action, handler);
+        m_actionInvokeHandlers.put(action, handler);
     }
 
     public Function<?, ?> getHandler(Action action) {
         if (null == action) {
             throw new IllegalArgumentException("action must not be null");
         }
-        if (!m_handlers.containsKey(action)) {
+        if (!m_actionInvokeHandlers.containsKey(action)) {
             throw new IllegalArgumentException("Unknown action: " + action);
         }
 
-        return m_handlers.get(action);
+        return m_actionInvokeHandlers.get(action);
     }
 
     public void addUpdateHandler(Property property, Consumer<Object> callback) {
         if (null == property) {
             throw new IllegalArgumentException("property must not be null");
         }
-        if (!m_updateHandlers.containsKey(property)) {
+        if (!m_propertyUpdateHandlers.containsKey(property)) {
             throw new IllegalArgumentException("Unknown property: " + property);
         }
 
-        m_updateHandlers.get(property).add(callback);
+        m_propertyUpdateHandlers.get(property).add(callback);
     }
 
     public List<Consumer<Object>> getUpdateHandlers(Property property) {
         if (null == property) {
             throw new IllegalArgumentException("property must not be null");
         }
-        if (!m_updateHandlers.containsKey(property)) {
+        if (!m_propertyUpdateHandlers.containsKey(property)) {
             throw new IllegalArgumentException("Unknown property: " + property);
         }
 
-        return m_updateHandlers.get(property);
+        return m_propertyUpdateHandlers.get(property);
     }
 }

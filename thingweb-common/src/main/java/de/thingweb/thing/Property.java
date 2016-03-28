@@ -45,7 +45,7 @@ public class Property extends Observable {
 	private final PropertyDescription m_propertyDescription;
 	
 	public Property(PropertyDescription propertyDescription){
-		m_propertyDescription = propertyDescription;
+		m_propertyDescription = propertyDescription.clone();
 	}
 	
 	public PropertyDescription getDescription(){
