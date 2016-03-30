@@ -42,16 +42,16 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class ThingDescription {
     
-	@JsonIgnore
-    private Metadata metadata;
+//	@JsonIgnore
+//    private Metadata metadata;
 	
     @JsonProperty("@type")
     @JsonInclude(Include.NON_NULL)
     protected String thingType;
 
-    //No longer a Json property
-    @JsonIgnore
-    private List<InteractionDescription> interactions;
+//    //No longer a Json property
+//    @JsonIgnore
+//    private List<InteractionDescription> interactions;
     
     @JsonIgnore
     private List<Pair<String,String>> additionalContexts;
@@ -86,44 +86,44 @@ public class ThingDescription {
     @JsonIgnore
     public static final String WOT_TD_CONTEXT = "http://w3c.github.io/wot/w3c-wot-td-context.jsonld";
     
-    public ThingDescription(Metadata metadata, List<InteractionDescription> interactions, String type){
-    	this(metadata, interactions);
-    	this.thingType = type;
-    }
+//    public ThingDescription(Metadata metadata, List<InteractionDescription> interactions, String type){
+//    	this(metadata, interactions);
+//    	this.thingType = type;
+//    }
     
-    public ThingDescription(Metadata metadata, List<InteractionDescription> interactions) {
-      this.metadata = metadata;
-      this.name = metadata.getName();
-      this.security = metadata.getSecurityDescription();
-      this.uris = metadata.getProtocols();
-      this.encodings = metadata.getEncodings();
-      
-      this.interactions = interactions;  
-      
-      for(InteractionDescription id : interactions){
-    	  if(id instanceof PropertyDescription){
-    		  if(properties == null)
-    			  properties = new ArrayList<>();
-    		  properties.add((PropertyDescription)id);
-    	  }
-    	  else if(id instanceof ActionDescription){
-    		  if(actions == null)
-    			  actions = new ArrayList<>();
-    		  actions.add((ActionDescription)id);
-    	  }
-    	  else if(id instanceof EventDescription){
-    		  if(events == null)
-    			  events = new ArrayList<>();
-    		  events.add((EventDescription)id);
-    	  }
-      }
-    }
+//    public ThingDescription(Metadata metadata, List<InteractionDescription> interactions) {
+//      this.metadata = metadata;
+//      this.name = metadata.getName();
+//      this.security = metadata.getSecurityDescription();
+//      this.uris = metadata.getProtocols();
+//      this.encodings = metadata.getEncodings();
+//      
+//      this.interactions = interactions;  
+//      
+//      for(InteractionDescription id : interactions){
+//    	  if(id instanceof PropertyDescription){
+//    		  if(properties == null)
+//    			  properties = new ArrayList<>();
+//    		  properties.add((PropertyDescription)id);
+//    	  }
+//    	  else if(id instanceof ActionDescription){
+//    		  if(actions == null)
+//    			  actions = new ArrayList<>();
+//    		  actions.add((ActionDescription)id);
+//    	  }
+//    	  else if(id instanceof EventDescription){
+//    		  if(events == null)
+//    			  events = new ArrayList<>();
+//    		  events.add((EventDescription)id);
+//    	  }
+//      }
+//    }
     
     @JsonCreator
-    public ThingDescription(@JsonProperty("name") String name, @JsonProperty("@type") String type, @JsonProperty("uris") List<String> protocols, @JsonProperty("encodings") List<String> encodings, @JsonProperty("security") Object security, @JsonProperty("properties") List<PropertyDescription> properties, @JsonProperty("actions") List<ActionDescription> actions, @JsonProperty("events") List<EventDescription> events){
+    public ThingDescription(@JsonProperty("name") String name, @JsonProperty("@type") String type, @JsonProperty("uris") List<String> uris, @JsonProperty("encodings") List<String> encodings, @JsonProperty("security") Object security, @JsonProperty("properties") List<PropertyDescription> properties, @JsonProperty("actions") List<ActionDescription> actions, @JsonProperty("events") List<EventDescription> events){
         this.name = name;
         this.encodings = encodings;
-        this.uris = protocols;
+        this.uris = uris;
         this.security = security;
         this.properties = properties;
         this.actions = actions;
@@ -131,13 +131,25 @@ public class ThingDescription {
         this.thingType = type;
     }
     
-    public Metadata getMetadata() {
-      return metadata;
-    }
+	public String getName() {
+		return this.name;
+	}
     
-    public List<InteractionDescription> getInteractions() {
-      return interactions;
-    }
+	public List<String> getURIs() {
+		return this.uris;
+	}
+	
+	public List<String> getEncodings() {
+		return this.encodings;
+	}
+    
+//    public Metadata getMetadata() {
+//      return metadata;
+//    }
+    
+//    public List<InteractionDescription> getInteractions() {
+//      return interactions;
+//    }
     
     public List<PropertyDescription> getProperties() {
         return properties;

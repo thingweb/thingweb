@@ -28,21 +28,24 @@ import de.thingweb.desc.pojo.ActionDescription;
 import de.thingweb.desc.pojo.EventDescription;
 import de.thingweb.desc.pojo.Metadata;
 import de.thingweb.desc.pojo.PropertyDescription;
+import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.thing.Content;
 
 import java.util.List;
 
 public interface Client {
 	
-	public Metadata getMetadata();
+	public ThingDescription getThingDescription();
 	
-	public List<PropertyDescription> getProperties();
+//	public Metadata getMetadata();
+//	
+//	public List<PropertyDescription> getProperties();
+//	
+//	public List<ActionDescription> getActions();
+//	
+//	public List<EventDescription> getEvents();
 	
-	public List<ActionDescription> getActions();
-	
-	public List<EventDescription> getEvents();
-	
-	public String getUsedProtocolURI();
+	public String getUsedBaseURI();
 
 	
 	public void put(String propertyName, Content propertyValue, Callback callback) throws UnsupportedException;

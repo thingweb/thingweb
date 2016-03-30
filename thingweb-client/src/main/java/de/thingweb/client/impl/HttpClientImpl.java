@@ -33,6 +33,7 @@ import de.thingweb.desc.pojo.EventDescription;
 import de.thingweb.desc.pojo.Metadata;
 import de.thingweb.desc.pojo.PropertyDescription;
 import de.thingweb.desc.pojo.Protocol;
+import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.thing.Content;
 import de.thingweb.thing.MediaType;
 import org.eclipse.californium.core.CoapObserveRelation;
@@ -59,9 +60,8 @@ public class HttpClientImpl extends AbstractClientImpl {
 
 	Map<String, CoapObserveRelation> observes = new HashMap<>();
 	
-	public HttpClientImpl(Protocol prot, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions,
-			List<EventDescription> events) {
-		super(prot.getUri(), metadata, properties, actions, events);
+	public HttpClientImpl(String baseUri, ThingDescription td) {
+		super(baseUri, td);
 	}
 
 	public void put(String propertyName, Content propertyValue, Callback callback) throws UnsupportedException {
@@ -147,7 +147,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 		
 		protected void run(final boolean useValue) {
 			try {
-				URL url = new URL(uri + URI_PART_PROPERTIES + propertyName + (useValue ? VALUE_STRING : ""));
+				URL url = new URL(baseUri + URI_PART_PROPERTIES + propertyName + (useValue ? VALUE_STRING : ""));
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setRequestMethod("GET");
 				if(securityAsToken != null) {
@@ -226,9 +226,9 @@ public class HttpClientImpl extends AbstractClientImpl {
 				String uriPart = isAction ? URI_PART_PROPERTIES : URI_PART_ACTIONS;
 				URL url;
 				if(!isAction) {
-					url = new URL(uri + uriPart + name + (useValue ? VALUE_STRING : ""));
+					url = new URL(baseUri + uriPart + name + (useValue ? VALUE_STRING : ""));
 				} else {
-					url = new URL(uri + uriPart + name);
+					url = new URL(baseUri + uriPart + name);
 				}
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setDoOutput(true);

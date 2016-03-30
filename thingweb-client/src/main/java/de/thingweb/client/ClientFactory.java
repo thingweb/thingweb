@@ -45,13 +45,13 @@ public class ClientFactory {
 	private static final Logger log = LoggerFactory.getLogger(ClientFactory.class);
 	
 	ThingDescription td;
-	Metadata metadata;
-	List<PropertyDescription> properties;
-	List<ActionDescription> actions;
-	List<EventDescription> events;
+//	Metadata metadata;
+//	List<PropertyDescription> properties;
+//	List<ActionDescription> actions;
+//	List<EventDescription> events;
 
-	List<String> encodings;
-	List<Protocol> protocols;
+//	List<String> encodings;
+//	List<Protocol> protocols;
 	
 	boolean isCoapScheme(String scheme) {
 		return("coap".equals(scheme) || "coaps".equals(scheme));
@@ -79,7 +79,7 @@ public class ClientFactory {
 	protected Client getClient() throws UnsupportedException, URISyntaxException {
 		assert(td != null);
 		
-		processThingDescription();
+//		processThingDescription();
 		
 		// pick the right client
 		return pickClient();
@@ -101,122 +101,111 @@ public class ClientFactory {
 		return getClient();
 	}
 
-	protected void processThingDescription() {
-		assert(td != null);
-		
-		actions = new ArrayList<>();
-		properties = new ArrayList<>();
-		events = new ArrayList<>();
-		encodings = new ArrayList<>();
-		protocols = new ArrayList<>();
-
-		log.debug("Process thing desription");
-		log.debug("# Interactions");
-		List<InteractionDescription> interactions = td.getInteractions();
-		for(InteractionDescription id : interactions) {
-			String iname = id.getName();
-			log.debug("InteractionDescription name: " + iname);
-			if(id instanceof ActionDescription) {
-				ActionDescription ad = (ActionDescription) id;
-				log.debug("\tinput:  " + ad.getInputType());
-				log.debug("\toutput: " + ad.getOutputType());
-				actions.add(ad);
-			} else if(id instanceof PropertyDescription) {
-				PropertyDescription pd = (PropertyDescription) id;
-				log.debug("\toutput: " + pd.getOutputType());
-				boolean isWritable = true;
-				try {
-					// @Workaround repository
-					isWritable = pd.isWritable();
-				} catch (Exception e) {
-					// PropertyDescription coming from discovery seems to be different and causes issues
-					log.warn("Workaround for isWritable issue kicked in. Writable set by default to " + isWritable);
-					pd = new PropertyDescription(pd.getName(), null, isWritable, pd.getOutputType(), pd.getHrefs(), pd.getInteractionType(), pd.getStability());
-				}
-				log.debug("\twritable: " + isWritable);
-				properties.add(pd);
-			} else if(id instanceof EventDescription) {
-				EventDescription ed = (EventDescription) id;
-				log.debug("\toutput: " + ed.getOutputType());
-				events.add(ed);
-			} else {
-				log.warn("Unexpected interaction type: " + id);
-			}
-		}
-		
-		metadata = td.getMetadata();
-		log.debug("# Metadata " + metadata.getName());
-		log.debug("# Encodings");
-		List<String> encs = metadata.getEncodings();
-		// @Workaround repository
-		if(encs == null) {
-			// Information coming from discovery seems to be different and causes issues
-			log.warn("Workaround for TD encodings issue kicked in. Encoding set to " + "JSON");
-			encs = new ArrayList<>();
-			encs.add("JSON");
-		}
-		for(String enc : encs) {
-			log.debug(enc);
-			encodings.add(enc);
-		}
-		log.debug("# Encodings");
-		List<String> uris = metadata.getProtocols();
-		int i=1;
-		for(String uri : uris) {
-			log.debug(uri);
-			Protocol p = new Protocol(uri,i++);
-			// @Workaround repository
-			if(p.getPriority() == null) {
-				// Information coming from discovery seems to be different and causes issues
-				log.warn("Workaround for TD property issue kicked in. Priority set to " + 1);
-				p.priority = 1;
-			}
-			
-			protocols.add(p);
-			log.debug("\t" + p.getUri());
-			// clean-up URI (remove appended URI slash if any)
-			if(uri.endsWith("/")) {
-				uri = uri.substring(0, uri.length()-1);
-				p.uri = uri;
-				log.debug("\t\t" + "clean-up URI by removing trailing '/'");
-			}
-		}
-	}
+//	protected void processThingDescription() {
+//		assert(td != null);
+//		
+////		actions = new ArrayList<>();
+//		properties = new ArrayList<>();
+//		events = new ArrayList<>();
+//		encodings = new ArrayList<>();
+//		protocols = new ArrayList<>();
+//
+//		log.debug("Process thing desription");
+//		log.debug("# Interactions");
+//		List<InteractionDescription> interactions = td.getInteractions();
+//		for(InteractionDescription id : interactions) {
+//			String iname = id.getName();
+//			log.debug("InteractionDescription name: " + iname);
+//			if(id instanceof ActionDescription) {
+////				ActionDescription ad = (ActionDescription) id;
+////				log.debug("\tinput:  " + ad.getInputType());
+////				log.debug("\toutput: " + ad.getOutputType());
+////				actions.add(ad);
+//			} else if(id instanceof PropertyDescription) {
+//				PropertyDescription pd = (PropertyDescription) id;
+//				log.debug("\toutput: " + pd.getOutputType());
+//				boolean isWritable = true;
+//				try {
+//					// @Workaround repository
+//					isWritable = pd.isWritable();
+//				} catch (Exception e) {
+//					// PropertyDescription coming from discovery seems to be different and causes issues
+//					log.warn("Workaround for isWritable issue kicked in. Writable set by default to " + isWritable);
+//					pd = new PropertyDescription(pd.getName(), null, isWritable, pd.getOutputType(), pd.getHrefs(), pd.getInteractionType(), pd.getStability());
+//				}
+//				log.debug("\twritable: " + isWritable);
+//				properties.add(pd);
+//			} else if(id instanceof EventDescription) {
+//				EventDescription ed = (EventDescription) id;
+//				log.debug("\toutput: " + ed.getOutputType());
+//				events.add(ed);
+//			} else {
+//				log.warn("Unexpected interaction type: " + id);
+//			}
+//		}
+//		
+//		metadata = td.getMetadata();
+//		log.debug("# Metadata " + metadata.getName());
+//		log.debug("# Encodings");
+//		List<String> encs = metadata.getEncodings();
+//		// @Workaround repository
+//		if(encs == null) {
+//			// Information coming from discovery seems to be different and causes issues
+//			log.warn("Workaround for TD encodings issue kicked in. Encoding set to " + "JSON");
+//			encs = new ArrayList<>();
+//			encs.add("JSON");
+//		}
+//		for(String enc : encs) {
+//			log.debug(enc);
+//			encodings.add(enc);
+//		}
+//		log.debug("# Encodings");
+//		List<String> uris = metadata.getProtocols();
+//		int i=1;
+//		for(String uri : uris) {
+//			log.debug(uri);
+//			Protocol p = new Protocol(uri,i++);
+//			// @Workaround repository
+//			if(p.getPriority() == null) {
+//				// Information coming from discovery seems to be different and causes issues
+//				log.warn("Workaround for TD property issue kicked in. Priority set to " + 1);
+//				p.priority = 1;
+//			}
+//			
+//			protocols.add(p);
+//			log.debug("\t" + p.getUri());
+//			// clean-up URI (remove appended URI slash if any)
+//			if(uri.endsWith("/")) {
+//				uri = uri.substring(0, uri.length()-1);
+//				p.uri = uri;
+//				log.debug("\t\t" + "clean-up URI by removing trailing '/'");
+//			}
+//		}
+//	}
 
 	protected Client pickClient() throws UnsupportedException, URISyntaxException {
-		// check for right protocol&encoding
-		TreeMap<Integer, Client> tm = new TreeMap<>(); // sorted according priority
-		
-		
-		for(Protocol p : protocols) {
-			String suri = p.getUri();
-			if(suri != null && suri.length()>0){
-				URI uri = new URI(suri);
-				if(isCoapScheme(uri.getScheme())) {
-					Client c = new CoapClientImpl(p, metadata, properties, actions, events);
-					tm.put(p.priority, c);
-					log.info("Found matching client '" + CoapClientImpl.class.getName() + "' with priority " + p.priority);
-				} else if(isHttpScheme(uri.getScheme())) {
-					Client c = new HttpClientImpl(p, metadata, properties, actions, events);
-					tm.put(p.priority, c);
-					log.info("Found matching client '" + HttpClientImpl.class.getName() + "' with priority " + p.priority);
-				}				
+		List<String> uris = td.getURIs();
+		if(uris == null) {
+			String msg = "No uris set: " + uris;
+			log.warn(msg);
+			throw new UnsupportedException(msg);
+		}
+		for(String uri : uris) {
+			if(isCoapScheme(uri)) {
+				Client c = new CoapClientImpl(uri, td);
+				log.info("Found matching client '" + CoapClientImpl.class.getName());
+				return c;
+			} else if(isHttpScheme(uri)) {
+				Client c = new HttpClientImpl(uri, td);
+				log.info("Found matching client '" + HttpClientImpl.class.getName());
+				return c;
 			}
 		}
 		
-		// take priority into account
-		Set<Integer> keys = tm.keySet();
-		if(keys.isEmpty()) {
-			log.warn("No fitting client implementation found!");
-			throw new UnsupportedException("No fitting client implementation found!");
-			// return null;
-		} else {
-			// pick first one with highest priority
-			Client c = tm.get(keys.iterator().next());
-			log.info("Use '" + c.getClass().getName() + "' according to priority");
-			return c;
-		}
-
+		// no supported client found
+		String msg = "No fitting client implementation found for " + uris;
+		log.warn(msg);
+		throw new UnsupportedException(msg);
 
 	}
 	

@@ -31,6 +31,8 @@ import de.thingweb.desc.pojo.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 /**
  * The Thing class provides the "model" of a thing, the components and
@@ -67,44 +69,70 @@ public final class Thing {
 
         m_name = name;
 
-        List<InteractionDescription> interactions = new ArrayList<>();
-        List<String> protocols = new ArrayList<>();
+//        List<InteractionDescription> interactions = new ArrayList<>();
+//        List<String> protocols = new ArrayList<>();
         //TODO hardcoded JSON for now, retrieve list from ContentHelper
-        List<String> encodings = Arrays.asList("JSON");
+//        List<String> encodings = Arrays.asList("JSON");
 
-        Metadata metas = new Metadata(name, protocols,encodings, null);
-        m_td = new ThingDescription(metas,interactions);
+//        Metadata metas = new Metadata(name, protocols,encodings, null);
+        
+//        @JsonProperty("name") String name, 
+//        @JsonProperty("@type") String type, 
+//        @JsonProperty("uris") List<String> uris, 
+//        @JsonProperty("encodings") List<String> encodings, 
+//        @JsonProperty("security") Object security, 
+//        @JsonProperty("properties") List<PropertyDescription> properties, 
+//        @JsonProperty("actions") List<ActionDescription> actions, 
+//        @JsonProperty("events") List<EventDescription> events
+
+        
+        m_td = new ThingDescription(name, null, null, null, null, null, null, null);
     }
 
     public Thing(ThingDescription desc) {
-        this(desc.getMetadata().getName());
+        this(desc.getName());
         m_td = desc;
         // TODO check support for HTTP and/or CoAP
-        for (InteractionDescription i : desc.getInteractions()) {
-            if (i instanceof PropertyDescription) {
-                PropertyDescription pd = (PropertyDescription) i;
-                Property p = new Property(pd);
-                m_properties.add(p);
-            } else if (i instanceof ActionDescription) {
-                ActionDescription ad = (ActionDescription) i;
-                Action a = Action.getBuilder(i.getName())
-                        .setInputType(ad.getInputType())
-                        .setOutputType(ad.getOutputType())
-                        .build();
-                m_actions.add(a);
-            }
+        
+        for(PropertyDescription pd: desc.getProperties()) {
+        	m_properties.add(new Property(pd));
         }
+        for(ActionDescription ad : desc.getActions()) {
+            Action a = Action.getBuilder(ad.getName())
+                    .setInputType(ad.getInputType())
+                    .setOutputType(ad.getOutputType())
+                    .build();
+        	m_actions.add(a);
+        }
+ 
+        
+        
+//        for (InteractionDescription i : desc.getInteractions()) {
+//            if (i instanceof PropertyDescription) {
+//                PropertyDescription pd = (PropertyDescription) i;
+//                Property p = new Property(pd);
+//                m_properties.add(p);
+//            } else if (i instanceof ActionDescription) {
+//                ActionDescription ad = (ActionDescription) i;
+//                Action a = Action.getBuilder(i.getName())
+//                        .setInputType(ad.getInputType())
+//                        .setOutputType(ad.getOutputType())
+//                        .build();
+//                m_actions.add(a);
+//            }
+//        }
     }
 
     public void addProperty(PropertyDescription pd){
         Property p = new Property(pd);
         m_properties.add(p);
-        m_td.getInteractions().add(pd);
+        m_td.getProperties().add(pd);
+//        m_td.getInteractions().add(pd);
     }
     
-    public void addInteractions(List<InteractionDescription> interactionDescriptions) {
-        m_td.getInteractions().addAll(interactionDescriptions);
-    }
+//    public void addInteractions(List<InteractionDescription> interactionDescriptions) {
+//        m_td.getInteractions().addAll(interactionDescriptions);
+//    }
 
     public String getName() {
         return m_name;
@@ -205,7 +233,7 @@ public final class Thing {
         m_properties.add(property);
 
         PropertyDescription pdesc = property.getDescription();
-        m_td.getInteractions().add(pdesc);
+        m_td.getProperties().add(pdesc);
 
         notifyListeners();
     }
@@ -234,7 +262,7 @@ public final class Thing {
                 action.getInputType(),
                 action.getOutputType()
         );
-        m_td.getInteractions().add(adesc);
+        m_td.getActions().add(adesc);
 
         notifyListeners();
     }

@@ -46,6 +46,7 @@ import de.thingweb.desc.pojo.EventDescription;
 import de.thingweb.desc.pojo.Metadata;
 import de.thingweb.desc.pojo.PropertyDescription;
 import de.thingweb.desc.pojo.Protocol;
+import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.thing.Content;
 import de.thingweb.thing.MediaType;
 
@@ -58,8 +59,8 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	Map<String, ObserveRelation> observes = new HashMap<>();
 	
-	public CoapClientImpl(Protocol prot, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
-		super(prot.getUri(), metadata, properties, actions, events);
+	public CoapClientImpl(String baseUri, ThingDescription td) {
+		super(baseUri, td);
 	}
 	
 	
@@ -73,7 +74,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	protected void put(final String propertyName, final Content propertyValue, final Callback callback, final String securityAsToken, final boolean useValue) {
 		String uriPart = URI_PART_PROPERTIES;
-		final String curi = uri + uriPart + propertyName + (useValue ? VALUE_STRING : "");
+		final String curi = baseUri + uriPart + propertyName + (useValue ? VALUE_STRING : "");
 		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP put " + coap.getURI() + " (Security=" + securityAsToken + ")");
@@ -125,7 +126,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	protected void get(final String propertyName, final Callback callback, final String securityAsToken, final boolean useValue) {
-		final String curi = uri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
+		final String curi = baseUri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
 		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP get " + coap.getURI() + " (Security=" + securityAsToken + ")");
@@ -175,7 +176,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	protected void observe(final String propertyName, final Callback callback, final String securityAsToken, final boolean useValue) {
-		final String curi = uri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
+		final String curi = baseUri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
 		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP observe " + coap.getURI() + " (Security=" + securityAsToken + ")");
@@ -259,7 +260,7 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	public void action(final String actionName, Content actionValue, final Callback callback, String securityAsToken) {
 		final String uriPart = URI_PART_ACTIONS;
-		CoapClient coap = new CoapClient(uri + uriPart + actionName);
+		CoapClient coap = new CoapClient(baseUri + uriPart + actionName);
 		
 		log.info("CoAP post " + coap.getURI() + " (Security=" + securityAsToken + ")");
 		

@@ -25,22 +25,14 @@
 package de.thingweb.client.impl;
 
 import de.thingweb.client.Client;
-import de.thingweb.desc.pojo.ActionDescription;
-import de.thingweb.desc.pojo.EventDescription;
-import de.thingweb.desc.pojo.Metadata;
-import de.thingweb.desc.pojo.PropertyDescription;
-
-import java.util.List;
+import de.thingweb.desc.pojo.ThingDescription;
 
 public abstract class AbstractClientImpl implements Client {
 	
-	final Metadata metadata;
-	final List<PropertyDescription> properties;
-	final List<ActionDescription> actions;
-	final List<EventDescription> events;
+	final ThingDescription td;
 	
 	/** e.g., http://www.example.com:80/ledlamp or coap://localhost:5683/things/MyLED */
-	final String uri;
+	final String baseUri;
 
 	final String URI_PART_PROPERTIES = "/";
 	//final String URI_PART_PROPERTIES = "/properties/";
@@ -53,32 +45,17 @@ public abstract class AbstractClientImpl implements Client {
 	final boolean useValueInUrlFirst = false;
 	final String VALUE_STRING = "/value";
 
-	public AbstractClientImpl(String uri, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
-		this.uri = uri;
-		this.metadata = metadata;
-		this.properties = properties;
-		this.actions = actions;
-		this.events = events;
+	public AbstractClientImpl(String baseUri, ThingDescription td) {
+		this.baseUri = baseUri;
+		this.td = td;
 	}
 	
-	public String getUsedProtocolURI() {
-		return this.uri;
-	}
-	
-	public Metadata getMetadata() {
-		return this.metadata;
-	}
-	
-	public List<PropertyDescription> getProperties() {
-		return properties;
-	}
-	
-	public List<ActionDescription> getActions() {
-		return actions;
-	}
-	
-	public List<EventDescription> getEvents() {
-		return events;
+	public ThingDescription getThingDescription() {
+		return this.td;
 	}
 
+	
+	public String getUsedBaseURI() {
+		return this.baseUri;
+	}
 }
