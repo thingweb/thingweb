@@ -41,13 +41,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.thingweb.client.Callback;
-import de.thingweb.desc.pojo.ActionDescription;
-import de.thingweb.desc.pojo.EventDescription;
-import de.thingweb.desc.pojo.Metadata;
-import de.thingweb.desc.pojo.PropertyDescription;
-import de.thingweb.desc.pojo.Protocol;
 import de.thingweb.thing.Content;
 import de.thingweb.thing.MediaType;
+import de.thingweb.thing.Thing;
 
 public class CoapClientImpl extends AbstractClientImpl {
 	
@@ -58,8 +54,8 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	Map<String, ObserveRelation> observes = new HashMap<>();
 	
-	public CoapClientImpl(Protocol prot, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
-		super(prot.getUri(), metadata, properties, actions, events);
+	public CoapClientImpl(String uri, Thing thing) {
+		super(uri, thing);
 	}
 	
 	

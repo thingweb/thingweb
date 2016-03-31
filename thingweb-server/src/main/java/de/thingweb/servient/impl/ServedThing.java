@@ -26,8 +26,6 @@
 
 package de.thingweb.servient.impl;
 
-import de.thingweb.desc.pojo.InteractionDescription;
-import de.thingweb.desc.pojo.PropertyDescription;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
@@ -178,8 +176,8 @@ public class ServedThing implements ThingInterface {
     }
     
  // TODO This should perhaps be a generic add interaction. But wait and watch how proposals develop.
-    public void addProperty(PropertyDescription description){
-    	m_thingModel.addProperty(description);
+    public void addProperty(Property prop){
+    	m_thingModel.addProperty(prop);
     	m_stateContainer.updateHandlers();
     }
 }

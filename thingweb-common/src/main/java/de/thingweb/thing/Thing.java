@@ -49,7 +49,7 @@ public final class Thing {
 	 */
 
     private final String m_name;
-    private ThingDescription m_td;
+    private final Metadata m_metadata;
 
     /**
      * Creates a new thing model.
@@ -66,61 +66,29 @@ public final class Thing {
         }
 
         m_name = name;
-
-        List<InteractionDescription> interactions = new ArrayList<>();
-        List<String> protocols = new ArrayList<>();
-        //TODO hardcoded JSON for now, retrieve list from ContentHelper
-        List<String> encodings = Arrays.asList("JSON");
-
-        Metadata metas = new Metadata(name, protocols,encodings, null);
-        m_td = new ThingDescription(metas,interactions);
+        m_metadata = new Metadata();
     }
 
-    public Thing(ThingDescription desc) {
-        this(desc.getMetadata().getName());
-        m_td = desc;
-        // TODO check support for HTTP and/or CoAP
-        for (InteractionDescription i : desc.getInteractions()) {
-            if (i instanceof PropertyDescription) {
-                PropertyDescription pd = (PropertyDescription) i;
-                Property p = new Property(pd);
-                m_properties.add(p);
-            } else if (i instanceof ActionDescription) {
-                ActionDescription ad = (ActionDescription) i;
-                Action a = Action.getBuilder(i.getName())
-                        .setInputType(ad.getInputType())
-                        .setOutputType(ad.getOutputType())
-                        .build();
-                m_actions.add(a);
-            }
-        }
-    }
-
-    public void addProperty(PropertyDescription pd){
-        Property p = new Property(pd);
-        m_properties.add(p);
-        m_td.getInteractions().add(pd);
-    }
-    
-    public void addInteractions(List<InteractionDescription> interactionDescriptions) {
-        m_td.getInteractions().addAll(interactionDescriptions);
+    public Thing(String name, Map<String, Object> metadata) {
+        this(name);
+//        m_metadata = metadata; TODO
     }
 
     public String getName() {
         return m_name;
     }
 
-    public ThingDescription getThingDescription() {
-        return m_td;
+    public Metadata getMetadata() {
+        return m_metadata;
     }
 
 
-    public Collection<Property> getProperties() {
+    public List<Property> getProperties() {
         return m_propertiesView;
     }
 
 
-    public Collection<Action> getActions() {
+    public List<Action> getActions() {
         return m_actionsView;
     }
 
@@ -137,7 +105,7 @@ public final class Thing {
         }
 
         for (Property property : m_properties) {
-            if (property.getDescription().getName().equals(propertyName)) {
+            if (property.getName().equals(propertyName)) {
                 return property;
             }
         }
@@ -197,15 +165,12 @@ public final class Thing {
             throw new IllegalArgumentException("property must not be null");
         }
 
-        if (getProperty(property.getDescription().getName()) != null) {
+        if (getProperty(property.getName()) != null) {
             throw new IllegalArgumentException("duplicate property: " +
-                    property.getDescription().getName());
+                    property.getName());
         }
 
         m_properties.add(property);
-
-        PropertyDescription pdesc = property.getDescription();
-        m_td.getInteractions().add(pdesc);
 
         notifyListeners();
     }
@@ -228,13 +193,6 @@ public final class Thing {
         }
 
         m_actions.add(action);
-
-        ActionDescription adesc = new ActionDescription(
-                action.getName(),
-                action.getInputType(),
-                action.getOutputType()
-        );
-        m_td.getInteractions().add(adesc);
 
         notifyListeners();
     }
@@ -264,23 +222,23 @@ public final class Thing {
 
     private boolean protection = false;
 
-    private final Collection<Property> m_properties =
+    private final List<Property> m_properties =
             new CopyOnWriteArrayList<>();
 
 
-    private final Collection<Property> m_propertiesView =
-            Collections.unmodifiableCollection(m_properties);
+    private final List<Property> m_propertiesView =
+            Collections.unmodifiableList(m_properties);
 
 
-    private final Collection<Action> m_actions =
+    private final List<Action> m_actions =
             new CopyOnWriteArrayList<>();
 
 
-    private final Collection<Action> m_actionsView =
-            Collections.unmodifiableCollection(m_actions);
+    private final List<Action> m_actionsView =
+            Collections.unmodifiableList(m_actions);
 
 
-    private final Collection<ModelListener> m_listeners =
+    private final List<ModelListener> m_listeners =
             new CopyOnWriteArrayList<>();
 
     public Action getAction(String actionName) {

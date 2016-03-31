@@ -56,14 +56,14 @@ public class DescriptionParserTest {
     @Test
     public void testFromURLDoor() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/door.jsonld");
-    	DescriptionParser.fromURL(jsonld);
+    	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
     
     @Test
     public void testFromURLLed() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led.jsonld");
-    	DescriptionParser.fromURL(jsonld);
+    	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
     
@@ -71,7 +71,7 @@ public class DescriptionParserTest {
     public void testFromURLLed_v02() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led_v02.jsonld");
     	try {
-    		DescriptionParser.fromURL(jsonld);
+    		ThingDescriptionParser.fromURL(jsonld);
     		// TODO are not recognized fields are ignored
 //    	    fail();
     	} catch (IOException e) {
@@ -82,14 +82,14 @@ public class DescriptionParserTest {
     @Test
     public void testFromURLOutlet() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/outlet.jsonld");
-    	DescriptionParser.fromURL(jsonld);
+    	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
     
     @Test
     public void testFromURLWeather() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/weather.jsonld");
-    	DescriptionParser.fromURL(jsonld);
+    	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
 
@@ -105,21 +105,21 @@ public class DescriptionParserTest {
       String erroneous = "jsonld" + File.separator + "led_2.jsonld";
       
       try {
-          DescriptionParser.fromFile(happyPath);
+          ThingDescriptionParser.fromFile(happyPath);
       } catch (Exception e) {
           e.printStackTrace();
           fail();
       }
       
       try {
-          DescriptionParser.fromFile(altPath);
+          ThingDescriptionParser.fromFile(altPath);
       } catch (Exception e) {
           e.printStackTrace();
           fail();
       }
       
       try {
-          DescriptionParser.fromFile(erroneous);
+          ThingDescriptionParser.fromFile(erroneous);
           fail();
       } catch (IOException e) {
           if (e instanceof JsonParseException) {
@@ -139,9 +139,9 @@ public class DescriptionParserTest {
         char[] buf = new char [(int) f.length()];
         r.read(buf);
         r.close();
-        String jsonld = DescriptionParser.reshape(new String(buf).getBytes());
+        String jsonld = ThingDescriptionParser.reshape(new String(buf).getBytes());
         // checks that reshaped jsonld is compliant to description parser's impl.
-        DescriptionParser.fromBytes(jsonld.getBytes());
+        ThingDescriptionParser.fromBytes(jsonld.getBytes());
         // TODO any further checks?
       } catch (Exception e) {
         fail(e.getMessage());

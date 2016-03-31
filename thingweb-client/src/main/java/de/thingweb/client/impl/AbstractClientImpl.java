@@ -25,20 +25,18 @@
 package de.thingweb.client.impl;
 
 import de.thingweb.client.Client;
-import de.thingweb.desc.pojo.ActionDescription;
-import de.thingweb.desc.pojo.EventDescription;
-import de.thingweb.desc.pojo.Metadata;
-import de.thingweb.desc.pojo.PropertyDescription;
+import de.thingweb.thing.Action;
+import de.thingweb.thing.Event;
+import de.thingweb.thing.Metadata;
+import de.thingweb.thing.Property;
+import de.thingweb.thing.Thing;
 
 import java.util.List;
 
 public abstract class AbstractClientImpl implements Client {
 	
-	final Metadata metadata;
-	final List<PropertyDescription> properties;
-	final List<ActionDescription> actions;
-	final List<EventDescription> events;
-	
+  final Thing thing;
+  
 	/** e.g., http://www.example.com:80/ledlamp or coap://localhost:5683/things/MyLED */
 	final String uri;
 
@@ -53,32 +51,38 @@ public abstract class AbstractClientImpl implements Client {
 	final boolean useValueInUrlFirst = false;
 	final String VALUE_STRING = "/value";
 
-	public AbstractClientImpl(String uri, Metadata metadata, List<PropertyDescription> properties, List<ActionDescription> actions, List<EventDescription> events) {
+	public AbstractClientImpl(String uri, Thing thing) {
+		this.thing = thing;
 		this.uri = uri;
-		this.metadata = metadata;
-		this.properties = properties;
-		this.actions = actions;
-		this.events = events;
 	}
 	
 	public String getUsedProtocolURI() {
 		return this.uri;
 	}
 	
-	public Metadata getMetadata() {
-		return this.metadata;
+	@Override
+	public Metadata getMetadata()
+	{
+	  return thing.getMetadata();
 	}
 	
-	public List<PropertyDescription> getProperties() {
-		return properties;
+	@Override
+	public List<Property> getProperties()
+	{
+	  return thing.getProperties();
 	}
 	
-	public List<ActionDescription> getActions() {
-		return actions;
+	@Override
+	public List<Action> getActions()
+	{
+	  return thing.getActions();
 	}
 	
-	public List<EventDescription> getEvents() {
-		return events;
+	@Override
+	public List<Event> getEvents()
+	{
+	  // TODO
+	  return null;
 	}
 
 }

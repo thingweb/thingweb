@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
-import de.thingweb.desc.pojo.Protocol;
+import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.security.SecurityTokenValidator;
 import de.thingweb.security.SecurityTokenValidator4NicePlugfest;
@@ -151,11 +151,6 @@ public class MultiBindingThingServer implements ThingServer {
     }
 
     @Override
-    public ThingInterface addThing(ThingDescription thingDescription) {
-        return addThing(new Thing(thingDescription));
-    }
-
-    @Override
     public ThingInterface getThing(String thingName) {
         return things.get(thingName.toLowerCase());
     }
@@ -182,15 +177,19 @@ public class MultiBindingThingServer implements ThingServer {
 
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);
 
-        final List<String> protocols = thingModel.getThingModel().getThingDescription().getMetadata().getProtocols();
+        final List<String> protocols = new ArrayList<String>();
+        List<String> uris = thingModel.getThingModel().getMetadata().getAll("uris");
+        if (uris != null) {
+          for (String uri : uris) {
+            protocols.add(uri);
+          }
+        }
 
-        int prio=1;
         for (ResourceBuilder binding : m_bindings) {
             // update/create HATEOAS links to things
             binding.newResource(Defines.BASE_THING_URL, thingIndex);
             createBinding(binding, thingModel,isProtected);
-            final Protocol protocol = new Protocol(binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()),prio++);
-            protocols.add(protocol.uri);
+            protocols.add(binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()));
         }
 
 
@@ -208,7 +207,7 @@ public class MultiBindingThingServer implements ThingServer {
 
         // collect properties
         for (Property property : properties) {
-            String url = thingurl + "/" + property.getDescription().getName();
+            String url = thingurl + "/" + property.getName();
 
             final PropertyListener propertyListener = new PropertyListener(servedThing, property);
             if(isProtected) propertyListener.protectWith(getValidator());
@@ -240,26 +239,8 @@ public class MultiBindingThingServer implements ThingServer {
         interactionListeners.put(tdUrl,
                 new AbstractRESTListener() {
                     @Override
-                    public Content onGet() {
-                        //TODO fill up metadata
-                        ThingDescription td = thingModel.getThingDescription();
-
-                        //manually adding the context
-                        ObjectNode json = ContentHelper.getJsonMapper().valueToTree(td);
-                        ArrayNode contextNode = json.putArray("@context");
-                        contextNode.add(ThingDescription.WOT_TD_CONTEXT);
-                        if(td.getAdditionalContexts() != null){
-	                        for(Pair<String,String> contextEntry : td.getAdditionalContexts()){
-	                        	ObjectNode on = ContentHelper.getJsonMapper().createObjectNode();
-	                        	on.put(contextEntry.getKey(), contextEntry.getValue());
-	                        	contextNode.add(on);
-	                        }
-                        }
-
-                        //json.put("@context", "http://w3c.github.io/wot/w3c-wot-td-context.jsonld");
-
-                        return ContentHelper.wrap(json,
-                                MediaType.APPLICATION_JSON);
+                    public Content onGet() {                        
+                        return new Content(ThingDescriptionParser.toBytes(thingModel), MediaType.APPLICATION_JSON);
                     }
                 });
 

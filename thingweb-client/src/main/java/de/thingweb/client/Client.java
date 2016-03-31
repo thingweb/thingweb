@@ -24,11 +24,11 @@
 
 package de.thingweb.client;
 
-import de.thingweb.desc.pojo.ActionDescription;
-import de.thingweb.desc.pojo.EventDescription;
-import de.thingweb.desc.pojo.Metadata;
-import de.thingweb.desc.pojo.PropertyDescription;
+import de.thingweb.thing.Action;
 import de.thingweb.thing.Content;
+import de.thingweb.thing.Event;
+import de.thingweb.thing.Metadata;
+import de.thingweb.thing.Property;
 
 import java.util.List;
 
@@ -36,11 +36,11 @@ public interface Client {
 	
 	public Metadata getMetadata();
 	
-	public List<PropertyDescription> getProperties();
+	public List<Property> getProperties();
 	
-	public List<ActionDescription> getActions();
+	public List<Action> getActions();
 	
-	public List<EventDescription> getEvents();
+	public List<Event> getEvents();
 	
 	public String getUsedProtocolURI();
 

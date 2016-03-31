@@ -26,9 +26,7 @@
 
 package de.thingweb.jsruntime;
 
-import de.thingweb.desc.DescriptionParser;
-import de.thingweb.desc.pojo.PropertyDescription;
-import de.thingweb.desc.pojo.ThingDescription;
+import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.servient.ServientBuilder;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
@@ -76,8 +74,8 @@ public class ServientLauncher {
         Thing srvThing = new Thing("servient");
 
         srvThing.addProperties(
-        	new Property(new PropertyDescription("numberOfThings", false, "xsd:int")),
-        	new Property(new PropertyDescription("securityEnabled", true, "xsd:boolean"))
+            Property.getBuilder("numberOfThings").setXsdType("xsd:int").setWriteable(false).build(),
+            Property.getBuilder("securityEnabled").setXsdType("xsd:boolean").setWriteable(true).build()
         );
 
         srvThing.addActions(
@@ -101,12 +99,10 @@ public class ServientLauncher {
             final LinkedHashMap jsonld = ContentHelper.ensureClass(data, LinkedHashMap.class);
 
             try {
-                final ThingDescription thingDescription = DescriptionParser.mapJson(jsonld);
-                Thing newThing = new Thing(thingDescription.getMetadata().getName());
-                newThing.addInteractions(thingDescription.getInteractions());
+                final Thing newThing = ThingDescriptionParser.mapJson(jsonld);
                 server.addThing(newThing);
                 serverInterface.setProperty("numberOfThings", server.getThings().size());
-                return newThing.getThingDescription().getMetadata();
+                return newThing.getMetadata();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
