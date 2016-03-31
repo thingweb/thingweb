@@ -33,8 +33,10 @@ import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
 import com.siemens.ct.exi.exceptions.EXIException;
 
-import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.encoding.json.exi.EXI4JSONParser;
+import de.thingweb.thing.Action;
+import de.thingweb.thing.Property;
+import de.thingweb.thing.Property.Builder;
 import de.thingweb.thing.Thing;
 
 import org.json.JSONObject;
@@ -48,105 +50,30 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 public class ThingDescriptionParser
 {
 
-  public static final String WOT_TD_CONTEXT = "http://w3c.github.io/wot/w3c-wot-td-context.jsonld";
-  
-  // default JSON-LD context for TDs
-  private static Object context;
-
-  static
-  {
-    try
-    {
-      context = JsonUtils.fromURL(new URL("http://w3c.github.io/wot/w3c-wot-td-context.jsonld"));
-    }
-    catch (IOException e)
-    {
-      e.printStackTrace();
-      context = null;
-    }
-  }
-
-  private static Object compactJson(Object jsonld) throws IOException
-  {
-    if (context == null)
-    {
-      throw new IOException("Default TD context could not be retrieved");
-    }
-
-    try
-    {
-      jsonld = JsonLdProcessor.compact(jsonld, context, new JsonLdOptions());
-      return jsonld;
-    }
-    catch (JsonLdError e)
-    {
-      throw new IOException("The input object is not valid JSON-LD", e);
-    }
-  }
+  private static final String WOT_TD_CONTEXT = "http://w3c.github.io/wot/w3c-wot-td-context.jsonld";
 
   @SuppressWarnings("unchecked")
   // note: the jsonld-java implementation uses java.util.LinkedHashMap to store JSON objects
   // see http://wiki.fasterxml.com/JacksonInFiveMinutes
-  public static Thing mapJson(Object jsonld) throws IOException
+  public static Thing fromJavaMap(Object json) throws IOException
   {
-    // ensures keys are reduced to those in the default context
-    JSONObject json = new JSONObject((Map<String, Object>) compactJson(jsonld));
-
     ObjectMapper mapper = new ObjectMapper();
-    ThingDescription td = mapper.readValue(json.toString(), ThingDescription.class);
-    return td;
-  }
-
-  @SuppressWarnings("unchecked")
-  // same as for mapJson()
-  private static Object removeBlankNodesRec(Object jsonld)
-  {
-    if (jsonld instanceof Map)
-    { // JSON object
-      List<String> toRemove = new ArrayList<>();
-
-      for (Entry<String, Object> e : ((Map<String, Object>) jsonld).entrySet())
-      {
-        if (e.getKey().equals("@id"))
-        {
-          if (e.getValue().toString().startsWith("_"))
-          { // blank node
-            toRemove.add(e.getKey());
-          }
-        }
-        else
-        {
-          removeBlankNodesRec(e.getValue());
-        }
-      }
-
-      for (String k : toRemove)
-      {
-        ((Map<String, Object>) jsonld).remove(k);
-      }
+    JsonNode root = mapper.readValue(json.toString(), JsonNode.class);
+    
+    try {
+      return parse(root);
+    } catch (Exception e) {
+      return parseOld(root);
     }
-    else if (jsonld instanceof List)
-    { // JSON array
-      for (Object o : ((List<Object>) jsonld))
-      {
-        removeBlankNodesRec(o);
-      }
-    }
-    return jsonld;
-  }
-
-  @SuppressWarnings("unchecked")
-  // same as for mapJson()
-  private static JSONObject removeBlankNodes(Object jsonld)
-  {
-    return new JSONObject((Map<String, Object>) removeBlankNodesRec(jsonld));
   }
 
   public static Thing fromURL(URL url) throws JsonParseException, IOException
@@ -189,13 +116,12 @@ public class ThingDescriptionParser
     ObjectMapper mapper = new ObjectMapper();
     JsonNode root = mapper.readValue(bais, JsonNode.class);
 
-    // TODO validate object
-
-    Thing thing = new Thing(root.get("name").asText());
-
-    // TODO add properties and actions
-
-    return thing;
+    try {
+      return parse(root);
+    } catch (Exception e) {
+      // try old parser if by chance it was an old TD
+      return parseOld(root);
+    }
   }
 
   public static Thing fromFile(String fname) throws FileNotFoundException, IOException
@@ -232,12 +158,160 @@ public class ThingDescriptionParser
       Object frame = om.readValue("{\"http://www.w3c.org/wot/td#hasMetadata\":{}}", HashMap.class);
 
       jsonld = JsonLdProcessor.frame(jsonld, frame, new JsonLdOptions());
-      return removeBlankNodes(compactJson(jsonld)).toString();
+      return null;
+//      return removeBlankNodes(compactJson(jsonld)).toString();
     }
     catch (JsonLdError e)
     {
       throw new IOException("Can't reshape triples", e);
     }
+  }
+  
+  @Deprecated
+  private static Thing parseOld(JsonNode td) {
+    try {
+      Thing thing = new Thing(td.get("metadata").get("name").asText());
+      
+      Iterator<String> tdIterator = td.fieldNames();
+      while (tdIterator.hasNext()) {
+        switch (tdIterator.next()) {
+          case "metadata":
+            Iterator<String> metaIterator = td.get("metadata").fieldNames();
+            while (metaIterator.hasNext()) {
+              switch (metaIterator.next()) {
+                case "encodings":
+                  for (JsonNode encoding : td.get("metadata").get("encodings")) {
+                    thing.getMetadata().add("encodings", encoding.asText());
+                  }
+                  break;
+                  
+                case "protocols":
+                  TreeMap<Long, String> orderedURIs = new TreeMap<>();
+                  for (JsonNode protocol : td.get("metadata").get("protocols")) {
+                    orderedURIs.put(protocol.get("priority").asLong(), protocol.get("uri").asText());
+                  }
+                  for (String uri : orderedURIs.values()) {
+                    // values returned in ascending order
+                    thing.getMetadata().add("uris", uri);
+                  }
+                  break;
+              }
+            }
+            break;
+            
+          case "interactions":
+            for (JsonNode inter : td.get("interactions")) {
+              if (inter.get("@type").asText().equals("Property")) {
+                Property.Builder builder = Property.getBuilder(inter.get("name").asText());
+                Iterator<String> propIterator = inter.fieldNames();
+                while (propIterator.hasNext()) {
+                  switch (propIterator.next()) {
+                    case "outputData":
+                      builder.setXsdType(inter.get("outputData").asText());
+                      break;
+                    case "writable":
+                      builder.setWriteable(inter.get("writable").asBoolean());
+                      break;
+                  }
+                }
+                thing.addProperty(builder.build());
+              } else if (inter.get("@type").asText().equals("Action")) {
+                Action.Builder builder = Action.getBuilder(inter.get("name").asText());
+                Iterator<String> actionIterator = inter.fieldNames();
+                while (actionIterator.hasNext()) {
+                  switch (actionIterator.next()) {
+                    case "inputData":
+                      builder.setInputType(inter.get("inputData").asText());
+                      break;
+                    case "outputData":
+                      builder.setOutputType(inter.get("outputData").asText());
+                      break;
+                  }
+                }
+                thing.addAction(builder.build());
+              } else if (inter.get("@type").asText().equals("Event")) {
+                // TODO
+              }
+            }
+            break;
+        }
+      }
+      
+      return thing;
+    } catch (Exception e) { // anything could happen here
+      return null;
+    }
+  }
+  
+  private static Thing parse(JsonNode td) throws Exception {
+    // TODO validate data
+    
+    Thing thing = new Thing(td.get("name").asText());
+    
+    Iterator<String> tdIterator = td.fieldNames();
+    while (tdIterator.hasNext()) {
+      switch (tdIterator.next()) {
+        case "uris":
+          for (JsonNode uri : td.get("uris")) {
+            thing.getMetadata().add("uris", uri.asText());
+          }
+          break;
+          
+        case "properties":
+          for (JsonNode prop : td.get("properties")) {
+            Property.Builder builder = Property.getBuilder(prop.get("name").asText());
+            Iterator<String> it = prop.fieldNames();
+            while (it.hasNext()) {
+              switch (it.next()) {
+                case "valueType":
+                  builder.setXsdType(prop.get("valueType").asText());
+                  break;
+                case "writable":
+                  builder.setWriteable(prop.get("writable").asBoolean());
+                  break;
+                case "hrefs":
+                  builder.setHrefs(prop.findValuesAsText("hrefs"));
+                  break;
+              }
+            }
+            thing.addProperty(builder.build());
+          }
+          break;
+          
+        case "actions":
+          for (JsonNode action : td.get("actions")) {
+            Action.Builder builder = Action.getBuilder(action.get("name").asText());
+            Iterator<String> it = action.fieldNames();
+            while (it.hasNext()) {
+              switch (it.next()) {
+                case "inputData":
+                  builder.setInputType(action.get("inputData").get("valueType").asText());
+                  break;
+                case "outputData":
+                  builder.setOutputType(action.get("outputData").get("valueType").asText());
+                  break;
+                case "hrefs":
+                  builder.setHrefs(action.findValuesAsText("hrefs"));
+                  break;
+              }
+            }
+            thing.addAction(builder.build());
+          }
+          break;
+          
+        case "events":
+          // TODO
+          break;
+          
+        case "encodings":
+          for (JsonNode encoding : td.get("encodings")) {
+            thing.getMetadata().add("encodings", encoding.asText());
+          }
+          break;
+      }
+    }
+    
+    return thing;
   }
 
   public static void main(String[] args) throws FileNotFoundException, IOException

@@ -99,7 +99,7 @@ public class ServientLauncher {
             final LinkedHashMap jsonld = ContentHelper.ensureClass(data, LinkedHashMap.class);
 
             try {
-                final Thing newThing = ThingDescriptionParser.mapJson(jsonld);
+                final Thing newThing = ThingDescriptionParser.fromJavaMap(jsonld);
                 server.addThing(newThing);
                 serverInterface.setProperty("numberOfThings", server.getThings().size());
                 return newThing.getMetadata();

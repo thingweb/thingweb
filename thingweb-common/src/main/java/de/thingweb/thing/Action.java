@@ -26,8 +26,12 @@
 
 package de.thingweb.thing;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import de.thingweb.thing.Property.Builder;
 
 public class Action {
 
@@ -35,16 +39,19 @@ public class Action {
     private final String name;
     private final String inputType;
     private final String outputType;
+    private final List<String> hrefs;
 
     @Deprecated
     protected Action(String name, Map<String, String> params) {
-        this(name, params.get("parm"), "");
+        this(name, params.get("parm"), "", new ArrayList<String>());
     }
-    protected Action(String name, String inputType, String outputType) {
+    
+    protected Action(String name, String inputType, String outputType, List<String> hrefs) {
         this.params = new HashMap<>();
         this.name = name;
         this.inputType = inputType;
         this.outputType = outputType;
+        this.hrefs = hrefs;
     }
 
     /**
@@ -72,7 +79,10 @@ public class Action {
     public String getName() {
         return name;
     }
-
+    
+    public List<String> getHrefs(){
+      return hrefs;
+    }
 
     public static class Builder {
         private final Map<String,String> params = new HashMap<>();
@@ -80,6 +90,7 @@ public class Action {
         private final String name;
         private String inputType = "";
         private String outputType = "";
+        private List<String> hrefs = new ArrayList<String>();
 
         private Builder(String name) {
             this.name = name;
@@ -93,6 +104,11 @@ public class Action {
         public Builder setOutputType(String outputType) {
             this.outputType = (outputType == null) ? "" : outputType;
             return this;
+        }
+        
+        public Builder setHrefs(List<String> hrefs) {
+          this.hrefs = hrefs;
+          return this;
         }
 
         /**
@@ -114,7 +130,7 @@ public class Action {
          */
         public Action build() {
             if(params.size() == 0)
-                    return new Action(name,inputType,outputType);
+                    return new Action(name,inputType,outputType, hrefs);
                else
                        return new Action(name,params);
         }

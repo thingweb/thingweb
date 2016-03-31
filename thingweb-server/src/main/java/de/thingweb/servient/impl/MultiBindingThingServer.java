@@ -33,7 +33,6 @@ import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
 import de.thingweb.desc.ThingDescriptionParser;
-import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.security.SecurityTokenValidator;
 import de.thingweb.security.SecurityTokenValidator4NicePlugfest;
 import de.thingweb.security.TokenRequirements;

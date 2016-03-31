@@ -26,8 +26,6 @@
 
 package de.thingweb.thing;
 
-import de.thingweb.desc.pojo.*;
-
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -67,11 +65,6 @@ public final class Thing {
 
         m_name = name;
         m_metadata = new Metadata();
-    }
-
-    public Thing(String name, Map<String, Object> metadata) {
-        this(name);
-//        m_metadata = metadata; TODO
     }
 
     public String getName() {

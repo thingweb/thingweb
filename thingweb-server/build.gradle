@@ -26,6 +26,7 @@
 
 dependencies {
     compile project(":thingweb-common")
+    compile project(":thingweb-parser")
 
     compile 'com.nanohttpd:nanohttpd:2.1.1'
     compile 'org.eclipse.californium:californium-core:1.0.0-M3'

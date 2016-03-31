@@ -35,7 +35,7 @@ import java.net.URL;
 
 import static org.junit.Assert.fail;
 
-public class DescriptionParserTest {
+public class ThingDescriptionParserTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -95,15 +95,10 @@ public class DescriptionParserTest {
 
     @Test
     public void testFromFile() {
-      String happyPath = "jsonld" + File.separator + "led.jsonld";
-      // (1) the document is not "compact" as per JSON-LD API spec ('td:' prefix already defined in the context)
-      // (2) the property 'label' does not appear in the context (should be dropped)
-      // (3) 'encodings' has only one member and is not defined as a list (should be transformed by compaction)
-      String altPath = "jsonld" + File.separator + "led_1.jsonld";
-      // JSON syntax error (missing comma)
-      // note : the JSON-LD API spec is very permissive. Hard to get a JsonLdError...
+      String happyPath = "jsonld" + File.separator + "led.v2.jsonld";
+      String happyPathOld = "jsonld" + File.separator + "led.jsonld";
       String erroneous = "jsonld" + File.separator + "led_2.jsonld";
-      
+
       try {
           ThingDescriptionParser.fromFile(happyPath);
       } catch (Exception e) {
@@ -112,7 +107,7 @@ public class DescriptionParserTest {
       }
       
       try {
-          ThingDescriptionParser.fromFile(altPath);
+          ThingDescriptionParser.fromFile(happyPathOld);
       } catch (Exception e) {
           e.printStackTrace();
           fail();
@@ -123,29 +118,29 @@ public class DescriptionParserTest {
           fail();
       } catch (IOException e) {
           if (e instanceof JsonParseException) {
-      	// as expected
+            // as expected
           } else {
-      	e.printStackTrace();
-      	fail();
+          	e.printStackTrace();
+          	fail();
           }
       }
     }
     
-    @Test
-    public void testReshape() {
-      try {
-        File f = new File("jsonld/outlet_flattened.jsonld");
-        FileReader r = new FileReader(f);
-        char[] buf = new char [(int) f.length()];
-        r.read(buf);
-        r.close();
-        String jsonld = ThingDescriptionParser.reshape(new String(buf).getBytes());
-        // checks that reshaped jsonld is compliant to description parser's impl.
-        ThingDescriptionParser.fromBytes(jsonld.getBytes());
-        // TODO any further checks?
-      } catch (Exception e) {
-        fail(e.getMessage());
-      }
-    }
+//    @Test
+//    public void testReshape() {
+//      try {
+//        File f = new File("jsonld/outlet_flattened.jsonld");
+//        FileReader r = new FileReader(f);
+//        char[] buf = new char [(int) f.length()];
+//        r.read(buf);
+//        r.close();
+//        String jsonld = ThingDescriptionParser.reshape(new String(buf).getBytes());
+//        // checks that reshaped jsonld is compliant to description parser's impl.
+//        ThingDescriptionParser.fromBytes(jsonld.getBytes());
+//        // TODO any further checks?
+//      } catch (Exception e) {
+//        fail(e.getMessage());
+//      }
+//    }
 
 }

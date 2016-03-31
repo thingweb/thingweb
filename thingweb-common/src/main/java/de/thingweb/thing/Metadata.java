@@ -13,7 +13,6 @@ import java.util.Set;
  * Helper class to provide data structure to hold multiple values with the same key
  *
  * @author Victor Charpenay
- * @creation 31.03.2016
  *
  */
 public class Metadata

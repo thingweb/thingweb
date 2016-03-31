@@ -39,23 +39,6 @@ public class Property extends Observable {
 	 * Implementation Note:
 	 * Thing relies on this class to be immutable for synchronization purposes!
 	 */
-  
-	/*
-  private final PropertyDescription m_propertyDescription;
-	
-	public Property(PropertyDescription propertyDescription){
-		m_propertyDescription = propertyDescription.clone();
-	}
-	
-	public PropertyDescription getDescription(){
-		return m_propertyDescription;
-	}
-	
-	@Override
-	public synchronized void setChanged() {
-		super.setChanged();
-	}
-	*/
 	
 	private final String m_name;
 	private final String m_propertyType;

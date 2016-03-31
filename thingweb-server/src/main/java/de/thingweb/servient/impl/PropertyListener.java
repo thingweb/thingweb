@@ -50,7 +50,7 @@ public class PropertyListener extends AbstractRESTListener implements Observer {
 
     @Override
     public Content onGet() {
-        if (!property.getDescription().isReadable()) {
+        if (!property.isReadable()) {
             throw new UnsupportedOperationException();
         }
 
@@ -61,8 +61,8 @@ public class PropertyListener extends AbstractRESTListener implements Observer {
 
     @Override
     public void onPut(Content data) {
-        if (!property.getDescription().isWritable()) {
-            throw new UnsupportedOperationException(property.getDescription().getName() + " is not writable");
+        if (!property.isWriteable()) {
+            throw new UnsupportedOperationException(property.getName() + " is not writable");
         }
 
         Object o = ContentHelper.getValueFromJson(data);

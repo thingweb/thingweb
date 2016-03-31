@@ -29,7 +29,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import de.thingweb.client.impl.CoapClientImpl;
 import de.thingweb.client.impl.HttpClientImpl;
 import de.thingweb.desc.ThingDescriptionParser;
-import de.thingweb.desc.pojo.*;
 import de.thingweb.thing.Thing;
 
 import org.eclipse.californium.core.CoapClient;
