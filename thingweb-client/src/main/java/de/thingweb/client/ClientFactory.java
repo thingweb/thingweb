@@ -110,10 +110,10 @@ public class ClientFactory {
       for (String suri : uris) {
         URI uri = new URI(suri);
         if(isCoapScheme(uri.getScheme())) {
-          Client c = new CoapClientImpl(suri, thing);
+          clients.add(new CoapClientImpl(suri, thing));
           log.info("Found matching client '" + CoapClientImpl.class.getName() + "' with priority " + prio++);
         } else if(isHttpScheme(uri.getScheme())) {
-          Client c = new HttpClientImpl(suri, thing);
+          clients.add(new HttpClientImpl(suri, thing));
           log.info("Found matching client '" + HttpClientImpl.class.getName() + "' with priority " + prio++);
         } 
       }

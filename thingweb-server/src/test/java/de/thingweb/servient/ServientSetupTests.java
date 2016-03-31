@@ -26,8 +26,7 @@
 
 package de.thingweb.servient;
 
-import de.thingweb.desc.DescriptionParser;
-import de.thingweb.desc.pojo.ThingDescription;
+import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.thing.Thing;
 import org.junit.After;
 import org.junit.Before;

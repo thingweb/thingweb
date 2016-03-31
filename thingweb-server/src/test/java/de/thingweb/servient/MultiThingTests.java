@@ -30,7 +30,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import de.thingweb.desc.pojo.PropertyDescription;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
@@ -65,8 +64,7 @@ public class MultiThingTests {
         Thing[] things = new Thing[nthings];
 
         Action testAction = Action.getBuilder("testAction").build();
-        PropertyDescription pd = new PropertyDescription("testProp", true, "xsd:string");
-        Property testProp = new Property(pd);
+        Property testProp = new Property(Property.getBuilder("testProp").setWriteable(true).setXsdType("xsd:string").build());
 
         for(int i = 0; i<nthings; i++) {
             things[i] = new Thing("thing" + i);
