@@ -25,7 +25,6 @@
 package de.thingweb.client;
 
 import de.thingweb.thing.Action;
-import de.thingweb.desc.pojo.ThingDescription;
 import de.thingweb.thing.Content;
 import de.thingweb.thing.Event;
 import de.thingweb.thing.Metadata;
@@ -35,13 +34,13 @@ import java.util.List;
 
 public interface Client {
 	
-	public ThingDescription getThingDescription();
-	
 	public List<Property> getProperties();
 	
 	public List<Action> getActions();
 	
 	public List<Event> getEvents();
+	
+	public Metadata getMetadata();
 	
 	public String getUsedProtocolURI();
 
