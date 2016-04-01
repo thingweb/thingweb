@@ -1,5 +1,6 @@
 package de.thingweb.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -18,6 +19,8 @@ public class TestClientFactory extends TestCase {
 	@Test
 	public void testUrlTutorialDoor() throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
 		URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/door.jsonld");
+		
+//		jsonld = new File("C:/Users/mchn4310/Desktop/door.jsonld").toURL();
 		
 		ClientFactory cf = new ClientFactory();
 		@SuppressWarnings("unused")
