@@ -47,7 +47,7 @@
       }
     }
   },
-  "required": ["uris", "name"],
+  "required": ["name"],
   "definitions": {
     "name": {
       "type": "string"
@@ -101,7 +101,7 @@
           "type": "boolean"
         }
       },
-      "required": ["name", "hrefs", "valueType"]
+      "required": ["name", "valueType"]
     },
     "action": {
       "title": "Action",
@@ -121,7 +121,7 @@
           "$ref": "#/definitions/data"
         }
       },
-      "required": ["name", "hrefs"]
+      "required": ["name"]
     },
     "event": {
       "title": "Event",
@@ -147,7 +147,7 @@
           ]
         }
       },
-      "required": ["name", "hrefs", "valueType"]
+      "required": ["name", "valueType"]
     },
     "associatedThing": {
       "title": "Associated Thing",

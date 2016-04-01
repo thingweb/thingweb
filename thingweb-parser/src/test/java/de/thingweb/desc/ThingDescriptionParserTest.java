@@ -96,8 +96,10 @@ public class ThingDescriptionParserTest {
     @Test
     public void testFromFile() {
       String happyPath = "jsonld" + File.separator + "led.v2.jsonld";
+      // should use parser for deprecated Thing Descriptions
       String happyPathOld = "jsonld" + File.separator + "led.jsonld";
-      String erroneous = "jsonld" + File.separator + "led_2.jsonld";
+      // should fail (required field not found)
+      String invalid = "jsonld" + File.separator + "led.v2.invalid.jsonld";
 
       try {
           ThingDescriptionParser.fromFile(happyPath);
@@ -114,10 +116,10 @@ public class ThingDescriptionParserTest {
       }
       
       try {
-          ThingDescriptionParser.fromFile(erroneous);
+          ThingDescriptionParser.fromFile(invalid);
           fail();
       } catch (IOException e) {
-          if (e instanceof JsonParseException) {
+          if (e instanceof IOException) {
             // as expected
           } else {
           	e.printStackTrace();

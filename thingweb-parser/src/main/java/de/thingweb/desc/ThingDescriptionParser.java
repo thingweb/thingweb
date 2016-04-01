@@ -24,14 +24,37 @@
 
 package de.thingweb.desc;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.TreeMap;
+
+import javax.management.RuntimeErrorException;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
@@ -41,35 +64,27 @@ import com.siemens.ct.exi.exceptions.EXIException;
 import de.thingweb.encoding.json.exi.EXI4JSONParser;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
-import de.thingweb.thing.Property.Builder;
 import de.thingweb.thing.Thing;
-
-import org.apache.commons.io.output.WriterOutputStream;
-import org.json.JSONObject;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import java.io.*;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 public class ThingDescriptionParser
 {
 
   private static final String WOT_TD_CONTEXT = "http://w3c.github.io/wot/w3c-wot-td-context.jsonld";
 
-  @SuppressWarnings("unchecked")
-  // note: the jsonld-java implementation uses java.util.LinkedHashMap to store JSON objects
-  // see http://wiki.fasterxml.com/JacksonInFiveMinutes
+  private static final JsonNode TD_SCHEMA;
+  
+  static {
+    File f = new File("schema", "td-schema.json");
+    try
+    {
+      TD_SCHEMA = JsonLoader.fromFile(f);
+    }
+    catch (IOException e)
+    {
+      throw new RuntimeException("Expected location for TD JSON schema: schema/td-schema.json", e);
+    }
+  }
+
   public static Thing fromJavaMap(Object json) throws IOException
   {
     ObjectMapper mapper = new ObjectMapper();
@@ -244,7 +259,7 @@ public class ThingDescriptionParser
   }
   
   @Deprecated
-  private static Thing parseOld(JsonNode td) {
+  private static Thing parseOld(JsonNode td) throws IOException {
     try {
       Thing thing = new Thing(td.get("metadata").get("name").asText());
       
@@ -315,12 +330,15 @@ public class ThingDescriptionParser
       
       return thing;
     } catch (Exception e) { // anything could happen here
-      return null;
+      throw new IOException("unable to parse Thing Description");
     }
   }
   
   private static Thing parse(JsonNode td) throws Exception {
-    // TODO validate data
+    ProcessingReport report = JsonSchemaFactory.byDefault().getValidator().validate(TD_SCHEMA, td);
+    if (!report.isSuccess()) {
+      throw new IOException("JSON data not valid");
+    }
     
     Thing thing = new Thing(td.get("name").asText());
     
