@@ -71,19 +71,19 @@ public class ThingDescriptionParser
 
   private static final String WOT_TD_CONTEXT = "http://w3c.github.io/wot/w3c-wot-td-context.jsonld";
 
-  private static final JsonNode TD_SCHEMA;
-  
-  static {
-    File f = new File("schema", "td-schema.json");
-    try
-    {
-      TD_SCHEMA = JsonLoader.fromFile(f);
-    }
-    catch (IOException e)
-    {
-      throw new RuntimeException("Expected location for TD JSON schema: schema/td-schema.json", e);
-    }
-  }
+//  private static final JsonNode TD_SCHEMA;
+//  
+//  static {
+//    File f = new File("schema", "td-schema.json");
+//    try
+//    {
+//      TD_SCHEMA = JsonLoader.fromFile(f);
+//    }
+//    catch (IOException e)
+//    {
+//      throw new RuntimeException("Expected location for TD JSON schema: schema/td-schema.json", e);
+//    }
+//  }
 
   public static Thing fromJavaMap(Object json) throws IOException
   {
@@ -335,10 +335,10 @@ public class ThingDescriptionParser
   }
   
   private static Thing parse(JsonNode td) throws Exception {
-    ProcessingReport report = JsonSchemaFactory.byDefault().getValidator().validate(TD_SCHEMA, td);
-    if (!report.isSuccess()) {
-      throw new IOException("JSON data not valid");
-    }
+//    ProcessingReport report = JsonSchemaFactory.byDefault().getValidator().validate(TD_SCHEMA, td);
+//    if (!report.isSuccess()) {
+//      throw new IOException("JSON data not valid");
+//    }
     
     Thing thing = new Thing(td.get("name").asText());
     
