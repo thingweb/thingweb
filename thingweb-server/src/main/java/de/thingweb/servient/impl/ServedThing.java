@@ -154,12 +154,22 @@ public class ServedThing implements ThingInterface {
             m_stateContainer.addUpdateHandler(property, callback);
         }
     }
-    
+
+    @Override
+    public void onUpdate(String propertyName, Consumer<Object> callback) {
+        onPropertyUpdate(propertyName,callback);
+    }
+
     @Override
     public void onPropertyRead(Consumer<Object> callback) {
     	m_propertyGetCallback = callback;
     }
     
+    @Override
+    public void onInvoke(String actionName, Function<Object, Object> callback) {
+        onActionInvoke(actionName,callback);
+    }
+
     //TODO overloads for void
     @Override
     public void onActionInvoke(String actionName, Function<Object, Object> callback) {
@@ -171,11 +181,13 @@ public class ServedThing implements ThingInterface {
         }
     }
 
+    @Override
     public String getName() {
         return m_thingModel.getName();
     }
     
  // TODO This should perhaps be a generic add interaction. But wait and watch how proposals develop.
+    //Taking this out, see Thing.addProperty
     public void addProperty(Property prop){
     	m_thingModel.addProperty(prop);
     	m_stateContainer.updateHandlers();
