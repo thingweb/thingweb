@@ -24,14 +24,25 @@
 
 package de.thingweb.desc;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.jsonldjava.core.JsonLdError;
+import com.github.jsonldjava.core.JsonLdOptions;
+import com.github.jsonldjava.core.JsonLdProcessor;
+import com.github.jsonldjava.utils.JsonUtils;
+import com.siemens.ct.exi.exceptions.EXIException;
+import de.thingweb.encoding.json.exi.EXI4JSONParser;
+import de.thingweb.thing.Action;
+import de.thingweb.thing.Property;
+import de.thingweb.thing.Thing;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,32 +50,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
-
-import javax.management.RuntimeErrorException;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import com.github.jsonldjava.core.JsonLdError;
-import com.github.jsonldjava.core.JsonLdOptions;
-import com.github.jsonldjava.core.JsonLdProcessor;
-import com.github.jsonldjava.utils.JsonUtils;
-import com.siemens.ct.exi.exceptions.EXIException;
-
-import de.thingweb.encoding.json.exi.EXI4JSONParser;
-import de.thingweb.thing.Action;
-import de.thingweb.thing.Property;
-import de.thingweb.thing.Thing;
 
 public class ThingDescriptionParser
 {
@@ -224,7 +209,11 @@ public class ThingDescriptionParser
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ObjectMapper mapper = new ObjectMapper();
+
+    //TODO catch the IOException here and throw a runtimeexception
+    // as this is no case where a developer could react
     mapper.writeValue(baos, td);
+
     return baos.toByteArray();
   }
 

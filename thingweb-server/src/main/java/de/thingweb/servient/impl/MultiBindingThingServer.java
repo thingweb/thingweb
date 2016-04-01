@@ -26,13 +26,9 @@
 
 package de.thingweb.servient.impl;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import de.thingweb.binding.AbstractRESTListener;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
-import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.security.SecurityTokenValidator;
 import de.thingweb.security.SecurityTokenValidator4NicePlugfest;
 import de.thingweb.security.TokenRequirements;
@@ -40,13 +36,11 @@ import de.thingweb.security.TokenRequirementsBuilder;
 import de.thingweb.servient.Defines;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
-import de.thingweb.thing.*;
-import de.thingweb.util.encoding.ContentHelper;
-import javafx.util.Pair;
-
+import de.thingweb.thing.Action;
+import de.thingweb.thing.Property;
+import de.thingweb.thing.Thing;
 import org.jose4j.lang.JoseException;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
@@ -68,6 +62,7 @@ public class MultiBindingThingServer implements ThingServer {
     private final Collection<ResourceBuilder> m_bindings = new ArrayList<>();
     protected SecurityTokenValidator4NicePlugfest validator;
     private TokenRequirements tokenRequirements;
+    private final JsonNodeFactory jsonNodeFactory = new JsonNodeFactory(false);
 
     public MultiBindingThingServer(Thing thingModel,
                                    ResourceBuilder... bindings) {
@@ -170,6 +165,18 @@ public class MultiBindingThingServer implements ThingServer {
     }
 
     private void createBindings(ServedThing thingModel, boolean isProtected) {
+        //TODO maybe replace the thins-root HypermediaIndex by a repository-output structure
+        /* i.e.
+            {
+                "thing1" : <td of thing1>,
+                "thing2" : <td of thing2>,
+            }
+         */
+        //final ObjectNode response = jsonNodeFactory.objectNode();
+        //things.forEach(
+        //        (name,thing) -> response.put(name, ThingDescriptionParser.toBytes(thing.getThingModel()))
+        //);
+
         final List<HyperMediaLink> thinglinks = things.keySet().stream()
                 .sorted()
                 .map(name -> new HyperMediaLink("thing", Defines.BASE_THING_URL + urlize(name)))
@@ -177,7 +184,7 @@ public class MultiBindingThingServer implements ThingServer {
 
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);
 
-        final List<String> protocols = new ArrayList<String>();
+        final List<String> protocols = new ArrayList<>();
         List<String> uris = thingModel.getThingModel().getMetadata().getAll("uris");
         if (uris != null) {
           for (String uri : uris) {
@@ -201,9 +208,11 @@ public class MultiBindingThingServer implements ThingServer {
         final Collection<Property> properties = thingModel.getProperties();
         final Collection<Action> actions = thingModel.getActions();
 
-        final List<HyperMediaLink> interactionLinks = new LinkedList<>();
+        //final List<HyperMediaLink> interactionLinks = new LinkedList<>();
         final Map<String, RESTListener> interactionListeners = new HashMap<>();
         final String thingurl = Defines.BASE_THING_URL + thingModel.getName().toLowerCase();
+
+        final ThingDescriptionRestListener tdRestListener = new ThingDescriptionRestListener(thingModel);
 
         // collect properties
         for (Property property : properties) {
@@ -220,7 +229,7 @@ public class MultiBindingThingServer implements ThingServer {
 //            ));
 
             interactionListeners.put(url + "/value", propertyListener);
-            interactionLinks.add(new HyperMediaLink("property", urlizeTokens(url)));
+            //interactionLinks.add(new HyperMediaLink("property", urlizeTokens(url)));
         }
 
         // collect actions
@@ -230,33 +239,19 @@ public class MultiBindingThingServer implements ThingServer {
             final ActionListener actionListener = new ActionListener(servedThing, action);
             if(isProtected) actionListener.protectWith(getValidator());
             interactionListeners.put(url, actionListener);
-            interactionLinks.add(new HyperMediaLink("action", urlizeTokens(url)));
+            //interactionLinks.add(new HyperMediaLink("action", urlizeTokens(url)));
         }
 
         //add listener for thing description
         String tdUrl = thingurl + "/.td";
-        interactionLinks.add(new HyperMediaLink("description",urlizeTokens(tdUrl)));
+        //interactionLinks.add(new HyperMediaLink("description",urlizeTokens(tdUrl)));
         interactionListeners.put(tdUrl,
-                new AbstractRESTListener() {
-                    @Override
-                    public Content onGet() {                        
-                        try
-                        {
-                          return new Content(ThingDescriptionParser.toBytes(thingModel), MediaType.APPLICATION_JSON);
-                        }
-                        catch (IOException e)
-                        {
-                          e.printStackTrace();
-                          // TODO should return 5XX instead...
-                          String message = "Internal server error";
-                          return new Content(message.getBytes(), MediaType.TEXT_PLAIN);
-                        }
-                    }
-                });
+                tdRestListener);
 
         // thing root
         resources.newResource(thingurl,
-                new HypermediaIndex(interactionLinks)
+                tdRestListener
+                //new HypermediaIndex(interactionLinks)
         );
 
         // leaves last (side-effect of coap-binding)
