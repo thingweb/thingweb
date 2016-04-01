@@ -25,6 +25,7 @@
 dependencies {
     compile project(":thingweb-common")
     compile project(":thingweb-parser")
+    compile 'org.json:json:20141113'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
 
     compile 'org.eclipse.californium:californium-core:1.0.0-M3'
