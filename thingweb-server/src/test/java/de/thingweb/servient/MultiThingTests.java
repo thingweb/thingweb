@@ -64,7 +64,7 @@ public class MultiThingTests {
         Thing[] things = new Thing[nthings];
 
         Action testAction = Action.getBuilder("testAction").build();
-        Property testProp = new Property(Property.getBuilder("testProp").setWriteable(true).setXsdType("xsd:string").build());
+        Property testProp = Property.getBuilder("testProp").setWriteable(true).setXsdType("xsd:string").build();
 
         for(int i = 0; i<nthings; i++) {
             things[i] = new Thing("thing" + i);
@@ -91,7 +91,7 @@ public class MultiThingTests {
     @Test
     public void notUrlConformNames() throws Exception {
         final Thing thing = new Thing("Ugly strange näime");
-        thing.addProperty(new Property(new PropertyDescription("not url kompätibel")));
+        thing.addProperty(Property.getBuilder("not url kompätibel").build());
 
         thing.addAction(Action.getBuilder("wierdly named äktschn").build());
 
@@ -119,7 +119,7 @@ public class MultiThingTests {
 
     public static void main(String[] args) throws Exception {
         final Thing thing = new Thing("Ugly strange näime");
-        thing.addProperty(new Property(new PropertyDescription("not url kompätibel")));
+        thing.addProperty(Property.getBuilder("not url kompätibel").build());
         thing.addAction(Action.getBuilder("wierdly named äktschn").build());
 
         ServientBuilder.initialize();

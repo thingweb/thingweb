@@ -26,8 +26,7 @@
 
 package de.thingweb.security;
 
-import de.thingweb.desc.DescriptionParser;
-import de.thingweb.desc.pojo.ThingDescription;
+import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.servient.ServientBuilder;
 import de.thingweb.servient.TestTools;
 import de.thingweb.servient.ThingServer;
@@ -58,8 +57,7 @@ public class RemoveMe_SecureServerLauncher {
 
         ServientBuilder.initialize();
         String json = TestTools.readResource("simplething.jsonld");
-        ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
-        Thing theThing = new Thing(thingDescription);
+        Thing theThing = ThingDescriptionParser.fromBytes(json.getBytes());
         theThing.setProtection(true);
         ThingServer server = ServientBuilder.newThingServer(tokenRequirements, theThing);
         server.setTokenRequirements(tokenRequirements);

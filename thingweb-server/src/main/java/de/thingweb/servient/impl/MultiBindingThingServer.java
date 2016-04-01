@@ -46,6 +46,7 @@ import javafx.util.Pair;
 
 import org.jose4j.lang.JoseException;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
@@ -239,7 +240,17 @@ public class MultiBindingThingServer implements ThingServer {
                 new AbstractRESTListener() {
                     @Override
                     public Content onGet() {                        
-                        return new Content(ThingDescriptionParser.toBytes(thingModel), MediaType.APPLICATION_JSON);
+                        try
+                        {
+                          return new Content(ThingDescriptionParser.toBytes(thingModel), MediaType.APPLICATION_JSON);
+                        }
+                        catch (IOException e)
+                        {
+                          e.printStackTrace();
+                          // TODO should return 5XX instead...
+                          String message = "Internal server error";
+                          return new Content(message.getBytes(), MediaType.TEXT_PLAIN);
+                        }
                     }
                 });
 

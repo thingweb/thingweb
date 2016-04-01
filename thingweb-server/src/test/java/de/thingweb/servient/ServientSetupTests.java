@@ -58,15 +58,14 @@ public class ServientSetupTests {
     @Test
     public void parseTDFromJson() throws IOException, URISyntaxException {
         String json = readResource("simplething.jsonld");
-        ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
-        assertThat(thingDescription.getMetadata().getName(),equalTo("SimpleThing"));
+        Thing thingDescription = ThingDescriptionParser.fromBytes(json.getBytes());
+        assertThat(thingDescription.getName(),equalTo("SimpleThing"));
     }
 
     @Test
     public void createThing() throws IOException, URISyntaxException {
         String json = readResource("simplething.jsonld");
-        ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
-        Thing simpleThing = new Thing(thingDescription);
+        Thing simpleThing = ThingDescriptionParser.fromBytes(json.getBytes());
         assertThat(simpleThing.getAction("testaction"),notNullValue());
         assertThat(simpleThing.getProperty("number"),notNullValue());
     }
@@ -74,8 +73,7 @@ public class ServientSetupTests {
     @Test
     public void createSingleThingServient() throws Exception {
         String json = readResource("simplething.jsonld");
-        ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
-        Thing simpleThing = new Thing(thingDescription);
+        Thing simpleThing = ThingDescriptionParser.fromBytes(json.getBytes());
         ThingServer server = ServientBuilder.newThingServer(simpleThing);
         ServientBuilder.start();
     }
@@ -83,8 +81,7 @@ public class ServientSetupTests {
     @Test
     public void createThingServientAndAddThing() throws Exception {
         String json = readResource("simplething.jsonld");
-        ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
-        Thing simpleThing = new Thing(thingDescription);
+        Thing simpleThing = ThingDescriptionParser.fromBytes(json.getBytes());
         ThingServer server = ServientBuilder.newThingServer();
         server.addThing(simpleThing);
         ServientBuilder.start();
@@ -99,8 +96,7 @@ public class ServientSetupTests {
     @Test
     public void addAfterStart() throws Exception {
         String json = readResource("simplething.jsonld");
-        ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
-        Thing simpleThing = new Thing(thingDescription);
+        Thing simpleThing = ThingDescriptionParser.fromBytes(json.getBytes());
         ThingServer server = ServientBuilder.newThingServer();
         ServientBuilder.start();
         server.addThing(simpleThing);
@@ -109,8 +105,7 @@ public class ServientSetupTests {
     @Test
     public void addPartialThing() throws Exception {
         String json = readResource("interactiononly.jsonld");
-        ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
-        Thing partialThing = new Thing(thingDescription);
+        Thing partialThing = ThingDescriptionParser.fromBytes(json.getBytes());
         ThingServer server = ServientBuilder.newThingServer();
         ServientBuilder.start();
         server.addThing(partialThing);

@@ -26,8 +26,7 @@
 
 package de.thingweb.servient;
 
-import de.thingweb.desc.DescriptionParser;
-import de.thingweb.desc.pojo.ThingDescription;
+import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.thing.MediaType;
 import de.thingweb.thing.Thing;
 
@@ -51,8 +50,7 @@ public class TestTools {
     public static void main(String[] args) throws Exception {
         ServientBuilder.initialize();
         String json = readResource("simplething.jsonld");
-        ThingDescription thingDescription = DescriptionParser.fromBytes(json.getBytes());
-        Thing simpleThing = new Thing(thingDescription);
+        Thing simpleThing = ThingDescriptionParser.fromBytes(json.getBytes());
         ThingServer server = ServientBuilder.newThingServer(simpleThing);
         server.getThing("SimpleThing").setProperty("number",38);
         ServientBuilder.start();

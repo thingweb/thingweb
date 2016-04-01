@@ -47,6 +47,10 @@ public class Metadata
     return items.get(key);
   }
   
+  public boolean contains(String key) {
+    return items.containsKey(key);
+  }
+  
   private void checkKey(String key) {
     if (!items.containsKey(key)) {
       items.put(key, new ArrayList<String>());

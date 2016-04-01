@@ -33,7 +33,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class ThingDescriptionParserTest {
 
@@ -124,6 +124,12 @@ public class ThingDescriptionParserTest {
           	fail();
           }
       }
+    }
+    
+    @Test
+    public void testToBytes() throws Exception
+    {
+      // TODO
     }
     
 //    @Test

@@ -24,9 +24,14 @@
 
 package de.thingweb.desc;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
@@ -39,6 +44,7 @@ import de.thingweb.thing.Property;
 import de.thingweb.thing.Property.Builder;
 import de.thingweb.thing.Thing;
 
+import org.apache.commons.io.output.WriterOutputStream;
 import org.json.JSONObject;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -131,10 +137,80 @@ public class ThingDescriptionParser
     return fromBytes(data);
   }
   
-  public static byte[] toBytes(Thing thing)
+  public static byte[] toBytes(Thing thing) throws IOException
   {
-    // TODO
-    return null;
+    JsonNodeFactory factory = new JsonNodeFactory(false);
+    
+    ObjectNode td = factory.objectNode();
+    td.put("@context", WOT_TD_CONTEXT);
+    td.put("name", thing.getName());
+    
+    if (thing.getMetadata().contains("encodings")) {
+      ArrayNode encodings = factory.arrayNode();
+      for (String e : thing.getMetadata().getAll("encodings")) {
+        encodings.add(e);
+      }
+      td.put("encodings", encodings);
+    }
+     
+    if (thing.getMetadata().contains("uris")) {
+      ArrayNode uris = factory.arrayNode();
+      for (String uri : thing.getMetadata().getAll("uris")) {
+        uris.add(uri);
+      }
+      td.put("uris", uris);
+    }
+    
+    ArrayNode properties = factory.arrayNode();
+    for (Property prop : thing.getProperties()) {
+      ObjectNode p = factory.objectNode();
+      p.put("name", prop.getName());
+      p.put("writable", prop.isWriteable());
+      p.put("valueType", prop.getXsdType());
+      
+      if (prop.getHrefs().size() > 0) {
+        ArrayNode hrefs = factory.arrayNode();
+        for (String href : prop.getHrefs()) {
+          hrefs.add(href);
+        }
+        p.put("hrefs", hrefs);
+      }
+      
+      properties.add(p);
+    }
+    td.put("properties", properties);
+    
+    ArrayNode actions = factory.arrayNode();
+    for (Action action : thing.getActions()) {
+      ObjectNode a = factory.objectNode();
+      a.put("name", action.getName());
+      
+      ObjectNode in = factory.objectNode();
+      in.put("valueType", action.getInputType());
+      a.put("inputData", in);
+      
+      ObjectNode out = factory.objectNode();
+      out.put("valueType", action.getOutputType());
+      a.put("outputData", out);
+      
+      if (action.getHrefs().size() > 0) {
+        ArrayNode hrefs = factory.arrayNode();
+        for (String href : action.getHrefs()) {
+          hrefs.add(href);
+        }
+        a.put("hrefs", hrefs);
+      }
+      
+      actions.add(a);
+    }
+    td.put("actions", actions);
+    
+    // TODO events
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.writeValue(baos, td);
+    return baos.toByteArray();
   }
 
   /**
