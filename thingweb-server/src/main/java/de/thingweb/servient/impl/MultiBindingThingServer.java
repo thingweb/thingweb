@@ -177,6 +177,7 @@ public class MultiBindingThingServer implements ThingServer {
         //        (name,thing) -> response.put(name, ThingDescriptionParser.toBytes(thing.getThingModel()))
         //);
 
+        // Hypermedia index
         final List<HyperMediaLink> thinglinks = things.keySet().stream()
                 .sorted()
                 .map(name -> new HyperMediaLink("thing", Defines.BASE_THING_URL + urlize(name)))
@@ -184,22 +185,19 @@ public class MultiBindingThingServer implements ThingServer {
 
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);
 
-        final List<String> protocols = new ArrayList<>();
-        List<String> uris = thingModel.getThingModel().getMetadata().getAll("uris");
-        if (uris != null) {
-          for (String uri : uris) {
-            protocols.add(uri);
-          }
-        }
 
+        // resources
         for (ResourceBuilder binding : m_bindings) {
             // update/create HATEOAS links to things
             binding.newResource(Defines.BASE_THING_URL, thingIndex);
+
+            //add thing
             createBinding(binding, thingModel,isProtected);
-            protocols.add(binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()));
+
+            //update metadata
+            thingModel.getThingModel().getMetadata()
+                    .add("uris", binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()));
         }
-
-
     }
     
     private void createBinding(ResourceBuilder resources, ServedThing servedThing, boolean isProtected) {
