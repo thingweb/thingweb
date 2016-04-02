@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
@@ -91,30 +92,30 @@ public class MultiThingTests {
     @Test
     public void notUrlConformNames() throws Exception {
         final Thing thing = new Thing("Ugly strange näime");
-        thing.addProperty(Property.getBuilder("not url kompätibel").build());
 
-        thing.addAction(Action.getBuilder("wierdly named äktschn").build());
+        final String propertyName = "not url kompätibel";
+        thing.addProperty(Property.getBuilder(propertyName).build());
+
+        final String actionName = "wierdly named äktschn";
+        thing.addAction(Action.getBuilder(actionName).build());
 
         server.addThing(thing);
 
         ServientBuilder.start();
-
         URL thingroot = new URL("http://localhost:8080/things/");
 
         final ArrayNode jsonNode = (ArrayNode) jsonMapper.readTree(thingroot);
         final String thingHref = jsonNode.get(0).get("href").textValue();
 
-        // this replacement needs to be done when writing the json
+        // check if thing is reachable
         final URL thingUrl = new URL(thingroot,thingHref);
-        final ArrayNode thingLinks = (ArrayNode) jsonMapper.readTree(thingUrl);
+        final Thing thing1 = ThingDescriptionParser.fromURL(thingUrl);
 
-        thingLinks.forEach(node -> {
-            try {
-                jsonMapper.readTree(new URL(thingUrl,node.get("href").textValue()));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        assertThat("should be the same name",thing1.getName(), equalTo(thing.getName()));
+        assertThat("should contain an action", thing1.getActions(), hasSize(greaterThanOrEqualTo(1)));
+        assertThat("property name should be the same", thing1.getActions().get(0).getName(), equalTo(actionName));
+        assertThat("should contain a property", thing1.getProperties(), hasSize(greaterThanOrEqualTo(1)));
+        assertThat("action name should be the same",thing1.getProperties().get(0).getName(), equalTo(propertyName));
     }
 
     public static void main(String[] args) throws Exception {
