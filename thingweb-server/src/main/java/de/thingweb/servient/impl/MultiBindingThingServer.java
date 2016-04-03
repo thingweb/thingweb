@@ -203,23 +203,19 @@ public class MultiBindingThingServer implements ThingServer {
     private void createBinding(ResourceBuilder resources, ServedThing servedThing, boolean isProtected) {
         final Thing thingModel = servedThing.getThingModel();
 
-        final Collection<Property> properties = thingModel.getProperties();
-        final Collection<Action> actions = thingModel.getActions();
-
-        //final List<HyperMediaLink> interactionLinks = new LinkedList<>();
         final Map<String, RESTListener> interactionListeners = new HashMap<>();
         final String thingurl = Defines.BASE_THING_URL + thingModel.getName().toLowerCase();
 
         final ThingDescriptionRestListener tdRestListener = new ThingDescriptionRestListener(thingModel);
 
         // collect properties
-        for (Property property : properties) {
+        for (Property property : thingModel.getProperties()) {
             String url = thingurl + "/" + property.getName();
 
             final PropertyListener propertyListener = new PropertyListener(servedThing, property);
             if(isProtected) propertyListener.protectWith(getValidator());
             interactionListeners.put(url, propertyListener);
-
+            property.getHrefs().add(urlize(property.getName()));
 //            TODO I'll comment this out until we have /value on the microcontroller
 //            interactionListeners.put(url, new HypermediaIndex(
 //                    new HyperMediaLink("value","value"),
@@ -227,30 +223,24 @@ public class MultiBindingThingServer implements ThingServer {
 //            ));
 
             interactionListeners.put(url + "/value", propertyListener);
-            //interactionLinks.add(new HyperMediaLink("property", urlizeTokens(url)));
         }
 
         // collect actions
-        for (Action action : actions) {
+        for (Action action : thingModel.getActions()) {
             //TODO optimize by preconstructing strings and using format
             final String url = thingurl + "/" + action.getName();
             final ActionListener actionListener = new ActionListener(servedThing, action);
             if(isProtected) actionListener.protectWith(getValidator());
             interactionListeners.put(url, actionListener);
-            //interactionLinks.add(new HyperMediaLink("action", urlizeTokens(url)));
+            action.getHrefs().add(urlize(action.getName()));
         }
 
         //add listener for thing description
         String tdUrl = thingurl + "/.td";
-        //interactionLinks.add(new HyperMediaLink("description",urlizeTokens(tdUrl)));
-        interactionListeners.put(tdUrl,
-                tdRestListener);
+        interactionListeners.put(tdUrl, tdRestListener);
 
         // thing root
-        resources.newResource(thingurl,
-                tdRestListener
-                //new HypermediaIndex(interactionLinks)
-        );
+        resources.newResource(thingurl, tdRestListener);
 
         // leaves last (side-effect of coap-binding)
         interactionListeners.entrySet().stream().forEachOrdered(
