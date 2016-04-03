@@ -181,7 +181,7 @@ public class MultiBindingThingServer implements ThingServer {
                 final ObjectNode response = jsonNodeFactory.objectNode();
                 things.forEach(
                         (name, thing) -> {
-                                response.put(name, ThingDescriptionParser.toJsonObject(thingModel.getThingModel()));
+                                response.put(name, ThingDescriptionParser.toJsonObject(thing.getThingModel()));
                         }
                 );
                 return ContentHelper.wrap(response, MediaType.APPLICATION_JSON);
@@ -189,12 +189,12 @@ public class MultiBindingThingServer implements ThingServer {
         };
 
         // Hypermedia index
-        final List<HyperMediaLink> thinglinks = things.keySet().stream()
+/*        final List<HyperMediaLink> thinglinks = things.keySet().stream()
                 .sorted()
                 .map(name -> new HyperMediaLink("thing", Defines.BASE_THING_URL + urlize(name)))
                 .collect(Collectors.toList());
 
-        final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);
+        final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);*/
 
 
         // resources
