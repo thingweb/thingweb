@@ -39,6 +39,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -92,13 +93,13 @@ public class MultiThingTests {
 
     @Test
     public void notUrlConformNames() throws Exception {
-        final String thingName = "Ugly strange näime";
+        final String thingName = ensureUTF8("Ugly strange näime");
         final Thing thing = new Thing(thingName);
 
-        final String propertyName = "not url kompätibel";
+        final String propertyName = ensureUTF8("not url kompätibel");
         thing.addProperty(Property.getBuilder(propertyName).build());
 
-        final String actionName = "wierdly named äktschn";
+        final String actionName = ensureUTF8("wierdly named äktschn");
         thing.addAction(Action.getBuilder(actionName).build());
 
         server.addThing(thing);
@@ -122,6 +123,15 @@ public class MultiThingTests {
         assertThat("property name should be the same", thing1.getActions().get(0).getName(), equalTo(actionName));
         assertThat("should contain a property", thing1.getProperties(), hasSize(greaterThanOrEqualTo(1)));
         assertThat("action name should be the same",thing1.getProperties().get(0).getName(), equalTo(propertyName));
+    }
+
+    /** this is a crutch since I cannot get Gradle to compile using UTF-8.
+     * I am not sure why anybody would not want UTF-8 as the default setting...
+     * @param input string literal from the file
+     * @return string in utf-8
+     */
+    public static String ensureUTF8(String input) {
+        return String.valueOf(Charset.forName("UTF-8").encode(input));
     }
 
     @After

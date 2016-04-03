@@ -149,7 +149,7 @@ public class MultiBindingThingServer implements ThingServer {
 
     @Override
     public ThingInterface getThing(String thingName) {
-        return things.get(thingName.toLowerCase());
+        return things.get(thingName);
     }
 
     @Override
