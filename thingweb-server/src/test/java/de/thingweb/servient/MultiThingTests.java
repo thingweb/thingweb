@@ -28,8 +28,7 @@ package de.thingweb.servient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
@@ -40,6 +39,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -76,22 +76,24 @@ public class MultiThingTests {
 
         ServientBuilder.start();
 
-        JsonNode node = jsonMapper.readTree(new URL("http://localhost:8080/things/"));
-        assertThat("expecting an array of links to things",node.isArray(), is(true));
+        JsonNode jsonNode = jsonMapper.readTree(new URL("http://localhost:8080/things/"));
+        assertThat("should be an object", jsonNode.isObject(), is(true));
 
-        ArrayNode links = (ArrayNode) node;
+        final ObjectNode repo = (ObjectNode) jsonNode;
 
-        assertThat("expected at least the same number of links under /things as things", links.size(), greaterThanOrEqualTo(nthings));
+        assertThat("expected at least the same number of links under /things as things", repo.size(), greaterThanOrEqualTo(nthings));
 
-        links.forEach(link -> {
-            assertThat(link.get("href").textValue(),startsWith("/things/"));
-            assertThat(link.get("href").textValue(),not(isEmptyOrNullString()));
-        });
+        Arrays.stream(things).forEach(
+                thing -> assertThat("should contain all things, misses " + thing.getName(),repo.get(thing.getName()),notNullValue())
+        );
+
+        //further checks
     }
 
     @Test
     public void notUrlConformNames() throws Exception {
-        final Thing thing = new Thing("Ugly strange näime");
+        final String thingName = "Ugly strange näime";
+        final Thing thing = new Thing(thingName);
 
         final String propertyName = "not url kompätibel";
         thing.addProperty(Property.getBuilder(propertyName).build());
@@ -104,29 +106,22 @@ public class MultiThingTests {
         ServientBuilder.start();
         URL thingroot = new URL("http://localhost:8080/things/");
 
-        final ArrayNode jsonNode = (ArrayNode) jsonMapper.readTree(thingroot);
-        final String thingHref = jsonNode.get(0).get("href").textValue();
+        final JsonNode jsonNode = jsonMapper.readTree(thingroot);
+        assertThat("should be an object", jsonNode.isObject(), is(true));
 
-        // check if thing is reachable
-        final URL thingUrl = new URL(thingroot,thingHref);
-        final Thing thing1 = ThingDescriptionParser.fromURL(thingUrl);
+        final ObjectNode repo = (ObjectNode) jsonNode;
+        final JsonNode thingDesc = repo.get(thingName);
+        assertThat(thingDesc,notNullValue());
+        assertThat(thingDesc.isObject(), is(true));
+
+        // check if thingdesc is parseable
+        final Thing thing1 = ThingDescriptionParser.fromJavaMap(thingDesc);
 
         assertThat("should be the same name",thing1.getName(), equalTo(thing.getName()));
         assertThat("should contain an action", thing1.getActions(), hasSize(greaterThanOrEqualTo(1)));
         assertThat("property name should be the same", thing1.getActions().get(0).getName(), equalTo(actionName));
         assertThat("should contain a property", thing1.getProperties(), hasSize(greaterThanOrEqualTo(1)));
         assertThat("action name should be the same",thing1.getProperties().get(0).getName(), equalTo(propertyName));
-    }
-
-    public static void main(String[] args) throws Exception {
-        final Thing thing = new Thing("Ugly strange näime");
-        thing.addProperty(Property.getBuilder("not url kompätibel").build());
-        thing.addAction(Action.getBuilder("wierdly named äktschn").build());
-
-        ServientBuilder.initialize();
-        ServientBuilder.newThingServer(thing);
-        ServientBuilder.start();
-
     }
 
     @After

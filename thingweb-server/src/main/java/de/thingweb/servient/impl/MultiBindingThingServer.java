@@ -27,8 +27,11 @@
 package de.thingweb.servient.impl;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
+import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.security.SecurityTokenValidator;
 import de.thingweb.security.SecurityTokenValidator4NicePlugfest;
 import de.thingweb.security.TokenRequirements;
@@ -36,9 +39,8 @@ import de.thingweb.security.TokenRequirementsBuilder;
 import de.thingweb.servient.Defines;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
-import de.thingweb.thing.Action;
-import de.thingweb.thing.Property;
-import de.thingweb.thing.Thing;
+import de.thingweb.thing.*;
+import de.thingweb.util.encoding.ContentHelper;
 import org.jose4j.lang.JoseException;
 
 import java.io.UnsupportedEncodingException;
@@ -133,7 +135,7 @@ public class MultiBindingThingServer implements ThingServer {
             throw new IllegalArgumentException("thingModel must not be null");
         }
         ServedThing servedThing = new ServedThing(thing);
-        things.put(thing.getName().toLowerCase(), servedThing);
+        things.put(thing.getName(), servedThing);
         createBindings(servedThing, thing.isProtected());
         return servedThing;
     }
@@ -172,10 +174,19 @@ public class MultiBindingThingServer implements ThingServer {
                 "thing2" : <td of thing2>,
             }
          */
-        //final ObjectNode response = jsonNodeFactory.objectNode();
-        //things.forEach(
-        //        (name,thing) -> response.put(name, ThingDescriptionParser.toBytes(thing.getThingModel()))
-        //);
+
+        AbstractRESTListener RepoRestListener = new AbstractRESTListener() {
+            @Override
+            public Content onGet() {
+                final ObjectNode response = jsonNodeFactory.objectNode();
+                things.forEach(
+                        (name, thing) -> {
+                                response.put(name, ThingDescriptionParser.toJsonObject(thingModel.getThingModel()));
+                        }
+                );
+                return ContentHelper.wrap(response, MediaType.APPLICATION_JSON);
+            }
+        };
 
         // Hypermedia index
         final List<HyperMediaLink> thinglinks = things.keySet().stream()
@@ -189,7 +200,7 @@ public class MultiBindingThingServer implements ThingServer {
         // resources
         for (ResourceBuilder binding : m_bindings) {
             // update/create HATEOAS links to things
-            binding.newResource(Defines.BASE_THING_URL, thingIndex);
+            binding.newResource(Defines.BASE_THING_URL, RepoRestListener);
 
             //add thing
             createBinding(binding, thingModel,isProtected);

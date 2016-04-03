@@ -139,73 +139,7 @@ public class ThingDescriptionParser
   
   public static byte[] toBytes(Thing thing) throws IOException
   {
-    JsonNodeFactory factory = new JsonNodeFactory(false);
-    
-    ObjectNode td = factory.objectNode();
-    td.put("@context", WOT_TD_CONTEXT);
-    td.put("name", thing.getName());
-    
-    if (thing.getMetadata().contains("encodings")) {
-      ArrayNode encodings = factory.arrayNode();
-      for (String e : thing.getMetadata().getAll("encodings")) {
-        encodings.add(e);
-      }
-      td.put("encodings", encodings);
-    }
-     
-    if (thing.getMetadata().contains("uris")) {
-      ArrayNode uris = factory.arrayNode();
-      for (String uri : thing.getMetadata().getAll("uris")) {
-        uris.add(uri);
-      }
-      td.put("uris", uris);
-    }
-    
-    ArrayNode properties = factory.arrayNode();
-    for (Property prop : thing.getProperties()) {
-      ObjectNode p = factory.objectNode();
-      p.put("name", prop.getName());
-      p.put("writable", prop.isWriteable());
-      p.put("valueType", prop.getXsdType());
-      
-      if (prop.getHrefs().size() > 0) {
-        ArrayNode hrefs = factory.arrayNode();
-        for (String href : prop.getHrefs()) {
-          hrefs.add(href);
-        }
-        p.put("hrefs", hrefs);
-      }
-      
-      properties.add(p);
-    }
-    td.put("properties", properties);
-    
-    ArrayNode actions = factory.arrayNode();
-    for (Action action : thing.getActions()) {
-      ObjectNode a = factory.objectNode();
-      a.put("name", action.getName());
-      
-      ObjectNode in = factory.objectNode();
-      in.put("valueType", action.getInputType());
-      a.put("inputData", in);
-      
-      ObjectNode out = factory.objectNode();
-      out.put("valueType", action.getOutputType());
-      a.put("outputData", out);
-      
-      if (action.getHrefs().size() > 0) {
-        ArrayNode hrefs = factory.arrayNode();
-        for (String href : action.getHrefs()) {
-          hrefs.add(href);
-        }
-        a.put("hrefs", hrefs);
-      }
-      
-      actions.add(a);
-    }
-    td.put("actions", actions);
-    
-    // TODO events
+    ObjectNode td = toJsonObject(thing);
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ObjectMapper mapper = new ObjectMapper();
@@ -215,6 +149,78 @@ public class ThingDescriptionParser
     mapper.writeValue(baos, td);
 
     return baos.toByteArray();
+  }
+
+  public static ObjectNode toJsonObject(Thing thing) {
+    JsonNodeFactory factory = new JsonNodeFactory(false);
+
+    ObjectNode td = factory.objectNode();
+    td.put("@context", WOT_TD_CONTEXT);
+    td.put("name", thing.getName());
+
+    if (thing.getMetadata().contains("encodings")) {
+      ArrayNode encodings = factory.arrayNode();
+      for (String e : thing.getMetadata().getAll("encodings")) {
+        encodings.add(e);
+      }
+      td.put("encodings", encodings);
+    }
+
+    if (thing.getMetadata().contains("uris")) {
+      ArrayNode uris = factory.arrayNode();
+      for (String uri : thing.getMetadata().getAll("uris")) {
+        uris.add(uri);
+      }
+      td.put("uris", uris);
+    }
+
+    ArrayNode properties = factory.arrayNode();
+    for (Property prop : thing.getProperties()) {
+      ObjectNode p = factory.objectNode();
+      p.put("name", prop.getName());
+      p.put("writable", prop.isWriteable());
+      p.put("valueType", prop.getXsdType());
+
+      if (prop.getHrefs().size() > 0) {
+        ArrayNode hrefs = factory.arrayNode();
+        for (String href : prop.getHrefs()) {
+          hrefs.add(href);
+        }
+        p.put("hrefs", hrefs);
+      }
+
+      properties.add(p);
+    }
+    td.put("properties", properties);
+
+    ArrayNode actions = factory.arrayNode();
+    for (Action action : thing.getActions()) {
+      ObjectNode a = factory.objectNode();
+      a.put("name", action.getName());
+
+      ObjectNode in = factory.objectNode();
+      in.put("valueType", action.getInputType());
+      a.put("inputData", in);
+
+      ObjectNode out = factory.objectNode();
+      out.put("valueType", action.getOutputType());
+      a.put("outputData", out);
+
+      if (action.getHrefs().size() > 0) {
+        ArrayNode hrefs = factory.arrayNode();
+        for (String href : action.getHrefs()) {
+          hrefs.add(href);
+        }
+        a.put("hrefs", hrefs);
+      }
+
+      actions.add(a);
+    }
+    td.put("actions", actions);
+
+    // TODO events
+
+    return td;
   }
 
   /**
