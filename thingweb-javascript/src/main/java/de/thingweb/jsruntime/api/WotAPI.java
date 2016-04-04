@@ -7,7 +7,7 @@ import de.thingweb.servient.ServientBuilder;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.Thing;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
+//import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import java.io.IOException;
 import java.net.URI;
