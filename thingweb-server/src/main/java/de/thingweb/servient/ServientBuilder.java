@@ -57,6 +57,7 @@ public final class ServientBuilder {
      *
      * @param thing the thing model, must not be null
      * @return the server, never null
+     * @throws Exception exception
      */
     public static ThingServer newThingServer(Thing thing) throws Exception {
         if(!initialized) initialize();
