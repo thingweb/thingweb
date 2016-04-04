@@ -25,6 +25,11 @@
 package de.thingweb.desc;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import de.thingweb.thing.Thing;
 
 import org.junit.*;
 
@@ -32,6 +37,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Comparator;
+import java.util.Iterator;
 
 import static org.junit.Assert.*;
 
@@ -131,7 +138,14 @@ public class ThingDescriptionParserTest {
     @Test
     public void testToBytes() throws Exception
     {
-      // TODO
+      String filename = "jsonld" + File.separator + "led.v2.plain.jsonld";
+      ObjectMapper mapper = new ObjectMapper();
+      
+      JsonNode original = mapper.readValue(new File(filename), JsonNode.class);
+      JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromFile(filename)), JsonNode.class);
+      
+      // TODO uncomment as soon as events got parsed
+//      assertTrue(original.equals(generated));
     }
     
 //    @Test

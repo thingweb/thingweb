@@ -35,10 +35,12 @@ import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
 import com.siemens.ct.exi.exceptions.EXIException;
+
 import de.thingweb.encoding.json.exi.EXI4JSONParser;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -47,8 +49,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeMap;
 
 public class ThingDescriptionParser
@@ -151,6 +156,7 @@ public class ThingDescriptionParser
     return baos.toByteArray();
   }
 
+  // TODO set as private (and check it is not called elsewhere)
   public static ObjectNode toJsonObject(Thing thing) {
     JsonNodeFactory factory = new JsonNodeFactory(false);
 
@@ -171,6 +177,7 @@ public class ThingDescriptionParser
       for (String uri : thing.getMetadata().getAll("uris")) {
         uris.add(uri);
       }
+      // TODO array even if single value?
       td.put("uris", uris);
     }
 
@@ -181,12 +188,14 @@ public class ThingDescriptionParser
       p.put("writable", prop.isWriteable());
       p.put("valueType", prop.getXsdType());
 
-      if (prop.getHrefs().size() > 0) {
+      if (prop.getHrefs().size() > 1) {
         ArrayNode hrefs = factory.arrayNode();
         for (String href : prop.getHrefs()) {
           hrefs.add(href);
         }
         p.put("hrefs", hrefs);
+      } else if (prop.getHrefs().size() == 1) {
+        p.put("hrefs", factory.textNode(prop.getHrefs().get(0)));
       }
 
       properties.add(p);
@@ -198,20 +207,26 @@ public class ThingDescriptionParser
       ObjectNode a = factory.objectNode();
       a.put("name", action.getName());
 
-      ObjectNode in = factory.objectNode();
-      in.put("valueType", action.getInputType());
-      a.put("inputData", in);
+      if (!action.getInputType().isEmpty()) {
+        ObjectNode in = factory.objectNode();
+        in.put("valueType", action.getInputType());
+        a.put("inputData", in);
+      }
 
-      ObjectNode out = factory.objectNode();
-      out.put("valueType", action.getOutputType());
-      a.put("outputData", out);
+      if (!action.getOutputType().isEmpty()) {
+        ObjectNode out = factory.objectNode();
+        out.put("valueType", action.getOutputType());
+        a.put("outputData", out);
+      }
 
-      if (action.getHrefs().size() > 0) {
+      if (action.getHrefs().size() > 1) {
         ArrayNode hrefs = factory.arrayNode();
         for (String href : action.getHrefs()) {
           hrefs.add(href);
         }
         a.put("hrefs", hrefs);
+      } else if (action.getHrefs().size() == 1) {
+        a.put("hrefs", factory.textNode(action.getHrefs().get(0)));
       }
 
       actions.add(a);
@@ -341,8 +356,8 @@ public class ThingDescriptionParser
     while (tdIterator.hasNext()) {
       switch (tdIterator.next()) {
         case "uris":
-          for (JsonNode uri : td.get("uris")) {
-            thing.getMetadata().add("uris", uri.asText());
+          for (String uri : stringOrArray(td.get("uris"))) {
+            thing.getMetadata().add("uris", uri);
           }
           break;
           
@@ -359,7 +374,7 @@ public class ThingDescriptionParser
                   builder.setWriteable(prop.get("writable").asBoolean());
                   break;
                 case "hrefs":
-                  builder.setHrefs(prop.findValuesAsText("hrefs"));
+                  builder.setHrefs(stringOrArray(prop.get("hrefs")));
                   break;
               }
             }
@@ -380,7 +395,7 @@ public class ThingDescriptionParser
                   builder.setOutputType(action.get("outputData").get("valueType").asText());
                   break;
                 case "hrefs":
-                  builder.setHrefs(action.findValuesAsText("hrefs"));
+                  builder.setHrefs(stringOrArray(action.get("hrefs")));
                   break;
               }
             }
@@ -402,10 +417,25 @@ public class ThingDescriptionParser
     
     return thing;
   }
+  
+  private static List<String> stringOrArray(JsonNode node) {
+    List<String> array = new ArrayList<String>();
+    
+    if (node.isTextual()) {
+      array.add(node.asText());
+    } else if (node.isArray()) {
+      for (JsonNode subnode : node) {
+        array.add(subnode.asText());
+      }
+    }
+    
+    return array;
+  }
 
   public static void main(String[] args) throws FileNotFoundException, IOException
   {
     Thing thing = fromFile("jsonld" + File.separator + "led.v2.jsonld");
+    System.out.println(new String(toBytes(thing)));
   }
 
 }
