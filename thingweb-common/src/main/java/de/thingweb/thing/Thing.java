@@ -80,6 +80,10 @@ public final class Thing {
         return m_propertiesView;
     }
 
+    
+    public List<Event> getEvents() {
+        return m_eventsView;
+    }
 
     public List<Action> getActions() {
         return m_actionsView;
@@ -198,6 +202,22 @@ public final class Thing {
         }
     }
 
+    public void addEvent(Event event) {
+        if (null == event) {
+            throw new IllegalArgumentException("Event must not be null");
+        }
+
+        if (getProperty(event.getName()) != null) {
+            throw new IllegalArgumentException("duplicate action: " +
+            		event.getName());
+        }
+
+        m_events.add(event);
+
+        notifyListeners();
+    }
+    
+    
     private void notifyListeners() {
         for (ModelListener listener : m_listeners) {
             listener.onChange(this);
@@ -221,6 +241,13 @@ public final class Thing {
 
     private final List<Property> m_propertiesView =
             Collections.unmodifiableList(m_properties);
+    
+    private final List<Event> m_events =
+            new CopyOnWriteArrayList<>();
+
+
+    private final List<Event> m_eventsView =
+            Collections.unmodifiableList(m_events);
 
 
     private final List<Action> m_actions =

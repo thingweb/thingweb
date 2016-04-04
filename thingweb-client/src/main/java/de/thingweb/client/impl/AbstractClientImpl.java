@@ -25,13 +25,7 @@
 package de.thingweb.client.impl;
 
 import de.thingweb.client.Client;
-import de.thingweb.thing.Action;
-import de.thingweb.thing.Event;
-import de.thingweb.thing.Metadata;
-import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
-
-import java.util.List;
 
 public abstract class AbstractClientImpl implements Client {
 	
@@ -61,28 +55,8 @@ public abstract class AbstractClientImpl implements Client {
 	}
 	
 	@Override
-	public Metadata getMetadata()
-	{
-	  return thing.getMetadata();
-	}
-	
-	@Override
-	public List<Property> getProperties()
-	{
-	  return thing.getProperties();
-	}
-	
-	@Override
-	public List<Action> getActions()
-	{
-	  return thing.getActions();
-	}
-	
-	@Override
-	public List<Event> getEvents()
-	{
-	  // TODO
-	  return null;
+	public Thing getThing() {
+	  return thing;
 	}
 
 }

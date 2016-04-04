@@ -28,7 +28,7 @@ public class TestClientFactory extends TestCase {
 	}
 	
 	@Test
-	public void testUrlTutorialDoor() throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
+	public void testFileTutorialDoor() throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
 		File f = File.createTempFile("door", "jsonld");
 		PrintWriter pout = new PrintWriter(f);
 		pout.write("{");
@@ -40,7 +40,6 @@ public class TestClientFactory extends TestCase {
 		pout.write("  \"properties\": [");
 		pout.write("	{");
 		pout.write("		\"name\": \"stateOpen\",");
-		pout.write("		\"valueType\": \"xsd:boolean\",");
 		pout.write("		\"valueType\": \"xsd:boolean\",");
 		pout.write("		\"href\": \"stateOpen\"");
 		pout.write("	}");
@@ -60,7 +59,19 @@ public class TestClientFactory extends TestCase {
 		System.out.println(client);
 		
 		assertTrue(client instanceof HttpClientImpl);
-		assertTrue(client.getUsedProtocolURI().equals("http://www.example.com:80/door"));
+		assertTrue("http://www.example.com:80/door".equals(client.getUsedProtocolURI()));
+		assertTrue("MyDoor".equals(client.getThing().getName()));
+		// actions
+		assertTrue(client.getThing().getActions() == null || client.getThing().getActions().isEmpty());
+		// properties
+		assertTrue(!client.getThing().getProperties().isEmpty());
+		assertTrue(client.getThing().getProperties().get(0).getName().equals("stateOpen"));
+		assertTrue(client.getThing().getProperties().get(0).getValueType().equals("xsd:boolean"));
+		// events
+		assertTrue(!client.getThing().getEvents().isEmpty());
+		assertTrue(client.getThing().getEvents().get(0).getName().equals("stateChanged"));
+		assertTrue(client.getThing().getEvents().get(0).getValueType().equals("xsd:boolean"));
+		
 		// TODO add more tests such as events, properties
 		
 	}

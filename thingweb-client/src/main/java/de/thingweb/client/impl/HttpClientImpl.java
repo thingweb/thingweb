@@ -26,26 +26,25 @@
 
 package de.thingweb.client.impl;
 
-import de.thingweb.client.Callback;
-import de.thingweb.client.UnsupportedException;
-import de.thingweb.thing.Content;
-import de.thingweb.thing.MediaType;
-import de.thingweb.thing.Thing;
-
-import org.eclipse.californium.core.CoapObserveRelation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.eclipse.californium.core.CoapObserveRelation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.thingweb.client.Callback;
+import de.thingweb.client.UnsupportedException;
+import de.thingweb.thing.Content;
+import de.thingweb.thing.MediaType;
+import de.thingweb.thing.Thing;
 
 public class HttpClientImpl extends AbstractClientImpl {
 

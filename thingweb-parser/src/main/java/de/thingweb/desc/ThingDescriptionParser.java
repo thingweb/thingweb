@@ -24,6 +24,27 @@
 
 package de.thingweb.desc;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeMap;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,23 +59,9 @@ import com.siemens.ct.exi.exceptions.EXIException;
 
 import de.thingweb.encoding.json.exi.EXI4JSONParser;
 import de.thingweb.thing.Action;
+import de.thingweb.thing.Event;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import java.io.*;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
 
 public class ThingDescriptionParser
 {
@@ -186,7 +193,7 @@ public class ThingDescriptionParser
       ObjectNode p = factory.objectNode();
       p.put("name", prop.getName());
       p.put("writable", prop.isWriteable());
-      p.put("valueType", prop.getXsdType());
+      p.put("valueType", prop.getValueType());
 
       if (prop.getHrefs().size() > 1) {
         ArrayNode hrefs = factory.arrayNode();
@@ -233,7 +240,29 @@ public class ThingDescriptionParser
     }
     td.put("actions", actions);
 
-    // TODO events
+    ArrayNode events = factory.arrayNode();
+    for (Event event : thing.getEvents()) {
+      ObjectNode a = factory.objectNode();
+      a.put("name", event.getName());
+
+      if (!event.getValueType().isEmpty()) {
+        ObjectNode in = factory.objectNode();
+        in.put("valueType", event.getValueType());
+      }
+
+      if (event.getHrefs().size() > 1) {
+        ArrayNode hrefs = factory.arrayNode();
+        for (String href : event.getHrefs()) {
+          hrefs.add(href);
+        }
+        a.put("hrefs", hrefs);
+      } else if (event.getHrefs().size() == 1) {
+        a.put("hrefs", factory.textNode(event.getHrefs().get(0)));
+      }
+
+      events.add(a);
+    }
+    td.put("events", actions);
 
     return td;
   }
@@ -331,7 +360,16 @@ public class ThingDescriptionParser
                 }
                 thing.addAction(builder.build());
               } else if (inter.get("@type").asText().equals("Event")) {
-                // TODO
+                  Event.Builder builder = Event.getBuilder(inter.get("name").asText());
+                  Iterator<String> actionIterator = inter.fieldNames();
+                  while (actionIterator.hasNext()) {
+                    switch (actionIterator.next()) {
+                      case "outputData":
+                        builder.setValueType(inter.get("outputData").asText());
+                        break;
+                    }
+                  }
+                  thing.addEvent(builder.build());
               }
             }
             break;
@@ -404,8 +442,22 @@ public class ThingDescriptionParser
           break;
           
         case "events":
-          // TODO
-          break;
+            for (JsonNode event : td.get("events")) {
+                Event.Builder builder = Event.getBuilder(event.get("name").asText());
+                Iterator<String> it = event.fieldNames();
+                while (it.hasNext()) {
+                  switch (it.next()) {
+                    case "valueType":
+                      builder.setValueType(event.get("valueType").asText());
+                      break;
+                    case "hrefs":
+                      builder.setHrefs(stringOrArray(event.get("hrefs")));
+                      break;
+                  }
+                }
+                thing.addEvent(builder.build());
+              }
+              break;
           
         case "encodings":
           for (JsonNode encoding : td.get("encodings")) {

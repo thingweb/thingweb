@@ -24,27 +24,15 @@
 
 package de.thingweb.client;
 
-import de.thingweb.thing.Action;
 import de.thingweb.thing.Content;
-import de.thingweb.thing.Event;
-import de.thingweb.thing.Metadata;
-import de.thingweb.thing.Property;
-
-import java.util.List;
+import de.thingweb.thing.Thing;
 
 public interface Client {
 	
-	public List<Property> getProperties();
-	
-	public List<Action> getActions();
-	
-	public List<Event> getEvents();
-	
-	public Metadata getMetadata();
+	public Thing getThing();
 	
 	public String getUsedProtocolURI();
 
-	
 	public void put(String propertyName, Content propertyValue, Callback callback) throws UnsupportedException;
 	
 	public void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken) throws UnsupportedException;

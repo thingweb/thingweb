@@ -84,7 +84,7 @@ public class Property extends Observable {
 		return m_isWriteable;
 	}
 
-	public String getXsdType() {
+	public String getValueType() {
 		return m_valueType;
 	}
 	
