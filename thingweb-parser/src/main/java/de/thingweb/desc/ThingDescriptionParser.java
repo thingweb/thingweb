@@ -192,7 +192,7 @@ public class ThingDescriptionParser
     for (Property prop : thing.getProperties()) {
       ObjectNode p = factory.objectNode();
       p.put("name", prop.getName());
-      p.put("writable", prop.isWriteable());
+      p.put("writable", prop.isWritable());
       p.put("valueType", prop.getValueType());
 
       if (prop.getHrefs().size() > 1) {

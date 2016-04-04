@@ -44,13 +44,13 @@ public class Property extends Observable {
 	private final String m_propertyType;
 	private final String m_valueType;
 	private final boolean m_isReadable;
-	private final boolean m_isWriteable;
+	private final boolean m_isWritable;
 	private final List<String> m_hrefs;
 	
 	
 
 	
-	protected Property(String name, String xsdType, boolean isReadable, boolean isWriteable, String propertyType, List<String> hrefs) {
+	protected Property(String name, String xsdType, boolean isReadable, boolean isWritable, String propertyType, List<String> hrefs) {
 		if (null == name) {
 			throw new IllegalArgumentException("name must not be null");
 		}
@@ -58,7 +58,7 @@ public class Property extends Observable {
 		this.m_valueType = xsdType;
 		m_name = name;
 		m_isReadable = isReadable;
-		m_isWriteable = isWriteable;
+		m_isWritable = isWritable;
 		m_propertyType = propertyType;
 		m_hrefs = hrefs;
 	}
@@ -80,8 +80,8 @@ public class Property extends Observable {
 		return m_isReadable;
 	}
 
-	public boolean isWriteable() {
-		return m_isWriteable;
+	public boolean isWritable() {
+		return m_isWritable;
 	}
 
 	public String getValueType() {
