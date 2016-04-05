@@ -12,12 +12,12 @@ For information about what it does, see also:
 
 Hosted on Bintray:
 
-* client: [ ![Download](https://api.bintray.com/packages/h0ru5/maven/de.thingweb.thingweb-client/images/download.svg) ](https://bintray.com/h0ru5/maven/de.thingweb.thingweb-client/_latestVersion)
-* common: [ ![Download](https://api.bintray.com/packages/h0ru5/maven/de.thingweb.thingweb-common/images/download.svg) ](https://bintray.com/h0ru5/maven/de.thingweb.thingweb-common/_latestVersion)
-* discovery: [ ![Download](https://api.bintray.com/packages/h0ru5/maven/de.thingweb.thingweb-discovery/images/download.svg) ](https://bintray.com/h0ru5/maven/de.thingweb.thingweb-discovery/_latestVersion)
-* javascript-runtime: [ ![Download](https://api.bintray.com/packages/h0ru5/maven/de.thingweb.thingweb-javascript/images/download.svg) ](https://bintray.com/h0ru5/maven/de.thingweb.thingweb-javascript/_latestVersion)
-* td-parser: [ ![Download](https://api.bintray.com/packages/h0ru5/maven/de.thingweb.thingweb-parser/images/download.svg) ](https://bintray.com/h0ru5/maven/de.thingweb.thingweb-parser/_latestVersion)
-* server: [ ![Download](https://api.bintray.com/packages/h0ru5/maven/de.thingweb.thingweb-server/images/download.svg) ](https://bintray.com/h0ru5/maven/de.thingweb.thingweb-server/_latestVersion)
+* client: [ ![Download](https://api.bintray.com/packages/thingweb/maven/de.thingweb.thingweb-client/images/download.svg) ](https://bintray.com/thingweb/maven/de.thingweb.thingweb-client/_latestVersion)
+* common: [ ![Download](https://api.bintray.com/packages/thingweb/maven/de.thingweb.thingweb-common/images/download.svg) ](https://bintray.com/thingweb/maven/de.thingweb.thingweb-common/_latestVersion)
+* discovery: [ ![Download](https://api.bintray.com/packages/thingweb/maven/de.thingweb.thingweb-discovery/images/download.svg) ](https://bintray.com/thingweb/maven/de.thingweb.thingweb-discovery/_latestVersion)
+* javascript-runtime: [ ![Download](https://api.bintray.com/packages/thingweb/maven/de.thingweb.thingweb-javascript/images/download.svg) ](https://bintray.com/thingweb/maven/de.thingweb.thingweb-javascript/_latestVersion)
+* td-parser: [ ![Download](https://api.bintray.com/packages/thingweb/maven/de.thingweb.thingweb-parser/images/download.svg) ](https://bintray.com/thingweb/maven/de.thingweb.thingweb-parser/_latestVersion)
+* server: [ ![Download](https://api.bintray.com/packages/thingweb/maven/de.thingweb.thingweb-server/images/download.svg) ](https://bintray.com/thingweb/maven/de.thingweb.thingweb-server/_latestVersion)
 
 Jcenter and MavenCentral will follow soon
 
@@ -26,7 +26,7 @@ Resolving using gradle:
 ```groovy
 repositories {
     maven {
-        url  "http://dl.bintray.com/h0ru5/maven" 
+        url  "http://dl.bintray.com/thingweb/maven" 
     }
 }
 ```
