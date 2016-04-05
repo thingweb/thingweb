@@ -62,4 +62,3 @@ MIT License
 ### Who do I talk to? ###
 
 * W3C WoT IG Members from Siemens
-
