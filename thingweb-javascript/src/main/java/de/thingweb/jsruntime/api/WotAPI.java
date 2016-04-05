@@ -2,13 +2,12 @@ package de.thingweb.jsruntime.api;
 
 import de.thingweb.client.ClientFactory;
 import de.thingweb.client.UnsupportedException;
-import de.thingweb.desc.DescriptionParser;
-import de.thingweb.desc.pojo.ThingDescription;
+import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.servient.ServientBuilder;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.Thing;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
+//import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import java.io.IOException;
 import java.net.URI;
@@ -56,8 +55,7 @@ public class WotAPI {
 
     public ExposedThing exposeFromUri(String uri) {
         try {
-            ThingDescription description = DescriptionParser.fromURL(new URL(uri));
-            Thing thing = new Thing(description);
+            Thing thing = ThingDescriptionParser.fromURL(new URL(uri));
             ThingInterface servedThing = getThingServer().addThing(thing);
             return ExposedThing.from(servedThing);
         } catch (IOException e) {
@@ -75,8 +73,7 @@ public class WotAPI {
 
     public ExposedThing expose(String jsonld)  {
         try {
-            ThingDescription description = DescriptionParser.fromBytes(jsonld.getBytes());
-            Thing thing = new Thing(description);
+            Thing thing = ThingDescriptionParser.fromBytes(jsonld.getBytes());
             ThingInterface servedThing = getThingServer().addThing(thing);
             return ExposedThing.from(servedThing);
         } catch (IOException e) {
@@ -86,7 +83,7 @@ public class WotAPI {
 
     public ConsumedThing consume(String jsonld) {
         try {
-            ThingDescription description = DescriptionParser.fromBytes(jsonld.getBytes());
+            Thing description = ThingDescriptionParser.fromBytes(jsonld.getBytes());
             return ConsumedThing.from(getClientFactory().getClientFromTD(description));
         } catch (IOException | UnsupportedException | URISyntaxException e) {
             throw new RuntimeException(e);

@@ -26,8 +26,6 @@
 
 package de.thingweb.thing;
 
-import de.thingweb.desc.pojo.*;
-
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -48,6 +46,8 @@ public final class Thing {
 	 * broken by subclasses. 
 	 */
 
+    private final String m_name;
+    private final Metadata m_metadata;
 
     /**
      * Creates a new thing model.
@@ -64,59 +64,28 @@ public final class Thing {
         }
 
         m_name = name;
-
-        List<InteractionDescription> interactions = new ArrayList<>();
-        Map<String, Protocol> protocols = new LinkedHashMap<>();
-        //TODO hardcoded JSON for now, retrieve list from ContentHelper
-        List<String> encodings = Arrays.asList("JSON");
-
-        Metadata metas = new Metadata(name, protocols,encodings);
-        m_td = new ThingDescription(metas,interactions);
-    }
-
-    public Thing(ThingDescription desc) {
-        this(desc.getMetadata().getName());
-        m_td = desc;
-        // TODO check support for HTTP and/or CoAP
-        for (InteractionDescription i : desc.getInteractions()) {
-            if (i instanceof PropertyDescription) {
-                PropertyDescription pd = (PropertyDescription) i;
-                Property p = Property.getBuilder(i.getName())
-                        .setReadable(true)
-                        .setWriteable(pd.isWritable())
-                        .setXsdType(pd.getOutputType())
-                        .build();
-                m_properties.add(p);
-            } else if (i instanceof ActionDescription) {
-                ActionDescription ad = (ActionDescription) i;
-                Action a = Action.getBuilder(i.getName())
-                        .setInputType(ad.getInputType())
-                        .setOutputType(ad.getOutputType())
-                        .build();
-                m_actions.add(a);
-            }
-        }
-    }
-
-    public void addInteractions(List<InteractionDescription> interactionDescriptions) {
-        m_td.getInteractions().addAll(interactionDescriptions);
+        m_metadata = new Metadata();
     }
 
     public String getName() {
         return m_name;
     }
 
-    public ThingDescription getThingDescription() {
-        return m_td;
+    public Metadata getMetadata() {
+        return m_metadata;
     }
 
 
-    public Collection<Property> getProperties() {
+    public List<Property> getProperties() {
         return m_propertiesView;
     }
 
+    
+    public List<Event> getEvents() {
+        return m_eventsView;
+    }
 
-    public Collection<Action> getActions() {
+    public List<Action> getActions() {
         return m_actionsView;
     }
 
@@ -200,12 +169,6 @@ public final class Thing {
 
         m_properties.add(property);
 
-        PropertyDescription pdesc = new PropertyDescription(
-                property.getName()
-                , property.isWriteable()
-                , property.getXsdType());
-        m_td.getInteractions().add(pdesc);
-
         notifyListeners();
     }
 
@@ -228,13 +191,6 @@ public final class Thing {
 
         m_actions.add(action);
 
-        ActionDescription adesc = new ActionDescription(
-                action.getName(),
-                action.getInputType(),
-                action.getOutputType()
-        );
-        m_td.getInteractions().add(adesc);
-
         notifyListeners();
     }
 
@@ -246,17 +202,27 @@ public final class Thing {
         }
     }
 
+    public void addEvent(Event event) {
+        if (null == event) {
+            throw new IllegalArgumentException("Event must not be null");
+        }
+
+        if (getProperty(event.getName()) != null) {
+            throw new IllegalArgumentException("duplicate action: " +
+            		event.getName());
+        }
+
+        m_events.add(event);
+
+        notifyListeners();
+    }
+    
+    
     private void notifyListeners() {
         for (ModelListener listener : m_listeners) {
             listener.onChange(this);
         }
     }
-
-
-    private final String m_name;
-
-
-    private ThingDescription m_td;
 
     public boolean isProtected() {
         return protection;
@@ -269,23 +235,30 @@ public final class Thing {
 
     private boolean protection = false;
 
-    private final Collection<Property> m_properties =
+    private final List<Property> m_properties =
             new CopyOnWriteArrayList<>();
 
 
-    private final Collection<Property> m_propertiesView =
-            Collections.unmodifiableCollection(m_properties);
-
-
-    private final Collection<Action> m_actions =
+    private final List<Property> m_propertiesView =
+            Collections.unmodifiableList(m_properties);
+    
+    private final List<Event> m_events =
             new CopyOnWriteArrayList<>();
 
 
-    private final Collection<Action> m_actionsView =
-            Collections.unmodifiableCollection(m_actions);
+    private final List<Event> m_eventsView =
+            Collections.unmodifiableList(m_events);
 
 
-    private final Collection<ModelListener> m_listeners =
+    private final List<Action> m_actions =
+            new CopyOnWriteArrayList<>();
+
+
+    private final List<Action> m_actionsView =
+            Collections.unmodifiableList(m_actions);
+
+
+    private final List<ModelListener> m_listeners =
             new CopyOnWriteArrayList<>();
 
     public Action getAction(String actionName) {

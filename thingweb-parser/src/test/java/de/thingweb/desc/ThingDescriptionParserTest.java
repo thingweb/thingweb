@@ -24,18 +24,26 @@
 
 package de.thingweb.desc;
 
-import com.fasterxml.jackson.core.JsonParseException;
-
-import org.junit.*;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
-
 import static org.junit.Assert.fail;
 
-public class DescriptionParserTest {
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.thingweb.thing.Thing;
+
+public class ThingDescriptionParserTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -56,14 +64,14 @@ public class DescriptionParserTest {
     @Test
     public void testFromURLDoor() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/door.jsonld");
-    	DescriptionParser.fromURL(jsonld);
+    	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
     
     @Test
     public void testFromURLLed() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led.jsonld");
-    	DescriptionParser.fromURL(jsonld);
+    	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
     
@@ -71,7 +79,7 @@ public class DescriptionParserTest {
     public void testFromURLLed_v02() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led_v02.jsonld");
     	try {
-    		DescriptionParser.fromURL(jsonld);
+    		ThingDescriptionParser.fromURL(jsonld);
     		// TODO are not recognized fields are ignored
 //    	    fail();
     	} catch (IOException e) {
@@ -82,70 +90,89 @@ public class DescriptionParserTest {
     @Test
     public void testFromURLOutlet() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/outlet.jsonld");
-    	DescriptionParser.fromURL(jsonld);
+    	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
     
     @Test
     public void testFromURLWeather() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/weather.jsonld");
-    	DescriptionParser.fromURL(jsonld);
+    	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
-
+    
+    @Test
+    public void testLocalStrangeCharacters() throws JsonParseException, IOException {
+    	String foo = "{\"metadata\":{\"name\":\"Ugly strange n\u00E4ime\",\"protocols\":{\"CoAP\":{\"uri\":\"coap://MD1EWQUC/things/ugly+strange+n%c3%a4ime\",\"priority\":1},\"HTTP\":{\"uri\":\"http://MD1EWQUC:8080/things/ugly+strange+n%c3%a4ime\",\"priority\":2}},\"encodings\":[\"JSON\"]},\"interactions\":[{\"@type\":\"Property\",\"name\":\"not url komp\u00E4tibel\",\"writable\":false,\"outputData\":\"xsd:string\"},{\"@type\":\"Action\",\"name\":\"wierdly named \u00E4ktschn\",\"inputData\":null,\"outputData\":\"\"}],\"@context\":\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\"}";
+   		@SuppressWarnings("unused")
+		Thing td = ThingDescriptionParser.fromBytes(foo.getBytes());
+   		// TODO any further checks?
+    }
+    
+ 
     @Test
     public void testFromFile() {
-      String happyPath = "jsonld" + File.separator + "led.jsonld";
-      // (1) the document is not "compact" as per JSON-LD API spec ('td:' prefix already defined in the context)
-      // (2) the property 'label' does not appear in the context (should be dropped)
-      // (3) 'encodings' has only one member and is not defined as a list (should be transformed by compaction)
-      String altPath = "jsonld" + File.separator + "led_1.jsonld";
-      // JSON syntax error (missing comma)
-      // note : the JSON-LD API spec is very permissive. Hard to get a JsonLdError...
-      String erroneous = "jsonld" + File.separator + "led_2.jsonld";
-      
+      String happyPath = "jsonld" + File.separator + "led.v2.jsonld";
+      // should use parser for deprecated Thing Descriptions
+      String happyPathOld = "jsonld" + File.separator + "led.jsonld";
+      // should fail (required field not found)
+      String invalid = "jsonld" + File.separator + "led.v2.invalid.jsonld";
+
       try {
-          DescriptionParser.fromFile(happyPath);
+          ThingDescriptionParser.fromFile(happyPath);
       } catch (Exception e) {
           e.printStackTrace();
           fail();
       }
       
       try {
-          DescriptionParser.fromFile(altPath);
+          ThingDescriptionParser.fromFile(happyPathOld);
       } catch (Exception e) {
           e.printStackTrace();
           fail();
       }
       
       try {
-          DescriptionParser.fromFile(erroneous);
+          ThingDescriptionParser.fromFile(invalid);
           fail();
       } catch (IOException e) {
-          if (e instanceof JsonParseException) {
-      	// as expected
+          if (e instanceof IOException) {
+            // as expected
           } else {
-      	e.printStackTrace();
-      	fail();
+          	e.printStackTrace();
+          	fail();
           }
       }
     }
     
     @Test
-    public void testReshape() {
-      try {
-        File f = new File("jsonld/outlet_flattened.jsonld");
-        FileReader r = new FileReader(f);
-        char[] buf = new char [(int) f.length()];
-        r.read(buf);
-        r.close();
-        String jsonld = DescriptionParser.reshape(new String(buf).getBytes());
-        // checks that reshaped jsonld is compliant to description parser's impl.
-        DescriptionParser.fromBytes(jsonld.getBytes());
-        // TODO any further checks?
-      } catch (Exception e) {
-        fail(e.getMessage());
-      }
+    public void testToBytes() throws Exception
+    {
+      String filename = "jsonld" + File.separator + "led.v2.plain.jsonld";
+      ObjectMapper mapper = new ObjectMapper();
+      
+      JsonNode original = mapper.readValue(new File(filename), JsonNode.class);
+      JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromFile(filename)), JsonNode.class);
+      
+      // TODO uncomment as soon as events got parsed
+//      assertTrue(original.equals(generated));
     }
+    
+//    @Test
+//    public void testReshape() {
+//      try {
+//        File f = new File("jsonld/outlet_flattened.jsonld");
+//        FileReader r = new FileReader(f);
+//        char[] buf = new char [(int) f.length()];
+//        r.read(buf);
+//        r.close();
+//        String jsonld = ThingDescriptionParser.reshape(new String(buf).getBytes());
+//        // checks that reshaped jsonld is compliant to description parser's impl.
+//        ThingDescriptionParser.fromBytes(jsonld.getBytes());
+//        // TODO any further checks?
+//      } catch (Exception e) {
+//        fail(e.getMessage());
+//      }
+//    }
 
 }

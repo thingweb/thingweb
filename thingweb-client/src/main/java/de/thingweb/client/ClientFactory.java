@@ -25,10 +25,12 @@
 package de.thingweb.client;
 
 import com.fasterxml.jackson.core.JsonParseException;
+
 import de.thingweb.client.impl.CoapClientImpl;
 import de.thingweb.client.impl.HttpClientImpl;
-import de.thingweb.desc.DescriptionParser;
-import de.thingweb.desc.pojo.*;
+import de.thingweb.desc.ThingDescriptionParser;
+import de.thingweb.thing.Thing;
+
 import org.eclipse.californium.core.CoapClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,14 +46,7 @@ public class ClientFactory {
 	
 	private static final Logger log = LoggerFactory.getLogger(ClientFactory.class);
 	
-	ThingDescription td;
-	Metadata metadata;
-	List<PropertyDescription> properties;
-	List<ActionDescription> actions;
-	List<EventDescription> events;
-
-	List<String> encodings;
-	List<Protocol> protocols;
+	Thing thing;
 	
 	boolean isCoapScheme(String scheme) {
 		return("coap".equals(scheme) || "coaps".equals(scheme));
@@ -68,7 +63,7 @@ public class ClientFactory {
 			
 			// synchronous coap
 			byte[] content = coap.get().getPayload();
-			td = DescriptionParser.fromBytes(content);
+			thing = ThingDescriptionParser.fromBytes(content);
 			
 			return getClient();
 		} else {
@@ -77,7 +72,7 @@ public class ClientFactory {
 	}
 	
 	protected Client getClient() throws UnsupportedException, URISyntaxException {
-		assert(td != null);
+		assert(thing != null);
 		
 		processThingDescription();
 		
@@ -87,132 +82,51 @@ public class ClientFactory {
 	
 	public Client getClientUrl(URL jsonld) throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
 		// Note: URL can't handle coap --> needs to be done before
-		td = DescriptionParser.fromURL(jsonld);
+		thing = ThingDescriptionParser.fromURL(jsonld);
 		return getClient();
 	}
 	
 	public Client getClientFile(String jsonld) throws FileNotFoundException, IOException, UnsupportedException, URISyntaxException {
-		td = DescriptionParser.fromFile(jsonld);
+		thing = ThingDescriptionParser.fromFile(jsonld);
 		return getClient();
 	}
 	
-	public Client getClientFromTD(ThingDescription thingDescription) throws UnsupportedException, URISyntaxException {
-		td = thingDescription;
+	public Client getClientFromTD(Thing thing) throws UnsupportedException, URISyntaxException {
+		this.thing = thing;
 		return getClient();
 	}
 
 	protected void processThingDescription() {
-		assert(td != null);
-		
-		actions = new ArrayList<>();
-		properties = new ArrayList<>();
-		events = new ArrayList<>();
-		encodings = new ArrayList<>();
-		protocols = new ArrayList<>();
-
-		log.debug("Process thing desription");
-		log.debug("# Interactions");
-		List<InteractionDescription> interactions = td.getInteractions();
-		for(InteractionDescription id : interactions) {
-			String iname = id.getName();
-			log.debug("InteractionDescription name: " + iname);
-			if(id instanceof ActionDescription) {
-				ActionDescription ad = (ActionDescription) id;
-				log.debug("\tinput:  " + ad.getInputType());
-				log.debug("\toutput: " + ad.getOutputType());
-				actions.add(ad);
-			} else if(id instanceof PropertyDescription) {
-				PropertyDescription pd = (PropertyDescription) id;
-				log.debug("\toutput: " + pd.getOutputType());
-				boolean isWritable = true;
-				try {
-					// @Workaround repository
-					isWritable = pd.isWritable();
-				} catch (Exception e) {
-					// PropertyDescription coming from discovery seems to be different and causes issues
-					log.warn("Workaround for isWritable issue kicked in. Writable set by default to " + isWritable);
-					pd = new PropertyDescription(pd.getName(), isWritable, pd.getOutputType());
-				}
-				log.debug("\twritable: " + isWritable);
-				properties.add(pd);
-			} else if(id instanceof EventDescription) {
-				EventDescription ed = (EventDescription) id;
-				log.debug("\toutput: " + ed.getOutputType());
-				events.add(ed);
-			} else {
-				log.warn("Unexpected interaction type: " + id);
-			}
-		}
-		
-		metadata = td.getMetadata();
-		log.debug("# Metadata " + metadata.getName());
-		log.debug("# Encodings");
-		List<String> encs = metadata.getEncodings();
-		// @Workaround repository
-		if(encs == null) {
-			// Information coming from discovery seems to be different and causes issues
-			log.warn("Workaround for TD encodings issue kicked in. Encoding set to " + "JSON");
-			encs = new ArrayList<>();
-			encs.add("JSON");
-		}
-		for(String enc : encs) {
-			log.debug(enc);
-			encodings.add(enc);
-		}
-		log.debug("# Encodings");
-		Map<String,Protocol> prots = metadata.getProtocols();
-		for(String ps : prots.keySet()) {
-			log.debug(ps);
-			Protocol p = prots.get(ps);
-			// @Workaround repository
-			if(p.getPriority() == null) {
-				// Information coming from discovery seems to be different and causes issues
-				log.warn("Workaround for TD property issue kicked in. Priority set to " + 1);
-				p.priority = 1;
-			}
-			
-			protocols.add(p);
-			log.debug("\t" + p.getUri());
-			// clean-up URI (remove appended URI slash if any)
-			String uri = p.getUri();
-			if(uri.endsWith("/")) {
-				uri = uri.substring(0, uri.length()-1);
-				p.uri = uri;
-				log.debug("\t\t" + "clean-up URI by removing trailing '/'");
-			}
-		}
+		// TODO if anything is wrong or inconsistent with thingweb-repository, put glue code here...
 	}
 
 	protected Client pickClient() throws UnsupportedException, URISyntaxException {
 		// check for right protocol&encoding
-		TreeMap<Integer, Client> tm = new TreeMap<>(); // sorted according priority
+		List<Client> clients = new ArrayList<>(); // it is assumed URIs are ordered by priority
 		
-		
-		for(Protocol p : protocols) {
-			String suri = p.getUri();
-			if(suri != null && suri.length()>0){
-				URI uri = new URI(suri);
-				if(isCoapScheme(uri.getScheme())) {
-					Client c = new CoapClientImpl(p, metadata, properties, actions, events);
-					tm.put(p.priority, c);
-					log.info("Found matching client '" + CoapClientImpl.class.getName() + "' with priority " + p.priority);
-				} else if(isHttpScheme(uri.getScheme())) {
-					Client c = new HttpClientImpl(p, metadata, properties, actions, events);
-					tm.put(p.priority, c);
-					log.info("Found matching client '" + HttpClientImpl.class.getName() + "' with priority " + p.priority);
-				}				
-			}
-		}
+		List<String> uris = thing.getMetadata().getAll("uris");
+    if (uris != null) {
+      int prio = 1;
+      for (String suri : uris) {
+        URI uri = new URI(suri);
+        if(isCoapScheme(uri.getScheme())) {
+          clients.add(new CoapClientImpl(suri, thing));
+          log.info("Found matching client '" + CoapClientImpl.class.getName() + "' with priority " + prio++);
+        } else if(isHttpScheme(uri.getScheme())) {
+          clients.add(new HttpClientImpl(suri, thing));
+          log.info("Found matching client '" + HttpClientImpl.class.getName() + "' with priority " + prio++);
+        } 
+      }
+    }
 		
 		// take priority into account
-		Set<Integer> keys = tm.keySet();
-		if(keys.isEmpty()) {
+		if(clients.isEmpty()) {
 			log.warn("No fitting client implementation found!");
 			throw new UnsupportedException("No fitting client implementation found!");
 			// return null;
 		} else {
 			// pick first one with highest priority
-			Client c = tm.get(keys.iterator().next());
+			Client c = clients.get(0);
 			log.info("Use '" + c.getClass().getName() + "' according to priority");
 			return c;
 		}

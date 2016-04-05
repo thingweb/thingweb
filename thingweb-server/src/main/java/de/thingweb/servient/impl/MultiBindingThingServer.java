@@ -26,12 +26,12 @@
 
 package de.thingweb.servient.impl;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
-import de.thingweb.desc.pojo.Protocol;
-import de.thingweb.desc.pojo.ThingDescription;
+import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.security.SecurityTokenValidator;
 import de.thingweb.security.SecurityTokenValidator4NicePlugfest;
 import de.thingweb.security.TokenRequirements;
@@ -64,6 +64,7 @@ public class MultiBindingThingServer implements ThingServer {
     private final Collection<ResourceBuilder> m_bindings = new ArrayList<>();
     protected SecurityTokenValidator4NicePlugfest validator;
     private TokenRequirements tokenRequirements;
+    private final JsonNodeFactory jsonNodeFactory = new JsonNodeFactory(false);
 
     public MultiBindingThingServer(Thing thingModel,
                                    ResourceBuilder... bindings) {
@@ -134,7 +135,7 @@ public class MultiBindingThingServer implements ThingServer {
             throw new IllegalArgumentException("thingModel must not be null");
         }
         ServedThing servedThing = new ServedThing(thing);
-        things.put(thing.getName().toLowerCase(), servedThing);
+        things.put(thing.getName(), servedThing);
         createBindings(servedThing, thing.isProtected());
         return servedThing;
     }
@@ -147,13 +148,8 @@ public class MultiBindingThingServer implements ThingServer {
     }
 
     @Override
-    public ThingInterface addThing(ThingDescription thingDescription) {
-        return addThing(new Thing(thingDescription));
-    }
-
-    @Override
     public ThingInterface getThing(String thingName) {
-        return things.get(thingName.toLowerCase());
+        return things.get(thingName);
     }
 
     @Override
@@ -171,45 +167,66 @@ public class MultiBindingThingServer implements ThingServer {
     }
 
     private void createBindings(ServedThing thingModel, boolean isProtected) {
-        final List<HyperMediaLink> thinglinks = things.keySet().stream()
+        //TODO maybe replace the thins-root HypermediaIndex by a repository-output structure
+        /* i.e.
+            {
+                "thing1" : <td of thing1>,
+                "thing2" : <td of thing2>,
+            }
+         */
+
+        AbstractRESTListener RepoRestListener = new AbstractRESTListener() {
+            @Override
+            public Content onGet() {
+                final ObjectNode response = jsonNodeFactory.objectNode();
+                things.forEach(
+                        (name, thing) -> {
+                                response.put(name, ThingDescriptionParser.toJsonObject(thing.getThingModel()));
+                        }
+                );
+                return ContentHelper.wrap(response, MediaType.APPLICATION_JSON);
+            }
+        };
+
+        // Hypermedia index
+/*        final List<HyperMediaLink> thinglinks = things.keySet().stream()
                 .sorted()
                 .map(name -> new HyperMediaLink("thing", Defines.BASE_THING_URL + urlize(name)))
                 .collect(Collectors.toList());
 
-        final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);
+        final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);*/
 
-        final Map<String, Protocol> protocols = thingModel.getThingModel().getThingDescription().getMetadata().getProtocols();
 
-        int prio=1;
+        // resources
         for (ResourceBuilder binding : m_bindings) {
             // update/create HATEOAS links to things
-            binding.newResource(Defines.BASE_THING_URL, thingIndex);
+            binding.newResource(Defines.BASE_THING_URL, RepoRestListener);
+
+            //add thing
             createBinding(binding, thingModel,isProtected);
-            final Protocol protocol = new Protocol(binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()),prio++);
-            protocols.put(binding.getIdentifier(),protocol);
+
+            //update metadata
+            thingModel.getThingModel().getMetadata()
+                    .add("uris", binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()));
         }
-
-
     }
-
+    
     private void createBinding(ResourceBuilder resources, ServedThing servedThing, boolean isProtected) {
         final Thing thingModel = servedThing.getThingModel();
 
-        final Collection<Property> properties = thingModel.getProperties();
-        final Collection<Action> actions = thingModel.getActions();
-
-        final List<HyperMediaLink> interactionLinks = new LinkedList<>();
         final Map<String, RESTListener> interactionListeners = new HashMap<>();
         final String thingurl = Defines.BASE_THING_URL + thingModel.getName().toLowerCase();
 
+        final ThingDescriptionRestListener tdRestListener = new ThingDescriptionRestListener(thingModel);
+
         // collect properties
-        for (Property property : properties) {
+        for (Property property : thingModel.getProperties()) {
             String url = thingurl + "/" + property.getName();
 
             final PropertyListener propertyListener = new PropertyListener(servedThing, property);
             if(isProtected) propertyListener.protectWith(getValidator());
             interactionListeners.put(url, propertyListener);
-
+            property.getHrefs().add(urlize(property.getName()));
 //            TODO I'll comment this out until we have /value on the microcontroller
 //            interactionListeners.put(url, new HypermediaIndex(
 //                    new HyperMediaLink("value","value"),
@@ -217,42 +234,24 @@ public class MultiBindingThingServer implements ThingServer {
 //            ));
 
             interactionListeners.put(url + "/value", propertyListener);
-            interactionLinks.add(new HyperMediaLink("property", urlizeTokens(url)));
         }
 
         // collect actions
-        for (Action action : actions) {
+        for (Action action : thingModel.getActions()) {
             //TODO optimize by preconstructing strings and using format
             final String url = thingurl + "/" + action.getName();
             final ActionListener actionListener = new ActionListener(servedThing, action);
             if(isProtected) actionListener.protectWith(getValidator());
             interactionListeners.put(url, actionListener);
-            interactionLinks.add(new HyperMediaLink("action", urlizeTokens(url)));
+            action.getHrefs().add(urlize(action.getName()));
         }
 
         //add listener for thing description
         String tdUrl = thingurl + "/.td";
-        interactionLinks.add(new HyperMediaLink("description",urlizeTokens(tdUrl)));
-        interactionListeners.put(tdUrl,
-                new AbstractRESTListener() {
-                    @Override
-                    public Content onGet() {
-                        //TODO fill up metadata
-                        ThingDescription td = thingModel.getThingDescription();
-
-                        //manually adding the context
-                        ObjectNode json = ContentHelper.getJsonMapper().valueToTree(td);
-                        json.put("@context", "http://w3c.github.io/wot/w3c-wot-td-context.jsonld");
-
-                        return ContentHelper.wrap(json,
-                                MediaType.APPLICATION_JSON);
-                    }
-                });
+        interactionListeners.put(tdUrl, tdRestListener);
 
         // thing root
-        resources.newResource(thingurl,
-                new HypermediaIndex(interactionLinks)
-        );
+        resources.newResource(thingurl, tdRestListener);
 
         // leaves last (side-effect of coap-binding)
         interactionListeners.entrySet().stream().forEachOrdered(

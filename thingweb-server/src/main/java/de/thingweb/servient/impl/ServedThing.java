@@ -48,11 +48,12 @@ public class ServedThing implements ThingInterface {
      */
     private final Object m_stateSync = new Object();
     private final Thing m_thingModel;
-    private final StateContainer m_state;
+    private final StateContainer m_stateContainer;
+    private Consumer<Object> m_propertyGetCallback;
 
     public ServedThing(Thing thing) {
         this.m_thingModel = thing;
-        this.m_state = new StateContainer(thing);
+        this.m_stateContainer = new StateContainer(thing);
     }
 
     public Thing getThingModel() {
@@ -70,8 +71,8 @@ public class ServedThing implements ThingInterface {
         }
 
         synchronized (m_stateSync) {
-            m_state.setProperty(property, value);
-            m_state.getUpdateHandlers(property)
+            m_stateContainer.setProperty(property, value);
+            m_stateContainer.getUpdateHandlers(property)
                     .parallelStream()
                     .forEach(handler -> handler.accept(value));
 
@@ -101,8 +102,11 @@ public class ServedThing implements ThingInterface {
                     "property does not belong to served thing");
         }
 
+        if(m_propertyGetCallback != null)
+        	m_propertyGetCallback.accept(property);
+        
         synchronized (m_stateSync) {
-            return m_state.getProperty(property);
+            return m_stateContainer.getProperty(property);
         }
 
     }
@@ -132,7 +136,7 @@ public class ServedThing implements ThingInterface {
 
     @Override
     public Object invokeAction(Action action, Object parameter) {
-        Function<?, ?> handler = m_state.getHandler(action);
+        Function<?, ?> handler = m_stateContainer.getHandler(action);
 
         Function<Object, Object> objectHandler = (Function<Object, Object>) handler;
         Object result = objectHandler.apply(parameter);
@@ -141,28 +145,51 @@ public class ServedThing implements ThingInterface {
     }
 
     @Override
-    public void onUpdate(String propertyName, Consumer<Object> callback) {
+    public void onPropertyUpdate(String propertyName, Consumer<Object> callback) {
         Property property = m_thingModel.getProperty(propertyName);
         if (property == null) {
             log.warn("property {} not found in thing {}", propertyName, m_thingModel.getName());
             throw new IllegalArgumentException(propertyName);
         } else {
-            m_state.addUpdateHandler(property, callback);
+            m_stateContainer.addUpdateHandler(property, callback);
         }
+    }
+
+    @Override
+    public void onUpdate(String propertyName, Consumer<Object> callback) {
+        onPropertyUpdate(propertyName,callback);
+    }
+
+    @Override
+    public void onPropertyRead(Consumer<Object> callback) {
+    	m_propertyGetCallback = callback;
+    }
+    
+    @Override
+    public void onInvoke(String actionName, Function<Object, Object> callback) {
+        onActionInvoke(actionName,callback);
     }
 
     //TODO overloads for void
     @Override
-    public void onInvoke(String actionName, Function<Object, Object> callback) {
+    public void onActionInvoke(String actionName, Function<Object, Object> callback) {
         Action action = m_thingModel.getAction(actionName);
         if (action == null) {
             log.warn("onInvoke for actionName '" + actionName + "' not found in thing model");
         } else {
-            m_state.addHandler(action, callback);
+            m_stateContainer.addHandler(action, callback);
         }
     }
 
+    @Override
     public String getName() {
         return m_thingModel.getName();
+    }
+    
+ // TODO This should perhaps be a generic add interaction. But wait and watch how proposals develop.
+    //Taking this out, see Thing.addProperty
+    public void addProperty(Property prop){
+    	m_thingModel.addProperty(prop);
+    	m_stateContainer.updateHandlers();
     }
 }

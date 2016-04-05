@@ -24,26 +24,32 @@
  *
  */
 
-package de.thingweb.servient;
+package de.thingweb.servient.impl;
 
-
-import de.thingweb.security.TokenRequirements;
+import de.thingweb.binding.AbstractRESTListener;
+import de.thingweb.desc.ThingDescriptionParser;
+import de.thingweb.thing.Content;
+import de.thingweb.thing.MediaType;
 import de.thingweb.thing.Thing;
 
-import java.util.Set;
+import java.io.IOException;
 
 /**
- * The ThingServer is thread safe.
+ * Created by Johannes on 02.04.2016.
  */
-public interface ThingServer {
+public class ThingDescriptionRestListener extends AbstractRESTListener {
+    private final Thing thingModel;
 
-    ThingInterface addThing(Thing thing);
+    public ThingDescriptionRestListener(Thing thingModel) {
+        this.thingModel = thingModel;
+    }
 
-    void rebindSec(String name, boolean enabled);
-
-    ThingInterface getThing(String thingName);
-
-    Set<Thing> getThings();
-
-    void setTokenRequirements(TokenRequirements tokenRequirements);
+    @Override
+    public Content onGet() {
+        try {
+            return new Content(ThingDescriptionParser.toBytes(thingModel), MediaType.APPLICATION_JSON);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

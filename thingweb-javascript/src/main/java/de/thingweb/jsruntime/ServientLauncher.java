@@ -26,8 +26,7 @@
 
 package de.thingweb.jsruntime;
 
-import de.thingweb.desc.DescriptionParser;
-import de.thingweb.desc.pojo.ThingDescription;
+import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.servient.ServientBuilder;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
@@ -75,8 +74,8 @@ public class ServientLauncher {
         Thing srvThing = new Thing("servient");
 
         srvThing.addProperties(
-            Property.getBuilder("numberOfThings").setXsdType("xsd:int").build(),
-            Property.getBuilder("securityEnabled").setWriteable(true).setXsdType("xsd:boolean").build()
+            Property.getBuilder("numberOfThings").setXsdType("xsd:int").setWriteable(false).build(),
+            Property.getBuilder("securityEnabled").setXsdType("xsd:boolean").setWriteable(true).build()
         );
 
         srvThing.addActions(
@@ -89,29 +88,27 @@ public class ServientLauncher {
         serverInterface.setProperty("numberOfThings", server.getThings().size());
         serverInterface.setProperty("securityEnabled", false);
 
-        serverInterface.onUpdate("securityEnabled", (nV) -> {
+        serverInterface.onPropertyUpdate("securityEnabled", (nV) -> {
             final Boolean protectionEnabled = ContentHelper.ensureClass(nV, Boolean.class);
             server.getThings().stream()
                     .filter((thing1 -> !thing1.equals(srvThing)))
                     .forEach(thing -> thing.setProtection(protectionEnabled));
         });
 
-        serverInterface.onInvoke("createThing", (data) -> {
+        serverInterface.onActionInvoke("createThing", (data) -> {
             final LinkedHashMap jsonld = ContentHelper.ensureClass(data, LinkedHashMap.class);
 
             try {
-                final ThingDescription thingDescription = DescriptionParser.mapJson(jsonld);
-                Thing newThing = new Thing(thingDescription.getMetadata().getName());
-                newThing.addInteractions(thingDescription.getInteractions());
+                final Thing newThing = ThingDescriptionParser.fromJavaMap(jsonld);
                 server.addThing(newThing);
                 serverInterface.setProperty("numberOfThings", server.getThings().size());
-                return newThing.getThingDescription().getMetadata();
+                return newThing.getMetadata();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         });
 
-        serverInterface.onInvoke("addScript", (data) -> {
+        serverInterface.onActionInvoke("addScript", (data) -> {
             final String script = ContentHelper.ensureClass(data, String.class);
 
             try {

@@ -61,7 +61,7 @@ public class PropertyListener extends AbstractRESTListener implements Observer {
 
     @Override
     public void onPut(Content data) {
-        if (!property.isWriteable()) {
+        if (!property.isWritable()) {
             throw new UnsupportedOperationException(property.getName() + " is not writable");
         }
 

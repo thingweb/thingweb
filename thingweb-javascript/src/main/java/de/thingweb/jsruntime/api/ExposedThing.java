@@ -26,13 +26,13 @@ public class ExposedThing {
     }
 
     public ExposedThing onInvoke(String actionName, Function callback) {
-        thing.onInvoke(actionName,callback);
+        thing.onActionInvoke(actionName,callback);
         return this;
     }
 
 
     public ExposedThing onUpdate(String propertyName, Consumer callback) {
-        thing.onUpdate(propertyName,callback);
+        thing.onPropertyUpdate(propertyName,callback);
         return this;
     }
 
