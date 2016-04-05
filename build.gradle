@@ -147,6 +147,7 @@ subprojects { Project subproject ->
     publish = true
     pkg {
       name = subproject.group + "." + subproject.name
+	  userOrg = 'thingweb'
       repo = 'maven'
       licenses = ['MIT']
       desc = "ThingWeb core components"
