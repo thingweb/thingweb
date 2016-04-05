@@ -105,7 +105,7 @@ public class ThingDescriptionParserTest {
     public void testLocalStrangeCharacters() throws JsonParseException, IOException {
     	String foo = "{\"metadata\":{\"name\":\"Ugly strange n\u00E4ime\",\"protocols\":{\"CoAP\":{\"uri\":\"coap://MD1EWQUC/things/ugly+strange+n%c3%a4ime\",\"priority\":1},\"HTTP\":{\"uri\":\"http://MD1EWQUC:8080/things/ugly+strange+n%c3%a4ime\",\"priority\":2}},\"encodings\":[\"JSON\"]},\"interactions\":[{\"@type\":\"Property\",\"name\":\"not url komp\u00E4tibel\",\"writable\":false,\"outputData\":\"xsd:string\"},{\"@type\":\"Action\",\"name\":\"wierdly named \u00E4ktschn\",\"inputData\":null,\"outputData\":\"\"}],\"@context\":\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\"}";
    		@SuppressWarnings("unused")
-		Thing td = ThingDescriptionParser.fromBytes(foo.getBytes(Charset.forName("UTF-8")));
+		Thing td = ThingDescriptionParser.fromBytes(foo.getBytes());
    		// TODO any further checks?
     }
     

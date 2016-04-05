@@ -31,8 +31,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -107,32 +109,21 @@ public class ThingDescriptionParser
     return fromBytes(baos.toByteArray());
   }
 
-  public static Thing fromBytes(byte[] data) throws JsonParseException, IOException
-  {
-    ByteArrayInputStream bais = new ByteArrayInputStream(data);
-
-    // check whether we deal with an exified JSON file
-    bais.mark(5); // latest after 4 byte cookie and 2 distinguishing bits it is clear whether we
-                  // deal with an EXI file
-    try
-    {
+  public static Thing fromBytes(byte[] data) throws JsonParseException, IOException {
+    try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
       EXI4JSONParser e4j = new EXI4JSONParser(new PrintStream(baos));
-      e4j.parse(new InputSource(bais));
+      e4j.parse(new InputSource(new ByteArrayInputStream(data)));
 
-      // adapt to new input stream
-      bais = new ByteArrayInputStream(baos.toByteArray());
-
-    }
-    catch (EXIException | SAXException e)
-    {
-      // something went wrong with EXI --> reset & try "plain-text" json
-      bais.reset();
+      // push-back EXI-generated JSON 
+      data = baos.toByteArray();
+    } catch (EXIException | SAXException e) {
+      // something went wrong with EXI --> use "plain-text" json
     }
 
     ObjectMapper mapper = new ObjectMapper();
-    JsonNode root = mapper.readValue(bais, JsonNode.class);
+    JsonNode root = mapper.readValue(new InputStreamReader(new ByteArrayInputStream(data), "UTF-8"), JsonNode.class);
 
     try {
       return parse(root);
