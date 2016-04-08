@@ -26,10 +26,17 @@ package de.thingweb.desc;
 
 import static org.junit.Assert.fail;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -40,6 +47,10 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.siemens.ct.exi.EXIFactory;
+import com.siemens.ct.exi.exceptions.EXIException;
+import com.siemens.ct.exi.helpers.DefaultEXIFactory;
+import com.siemens.ct.exi.json.EXIforJSONGenerator;
 
 import de.thingweb.thing.Thing;
 
@@ -74,6 +85,30 @@ public class ThingDescriptionParserTest {
     	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
+    
+	@Test
+	public void testFromURLLedEXI4JSON() throws JsonParseException, IOException, EXIException {
+		URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led.jsonld");
+
+		InputStream is = jsonld.openStream();
+
+		File f = File.createTempFile("jsonld", "e4j");
+		OutputStream os = new FileOutputStream(f);
+
+		EXIFactory ef = DefaultEXIFactory.newInstance();
+		ef.setSharedStrings(ThingDescriptionParser.SHARED_STRINGS_EXI_FOR_JSON);
+		
+		EXIforJSONGenerator e4j = new EXIforJSONGenerator(ef);
+		e4j.generate(is, os);
+
+		is.close();
+		os.close();
+
+		ThingDescriptionParser.fromFile(f.getAbsolutePath());
+		// TODO any further checks?
+	}
+    
+    
     
     @Test
     public void testFromURLLed_v02() throws JsonParseException, IOException {

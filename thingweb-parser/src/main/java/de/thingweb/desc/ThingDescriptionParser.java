@@ -32,20 +32,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,9 +53,11 @@ import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
+import com.siemens.ct.exi.EXIFactory;
 import com.siemens.ct.exi.exceptions.EXIException;
+import com.siemens.ct.exi.helpers.DefaultEXIFactory;
+import com.siemens.ct.exi.json.EXIforJSONParser;
 
-import de.thingweb.encoding.json.exi.EXI4JSONParser;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Event;
 import de.thingweb.thing.Property;
@@ -108,30 +106,46 @@ public class ThingDescriptionParser
     }
     return fromBytes(baos.toByteArray());
   }
+  
+	static List<String> SHARED_STRINGS_EXI_FOR_JSON = Arrays.asList(new String[] { "@context", "@id", "@type", "@value", "Brightness",
+			"Car", "CoAP", "DecreaseColor", "Distance", "Door", "EXI", "EXI4JSON", "Fan", "HTTP", "IncreaseColor",
+			"JSON", "Lamp", "Lighting", "Off", "On", "OnOff", "PowerConsumption", "RGBColor", "RGBColorBlue",
+			"RGBColorGreen", "RGBColorRed", "Speed", "Start", "Stop", "Switch", "Temperature", "Thing", "Toggle",
+			"TrafficLight", "WS", "actions", "associations", "celsius", "dogont", "encodings", "events", "hrefs",
+			"http://w3c.github.io/wot/w3c-wot-td-context.jsonld",
+			"https://w3c.github.io/wot/w3c-wot-common-context.jsonld", "inch", "inputData", "interactions", "joule",
+			"kelvin", "kmh", "kwh", "lgdo", "m", "max", "mile", "min", "mm", "mph", "name", "outputData",
+			"properties", "protocols", "qu", "reference", "schema", "security", "unit", "uris", "valueType",
+			"writable", "xsd:boolean", "xsd:byte", "xsd:float", "xsd:int", "xsd:short", "xsd:string",
+			"xsd:unsignedByte", "xsd:unsignedInt", "xsd:unsignedShort" });
 
-  public static Thing fromBytes(byte[] data) throws JsonParseException, IOException {
-    try {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	public static Thing fromBytes(byte[] data) throws JsonParseException, IOException {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-      EXI4JSONParser e4j = new EXI4JSONParser(new PrintStream(baos));
-      e4j.parse(new InputSource(new ByteArrayInputStream(data)));
+			EXIFactory ef = DefaultEXIFactory.newInstance();
+			ef.setSharedStrings(SHARED_STRINGS_EXI_FOR_JSON);
 
-      // push-back EXI-generated JSON 
-      data = baos.toByteArray();
-    } catch (EXIException | SAXException e) {
-      // something went wrong with EXI --> use "plain-text" json
-    }
+			EXIforJSONParser e4j = new EXIforJSONParser(ef);
+			e4j.parse(new ByteArrayInputStream(data), baos);
 
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode root = mapper.readValue(new InputStreamReader(new ByteArrayInputStream(data), "UTF-8"), JsonNode.class);
+			// push-back EXI-generated JSON
+			data = baos.toByteArray();
+		} catch (EXIException | IOException e) {
+			// something went wrong with EXI --> use "plain-text" json
+		}
 
-    try {
-      return parse(root);
-    } catch (Exception e) {
-      // try old parser if by chance it was an old TD
-      return parseOld(root);
-    }
-  }
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode root = mapper.readValue(new InputStreamReader(new ByteArrayInputStream(data), "UTF-8"),
+				JsonNode.class);
+
+		try {
+			return parse(root);
+		} catch (Exception e) {
+			// try old parser if by chance it was an old TD
+			return parseOld(root);
+		}
+	}
 
   public static Thing fromFile(String fname) throws FileNotFoundException, IOException
   {
