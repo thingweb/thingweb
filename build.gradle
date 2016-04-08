@@ -50,6 +50,9 @@
    mavenCentral()
    jcenter()
    mavenLocal()
+   maven {
+	 url "https://oss.sonatype.org/content/repositories/snapshots"
+   }
  }
 
 version = getVersionName()
@@ -91,6 +94,9 @@ subprojects { Project subproject ->
       mavenCentral()
       jcenter()
       mavenLocal()
+	  maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+      }
     }
 
     subproject.dependencies {
