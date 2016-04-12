@@ -58,7 +58,7 @@
 version = getVersionName()
 
 apply plugin: 'java-library-distribution'
-apply plugin: 'com.jfrog.bintray'
+// apply plugin: 'com.jfrog.bintray'
 
 dependencies {
     // let root project depend on all subprojects
@@ -77,11 +77,11 @@ distributions {
 
 // only our subprojects have a bintray configuration. replace the root project's
 // `bintrayUpload` task with one that restricts the calls to the subprojects.
-project.afterEvaluate {
-    task bintrayUpload(group: "publishing", overwrite: true) {
-        dependsOn subprojects.bintrayUpload
-    }
-}
+// project.afterEvaluate {
+//    task bintrayUpload(group: "publishing", overwrite: true) {
+//        dependsOn subprojects.bintrayUpload
+//    }
+// }
 
 subprojects { Project subproject ->
     subproject.apply plugin: 'java'
