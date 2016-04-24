@@ -196,26 +196,30 @@ public class MultiBindingThingServer implements ThingServer {
 
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);*/
 
-
+        
+        List<String> thingURIs = thingModel.getURIs();
+        boolean useNameAsURI = (thingURIs == null || thingURIs.size() != m_bindings.size());
+        int bindingIndex = 0;
         // resources
         for (ResourceBuilder binding : m_bindings) {
             // update/create HATEOAS links to things
             binding.newResource(Defines.BASE_THING_URL, RepoRestListener);
-
+            String thingurl = useNameAsURI ? urlize(thingModel.getName()) : thingURIs.get(bindingIndex++);
             //add thing
-            createBinding(binding, thingModel,isProtected);
+            createBinding(binding, thingModel,isProtected, thingurl);
 
             //update metadata
-            thingModel.getThingModel().getMetadata()
-                    .add("uris", binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()));
+        	thingModel.getThingModel().getMetadata()
+                    .add("uris", binding.getBase() + Defines.BASE_THING_URL + thingurl);
+
         }
     }
     
-    private void createBinding(ResourceBuilder resources, ServedThing servedThing, boolean isProtected) {
+    private void createBinding(ResourceBuilder resources, ServedThing servedThing, boolean isProtected, String thingurl) {
         final Thing thingModel = servedThing.getThingModel();
 
         final Map<String, RESTListener> interactionListeners = new HashMap<>();
-        final String thingurl = Defines.BASE_THING_URL + thingModel.getName().toLowerCase();
+        //final String thingurl = Defines.BASE_THING_URL + thingModel.getName().toLowerCase();
 
         final ThingDescriptionRestListener tdRestListener = new ThingDescriptionRestListener(thingModel);
 

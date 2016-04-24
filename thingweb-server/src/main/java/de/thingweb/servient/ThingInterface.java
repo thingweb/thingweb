@@ -27,6 +27,7 @@ package de.thingweb.servient;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -84,4 +85,6 @@ public interface ThingInterface {
     void onPropertyRead(Consumer<Object> callback);
 
     String getName();
+    
+    List<String> getURIs();
 }

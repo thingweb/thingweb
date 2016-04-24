@@ -33,6 +33,7 @@ import de.thingweb.thing.Thing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -184,6 +185,14 @@ public class ServedThing implements ThingInterface {
     @Override
     public String getName() {
         return m_thingModel.getName();
+    }
+    
+    @Override
+    public List<String> getURIs(){
+    	if(m_thingModel.getMetadata().contains("hrefs"))
+    		return m_thingModel.getMetadata().getAll("hrefs");
+    	else
+    		return null;
     }
     
  // TODO This should perhaps be a generic add interaction. But wait and watch how proposals develop.
