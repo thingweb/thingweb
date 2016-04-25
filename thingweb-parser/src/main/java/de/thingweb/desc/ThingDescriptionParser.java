@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -60,6 +61,7 @@ import com.siemens.ct.exi.json.EXIforJSONParser;
 
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Event;
+import de.thingweb.thing.Metadata;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
 
@@ -175,7 +177,18 @@ public class ThingDescriptionParser
     ObjectNode td = factory.objectNode();
     td.put("@context", WOT_TD_CONTEXT);
     td.put("name", thing.getName());
-
+    
+    Metadata metadata = thing.getMetadata();
+    Map<String, List<String>> metadataItems = metadata.getItems();
+    
+    for(String key : metadataItems.keySet()){
+    	ArrayNode metadataElement = factory.arrayNode();
+        for (String e : thing.getMetadata().getAll(key)) {
+        	metadataElement.add(e);
+        }
+        td.put(key, metadataElement);
+    }
+/*
     if (thing.getMetadata().contains("encodings")) {
       ArrayNode encodings = factory.arrayNode();
       for (String e : thing.getMetadata().getAll("encodings")) {
@@ -192,7 +205,7 @@ public class ThingDescriptionParser
       // TODO array even if single value?
       td.put("uris", uris);
     }
-
+*/
     ArrayNode properties = factory.arrayNode();
     for (Property prop : thing.getProperties()) {
       ObjectNode p = factory.objectNode();

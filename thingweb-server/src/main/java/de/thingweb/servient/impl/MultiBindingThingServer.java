@@ -197,9 +197,10 @@ public class MultiBindingThingServer implements ThingServer {
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);*/
 
         
-        List<String> thingURIs = thingModel.getURIs();
+        List<String> thingURIs = thingModel.getURIs(); //The Thing might be specified with part URL (i.e. without protocol binding and base)
         boolean useNameAsURI = (thingURIs == null || thingURIs.size() != m_bindings.size());
         int bindingIndex = 0;
+        List<String> fullyFormedThingURIs = new ArrayList<>();
         // resources
         for (ResourceBuilder binding : m_bindings) {
             // update/create HATEOAS links to things
@@ -209,10 +210,12 @@ public class MultiBindingThingServer implements ThingServer {
             createBinding(binding, thingModel,isProtected, thingurl);
 
             //update metadata
-        	thingModel.getThingModel().getMetadata()
-                    .add("uris", binding.getBase() + Defines.BASE_THING_URL + thingurl);
-
+            fullyFormedThingURIs.add(binding.getBase() + Defines.BASE_THING_URL + thingurl);
         }
+        
+        thingModel.getThingModel().getMetadata().remove(Metadata.METADATA_ELEMENT_URIS);
+        for(String uri : fullyFormedThingURIs)
+        	thingModel.getThingModel().getMetadata().add(Metadata.METADATA_ELEMENT_URIS, uri);
     }
     
     private void createBinding(ResourceBuilder resources, ServedThing servedThing, boolean isProtected, String thingurl) {

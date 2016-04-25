@@ -28,6 +28,7 @@ package de.thingweb.servient.impl;
 
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.thing.Action;
+import de.thingweb.thing.Metadata;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
 import org.slf4j.Logger;
@@ -189,8 +190,8 @@ public class ServedThing implements ThingInterface {
     
     @Override
     public List<String> getURIs(){
-    	if(m_thingModel.getMetadata().contains("hrefs"))
-    		return m_thingModel.getMetadata().getAll("hrefs");
+    	if(m_thingModel.getMetadata().contains(Metadata.METADATA_ELEMENT_URIS))
+    		return m_thingModel.getMetadata().getAll(Metadata.METADATA_ELEMENT_URIS);
     	else
     		return null;
     }

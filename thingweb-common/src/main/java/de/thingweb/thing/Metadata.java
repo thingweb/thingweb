@@ -14,6 +14,8 @@ import java.util.Map;
  */
 public class Metadata
 {
+  public final static String METADATA_ELEMENT_URIS = "uris";
+  public final static String METADATA_ELEMENT_ENCODINGS = "encodings";
   
   private Map<String, List<String>> items = new HashMap<String, List<String>>();
   
@@ -27,6 +29,11 @@ public class Metadata
     for (String v : values) {
       items.get(key).add(v);
     }
+  }
+  
+  public void remove(String key){
+	  if(items.containsKey(key))
+		  items.remove(key);
   }
   
   /**
@@ -46,6 +53,10 @@ public class Metadata
   
   public boolean contains(String key) {
     return items.containsKey(key);
+  }
+  
+  public Map<String, List<String>> getItems(){
+	  return items;
   }
   
   private void checkKey(String key) {
