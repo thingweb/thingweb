@@ -47,7 +47,7 @@ public final class Thing {
 	 */
 
     private final String m_name;
-    private final Metadata m_metadata;
+    private final ThingMetadata m_metadata;
 
     /**
      * Creates a new thing model.
@@ -64,14 +64,14 @@ public final class Thing {
         }
 
         m_name = name;
-        m_metadata = new Metadata();
+        m_metadata = new ThingMetadata();
     }
 
     public String getName() {
         return m_name;
     }
 
-    public Metadata getMetadata() {
+    public ThingMetadata getMetadata() {
         return m_metadata;
     }
 

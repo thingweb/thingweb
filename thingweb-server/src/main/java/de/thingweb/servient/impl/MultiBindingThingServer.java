@@ -213,9 +213,9 @@ public class MultiBindingThingServer implements ThingServer {
             fullyFormedThingURIs.add(binding.getBase() + Defines.BASE_THING_URL + thingurl);
         }
         
-        thingModel.getThingModel().getMetadata().remove(Metadata.METADATA_ELEMENT_URIS);
+        thingModel.getThingModel().getMetadata().remove(ThingMetadata.METADATA_ELEMENT_URIS);
         for(String uri : fullyFormedThingURIs)
-        	thingModel.getThingModel().getMetadata().add(Metadata.METADATA_ELEMENT_URIS, uri);
+        	thingModel.getThingModel().getMetadata().add(ThingMetadata.METADATA_ELEMENT_URIS, uri);
     }
     
     private void createBinding(ResourceBuilder resources, ServedThing servedThing, boolean isProtected, String thingurl) {

@@ -173,10 +173,20 @@ public class ThingDescriptionParser
   // TODO set as private (and check it is not called elsewhere)
   public static ObjectNode toJsonObject(Thing thing) {
     JsonNodeFactory factory = new JsonNodeFactory(false);
-
+    ArrayNode contexts = factory.arrayNode();
+    
     ObjectNode td = factory.objectNode();
-    td.put("@context", WOT_TD_CONTEXT);
+    //td.put("@context", WOT_TD_CONTEXT);
+    contexts.add(WOT_TD_CONTEXT);
+    Map<String, String> additionalContexts = thing.getMetadata().getContexts();
+    for(String key : additionalContexts.keySet()){
+	    ObjectNode context = factory.objectNode();
+	    context.put(key, additionalContexts.get(key));
+	    contexts.add(context);
+    }
+    td.put("@context", contexts);
     td.put("name", thing.getName());
+    td.putPOJO("associations", thing.getMetadata().getAssociations());
     
     Metadata metadata = thing.getMetadata();
     Map<String, List<String>> metadataItems = metadata.getItems();
@@ -222,7 +232,8 @@ public class ThingDescriptionParser
       } else if (prop.getHrefs().size() == 1) {
         p.put("hrefs", factory.textNode(prop.getHrefs().get(0)));
       }
-
+      if(prop.getMetadata().getAssociations().size() > 0)
+    	  p.putPOJO("associations", prop.getMetadata().getAssociations());
       properties.add(p);
     }
     td.put("properties", properties);
@@ -253,19 +264,21 @@ public class ThingDescriptionParser
       } else if (action.getHrefs().size() == 1) {
         a.put("hrefs", factory.textNode(action.getHrefs().get(0)));
       }
-
+      if(action.getMetadata().getAssociations().size() > 0)
+    	  a.putPOJO("associations", action.getMetadata().getAssociations());
       actions.add(a);
     }
     td.put("actions", actions);
 
     ArrayNode events = factory.arrayNode();
     for (Event event : thing.getEvents()) {
-      ObjectNode a = factory.objectNode();
-      a.put("name", event.getName());
+      ObjectNode n = factory.objectNode();
+      n.put("name", event.getName());
 
       if (!event.getValueType().isEmpty()) {
         ObjectNode in = factory.objectNode();
         in.put("valueType", event.getValueType());
+        n.put("inputData", in);
       }
 
       if (event.getHrefs().size() > 1) {
@@ -273,14 +286,14 @@ public class ThingDescriptionParser
         for (String href : event.getHrefs()) {
           hrefs.add(href);
         }
-        a.put("hrefs", hrefs);
+        n.put("hrefs", hrefs);
       } else if (event.getHrefs().size() == 1) {
-        a.put("hrefs", factory.textNode(event.getHrefs().get(0)));
+        n.put("hrefs", factory.textNode(event.getHrefs().get(0)));
       }
 
-      events.add(a);
+      events.add(n);
     }
-    td.put("events", actions);
+    td.put("events", events);
 
     return td;
   }

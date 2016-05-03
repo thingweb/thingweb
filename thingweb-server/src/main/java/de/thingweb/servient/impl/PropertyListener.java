@@ -49,12 +49,14 @@ public class PropertyListener extends AbstractRESTListener implements Observer {
     }
 
     @Override
-    public Content onGet() {
+    public Content onGet() throws Exception {
         if (!property.isReadable()) {
             throw new UnsupportedOperationException();
         }
 
         Object res = servedThing.getProperty(property);
+        if(res instanceof Exception)
+        	throw (Exception)res;
         return ContentHelper.makeJsonValue(res);
 
     }
@@ -66,7 +68,7 @@ public class PropertyListener extends AbstractRESTListener implements Observer {
         }
 
         Object o = ContentHelper.getValueFromJson(data);
-        servedThing.setProperty(property, o);
+        servedThing.updateProperty(property, o);
     }
 
 
@@ -74,5 +76,6 @@ public class PropertyListener extends AbstractRESTListener implements Observer {
     public void update(Observable o, Object arg) {
         log.info("change detected: " + o + " to " + arg);
         setChanged();
+        notifyObservers();
     }
 }

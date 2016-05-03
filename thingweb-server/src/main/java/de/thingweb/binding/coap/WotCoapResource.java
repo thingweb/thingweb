@@ -38,6 +38,7 @@ import org.eclipse.californium.core.coap.Option;
 import org.eclipse.californium.core.coap.OptionSet;
 import org.eclipse.californium.core.network.Exchange;
 import org.eclipse.californium.core.server.resources.CoapExchange;
+import org.jose4j.json.internal.json_simple.JSONObject;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -142,7 +143,11 @@ public class WotCoapResource extends CoapResource implements  Observer{
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
         } catch (Exception e) {
-            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        	JSONObject errorObject = new JSONObject();
+        	errorObject.put("errorMessage", e.getMessage());
+        	String responsePayload = errorObject.toJSONString();
+        	//TODO Media type be must got from rest listener..
+        	exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, responsePayload, MediaTypeRegistry.APPLICATION_JSON);
         }
     }
 

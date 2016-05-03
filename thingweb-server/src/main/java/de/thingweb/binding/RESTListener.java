@@ -41,7 +41,7 @@ public interface RESTListener {
 
 	void protectWith(SecurityTokenValidator validator);
 
-	Content onGet() throws UnsupportedOperationException, RuntimeException;
+	Content onGet() throws UnsupportedOperationException, RuntimeException, Exception;
 
 	void onPut(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
 	

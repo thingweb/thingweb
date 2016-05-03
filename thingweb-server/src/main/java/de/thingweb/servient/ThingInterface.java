@@ -28,6 +28,8 @@ import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
 
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -63,6 +65,7 @@ public interface ThingInterface {
      */
     void setProperty(String propertyName, Object value);
 
+    void updateProperty(Property property, Object value);
 
     Object getProperty(Property property);
 
@@ -83,6 +86,10 @@ public interface ThingInterface {
     void onUpdate(String propertyName, Consumer<Object> callback);
 
     void onPropertyRead(Consumer<Object> callback);
+    
+    void onPropertyUpdate(BiConsumer<Object, Object> callback);
+    
+    void onActionInvoke(BiFunction<Object, Object, Object> callback);
 
     String getName();
     

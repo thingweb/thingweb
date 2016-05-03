@@ -14,11 +14,13 @@ import java.util.Map;
  */
 public class Metadata
 {
-  public final static String METADATA_ELEMENT_URIS = "uris";
-  public final static String METADATA_ELEMENT_ENCODINGS = "encodings";
-  
   private Map<String, List<String>> items = new HashMap<String, List<String>>();
+  private List<HyperMediaLink> associations = new ArrayList<>();
   
+  public List<HyperMediaLink> getAssociations(){
+	  return associations;
+  }
+ 
   public void add(String key, String value) {
     checkKey(key);
     items.get(key).add(value);
@@ -64,5 +66,5 @@ public class Metadata
       items.put(key, new ArrayList<String>());
     }
   }
-
+  
 }
