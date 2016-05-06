@@ -72,9 +72,9 @@ public interface ThingInterface {
     Object invokeAction(Action action, Object parameter);
 
     @Deprecated
-    void onInvoke(String actionName, Function<Object, Object> callback);
+    void onInvoke(String actionName, Function<?, ?> callback);
 
-    void onActionInvoke(String actionName, Function<Object, Object> callback);
+    void onActionInvoke(String actionName, Function<?, ?> callback);
 
     void onPropertyUpdate(String propertyName, Consumer<Object> callback);
 

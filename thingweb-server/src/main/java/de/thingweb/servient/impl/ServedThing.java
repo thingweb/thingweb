@@ -138,6 +138,9 @@ public class ServedThing implements ThingInterface {
     public Object invokeAction(Action action, Object parameter) {
         Function<?, ?> handler = m_stateContainer.getHandler(action);
 
+        //interprete action metadata to avoid object introspection
+        //downcast handler to call it
+
         Function<Object, Object> objectHandler = (Function<Object, Object>) handler;
         Object result = objectHandler.apply(parameter);
 
@@ -166,13 +169,11 @@ public class ServedThing implements ThingInterface {
     }
     
     @Override
-    public void onInvoke(String actionName, Function<Object, Object> callback) {
+    public void onInvoke(String actionName, Function<?, ?> callback) {
         onActionInvoke(actionName,callback);
     }
 
-    //TODO overloads for void
-    @Override
-    public void onActionInvoke(String actionName, Function<Object, Object> callback) {
+    public void onActionInvoke(String actionName, Function<?, ?> callback) {
         Action action = m_thingModel.getAction(actionName);
         if (action == null) {
             log.warn("onInvoke for actionName '" + actionName + "' not found in thing model");

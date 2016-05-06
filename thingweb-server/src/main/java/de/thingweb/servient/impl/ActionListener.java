@@ -76,8 +76,11 @@ public class ActionListener extends AbstractRESTListener {
             param = new String(data.getContent());
         }
 
-        log.debug("invoking {}", action.getName());
+        log.debug("invoking {} with {}", action.getName());
         Object response = servedThing.invokeAction(action, param);
+
+        //differentiate if action has no outputvalue and return 204
+        //else
         return ContentHelper.wrap(response, MediaType.APPLICATION_JSON);
     }
 }
