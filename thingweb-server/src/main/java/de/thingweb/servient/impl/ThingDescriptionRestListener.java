@@ -33,12 +33,14 @@ import de.thingweb.thing.MediaType;
 import de.thingweb.thing.Thing;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 /**
  * Created by Johannes on 02.04.2016.
  */
 public class ThingDescriptionRestListener extends AbstractRESTListener {
     private final Thing thingModel;
+    private Consumer<Object> m_deleteCallback;
 
     public ThingDescriptionRestListener(Thing thingModel) {
         this.thingModel = thingModel;
@@ -51,5 +53,15 @@ public class ThingDescriptionRestListener extends AbstractRESTListener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+	public void onDelete() {
+    	m_deleteCallback.accept(thingModel);
+		throw new UnsupportedOperationException();
+	}
+    
+    public void addDeleteHandler(Consumer<Object> callback){
+    	m_deleteCallback = callback;
     }
 }

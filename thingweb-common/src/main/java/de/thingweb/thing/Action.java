@@ -33,7 +33,7 @@ import java.util.Map;
 
 import de.thingweb.thing.Property.Builder;
 
-public class Action {
+public class Action extends Interaction {
 
     private final Map<String, String> params;
     private final String name;

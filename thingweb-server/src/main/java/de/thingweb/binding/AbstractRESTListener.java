@@ -61,7 +61,7 @@ public class AbstractRESTListener extends Observable implements RESTListener {
 	}
 
 	@Override
-	public Content onGet() {
+	public Content onGet() throws Exception {
 		throw new UnsupportedOperationException();
 	}
 

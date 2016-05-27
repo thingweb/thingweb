@@ -28,11 +28,17 @@ package de.thingweb.servient.impl;
 
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.thing.Action;
+import de.thingweb.thing.Metadata;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
+import de.thingweb.thing.ThingMetadata;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -50,6 +56,8 @@ public class ServedThing implements ThingInterface {
     private final Thing m_thingModel;
     private final StateContainer m_stateContainer;
     private Consumer<Object> m_propertyGetCallback;
+    private BiConsumer<Object, Object> m_propertyPutCallback;
+    private BiFunction<Object, Object, Object> m_actionPostCallback;
 
     public ServedThing(Thing thing) {
         this.m_thingModel = thing;
@@ -58,6 +66,12 @@ public class ServedThing implements ThingInterface {
 
     public Thing getThingModel() {
         return m_thingModel;
+    }
+    
+    @Override
+    public void updateProperty(Property property, Object value) {
+        if(m_propertyPutCallback != null)
+        	m_propertyPutCallback.accept(property, value);
     }
 
     @Override
@@ -68,10 +82,13 @@ public class ServedThing implements ThingInterface {
         if (!m_thingModel.isOwnerOf(property)) {
             throw new IllegalArgumentException(
                     "property does not belong to served thing");
-        }
+        }        
 
         synchronized (m_stateSync) {
             m_stateContainer.setProperty(property, value);
+            //List<Consumer<Object>> handlers = m_stateContainer.getUpdateHandlers(property);
+            //for(Consumer<Object> h : handlers)
+            //	h.accept(value);
             m_stateContainer.getUpdateHandlers(property)
                     .parallelStream()
                     .forEach(handler -> handler.accept(value));
@@ -87,8 +104,7 @@ public class ServedThing implements ThingInterface {
         if (null == prop) {
             throw new IllegalArgumentException("no such property: " +
                     propertyName);
-        }
-
+        }        
         setProperty(prop, value);
     }
 
@@ -102,8 +118,10 @@ public class ServedThing implements ThingInterface {
                     "property does not belong to served thing");
         }
 
-        if(m_propertyGetCallback != null)
+        if(m_propertyGetCallback != null && !property.isUnderAsyncUpdate){
         	m_propertyGetCallback.accept(property);
+        }
+        //property.isUnderAsyncUpdate = false;
         
         synchronized (m_stateSync) {
             return m_stateContainer.getProperty(property);
@@ -136,12 +154,20 @@ public class ServedThing implements ThingInterface {
 
     @Override
     public Object invokeAction(Action action, Object parameter) {
+    	
+    	Object result = null;
+    	if(m_actionPostCallback != null){
+    		result = m_actionPostCallback.apply(action, parameter);
+    	}
+    	return result;
+    	/*
         Function<?, ?> handler = m_stateContainer.getHandler(action);
 
         Function<Object, Object> objectHandler = (Function<Object, Object>) handler;
         Object result = objectHandler.apply(parameter);
 
         return result;
+        */
     }
 
     @Override
@@ -166,6 +192,16 @@ public class ServedThing implements ThingInterface {
     }
     
     @Override
+    public void onPropertyUpdate(BiConsumer<Object, Object> callback) {
+    	m_propertyPutCallback = callback;
+    }
+    
+    @Override
+	public void onActionInvoke(BiFunction<Object, Object, Object> callback) {
+    	m_actionPostCallback = callback;
+    }
+    
+    @Override
     public void onInvoke(String actionName, Function<Object, Object> callback) {
         onActionInvoke(actionName,callback);
     }
@@ -184,6 +220,14 @@ public class ServedThing implements ThingInterface {
     @Override
     public String getName() {
         return m_thingModel.getName();
+    }
+    
+    @Override
+    public List<String> getURIs(){
+    	if(m_thingModel.getMetadata().contains(ThingMetadata.METADATA_ELEMENT_URIS))
+    		return m_thingModel.getMetadata().getAll(ThingMetadata.METADATA_ELEMENT_URIS);
+    	else
+    		return null;
     }
     
  // TODO This should perhaps be a generic add interaction. But wait and watch how proposals develop.

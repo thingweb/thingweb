@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package de.thingweb.servient.impl;
+package de.thingweb.thing;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

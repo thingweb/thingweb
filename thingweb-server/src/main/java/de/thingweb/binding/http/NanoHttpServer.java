@@ -34,6 +34,8 @@ import de.thingweb.thing.Content;
 import de.thingweb.thing.MediaType;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
+
+import org.jose4j.json.internal.json_simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,7 +137,10 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 			return addCORSHeaders(new Response(Status.BAD_REQUEST, MIME_PLAINTEXT, e.toString()));
 		} catch (Exception e) {
 			log.error("callback raised error", e);
-			return addCORSHeaders(new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, e.toString()));
+        	JSONObject errorObject = new JSONObject();
+        	errorObject.put("errorMessage", e.getMessage());
+        	String responsePayload = errorObject.toJSONString();
+			return addCORSHeaders(new Response(Response.Status.INTERNAL_ERROR, "application/json", responsePayload));
 		}
 
 	}
@@ -177,7 +182,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
     @Override
     public void newResource(String url, RESTListener restListener) {
-        resmap.put(url.toLowerCase(),restListener);
+        resmap.put("/" + url.toLowerCase(),restListener);
     }
 
 	@Override

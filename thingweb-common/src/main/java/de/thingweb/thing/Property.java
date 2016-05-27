@@ -34,7 +34,7 @@ import java.util.Observable;
 /**
  * This class is immutable.
  */
-public class Property extends Observable {
+public class Property extends Interaction {
 	/*
 	 * Implementation Note:
 	 * Thing relies on this class to be immutable for synchronization purposes!
@@ -47,10 +47,12 @@ public class Property extends Observable {
 	private final boolean m_isWritable;
 	private final List<String> m_hrefs;
 	
+	//TODO Experimental. Need to find a way to prevent recursion during async update.
+	public boolean isUnderAsyncUpdate = false;
 	
 
 	
-	protected Property(String name, String xsdType, boolean isReadable, boolean isWritable, String propertyType, List<String> hrefs) {
+	public Property(String name, String xsdType, boolean isReadable, boolean isWritable, String propertyType, List<String> hrefs) {
 		if (null == name) {
 			throw new IllegalArgumentException("name must not be null");
 		}
@@ -70,6 +72,7 @@ public class Property extends Observable {
 	@Override
 	public synchronized void setChanged() {
 		super.setChanged();
+		super.notifyObservers();
 	}
 
 	public String getName() {

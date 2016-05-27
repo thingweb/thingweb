@@ -14,9 +14,13 @@ import java.util.Map;
  */
 public class Metadata
 {
-  
   private Map<String, List<String>> items = new HashMap<String, List<String>>();
+  private List<HyperMediaLink> associations = new ArrayList<>();
   
+  public List<HyperMediaLink> getAssociations(){
+	  return associations;
+  }
+ 
   public void add(String key, String value) {
     checkKey(key);
     items.get(key).add(value);
@@ -27,6 +31,11 @@ public class Metadata
     for (String v : values) {
       items.get(key).add(v);
     }
+  }
+  
+  public void remove(String key){
+	  if(items.containsKey(key))
+		  items.remove(key);
   }
   
   /**
@@ -48,10 +57,14 @@ public class Metadata
     return items.containsKey(key);
   }
   
+  public Map<String, List<String>> getItems(){
+	  return items;
+  }
+  
   private void checkKey(String key) {
     if (!items.containsKey(key)) {
       items.put(key, new ArrayList<String>());
     }
   }
-
+  
 }

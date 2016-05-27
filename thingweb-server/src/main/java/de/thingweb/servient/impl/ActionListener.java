@@ -29,8 +29,13 @@ package de.thingweb.servient.impl;
 import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Content;
+import de.thingweb.thing.HyperMediaLink;
 import de.thingweb.thing.MediaType;
 import de.thingweb.util.encoding.ContentHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,10 +58,15 @@ public class ActionListener extends AbstractRESTListener {
     @Override
     public Content onGet() {
         //TODO manage executions in statecontainer and add links to executions
-        return HypermediaIndex.createContent(
-                new HyperMediaLink("invoke","_self","POST",inputType),
-                new HyperMediaLink("parent","../")
-        );
+    	List<HyperMediaLink> links = new ArrayList<>();
+    	
+    	links.add(new HyperMediaLink("invoke","_self","POST",inputType));
+    	links.add(new HyperMediaLink("parent","../"));
+    	
+    	if(action.getMetadata().getAssociations().size() > 0)
+    		links.addAll(action.getMetadata().getAssociations());
+
+    	return HypermediaIndex.createContent(links);
     }
 
     @Override

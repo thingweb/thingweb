@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.thing.Content;
+import de.thingweb.thing.HyperMediaLink;
 import de.thingweb.thing.MediaType;
 
 import java.util.Arrays;
