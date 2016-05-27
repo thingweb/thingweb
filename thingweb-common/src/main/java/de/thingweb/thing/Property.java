@@ -50,12 +50,12 @@ public class Property extends Observable {
 	
 
 	
-	protected Property(String name, String xsdType, boolean isReadable, boolean isWritable, String propertyType, List<String> hrefs) {
+	protected Property(String name, String valueType, boolean isReadable, boolean isWritable, String propertyType, List<String> hrefs) {
 		if (null == name) {
 			throw new IllegalArgumentException("name must not be null");
 		}
 		
-		this.m_valueType = xsdType;
+		this.m_valueType = valueType;
 		m_name = name;
 		m_isReadable = isReadable;
 		m_isWritable = isWritable;
@@ -100,7 +100,7 @@ public class Property extends Observable {
 		private String name;
 		private boolean isReadable = true;
 		private boolean isWriteable = false;
-		private String xsdType = "xsd:string";
+		private String valueType = "xsd:string";
 		private String propertyType = null;
 		private List<String> hrefs = new ArrayList<>();
 
@@ -108,8 +108,8 @@ public class Property extends Observable {
 			this.name = name;
 		}
 
-		public Builder setXsdType(String xsdType) {
-			this.xsdType = xsdType;
+		public Builder setValueType(String valueType) {
+			this.valueType = valueType;
 			return this;
 		}
 		
@@ -138,7 +138,7 @@ public class Property extends Observable {
 		}
 
 		public Property build() {
-			return new Property(name, xsdType, isReadable, isWriteable, propertyType, hrefs);
+			return new Property(name, valueType, isReadable, isWriteable, propertyType, hrefs);
 		}
 	}
 

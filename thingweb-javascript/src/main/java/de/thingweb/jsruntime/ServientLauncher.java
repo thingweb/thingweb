@@ -74,8 +74,8 @@ public class ServientLauncher {
         Thing srvThing = new Thing("servient");
 
         srvThing.addProperties(
-            Property.getBuilder("numberOfThings").setXsdType("xsd:int").setWriteable(false).build(),
-            Property.getBuilder("securityEnabled").setXsdType("xsd:boolean").setWriteable(true).build()
+            Property.getBuilder("numberOfThings").setValueType("xsd:int").setWriteable(false).build(),
+            Property.getBuilder("securityEnabled").setValueType("xsd:boolean").setWriteable(true).build()
         );
 
         srvThing.addActions(

@@ -66,7 +66,7 @@ public class MultiThingTests {
         Thing[] things = new Thing[nthings];
 
         Action testAction = Action.getBuilder("testAction").build();
-        Property testProp = Property.getBuilder("testProp").setWriteable(true).setXsdType("xsd:string").build();
+        Property testProp = Property.getBuilder("testProp").setWriteable(true).setValueType("xsd:string").build();
 
         for(int i = 0; i<nthings; i++) {
             things[i] = new Thing("thing" + i);

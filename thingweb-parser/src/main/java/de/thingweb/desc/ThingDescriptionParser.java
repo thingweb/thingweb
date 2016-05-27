@@ -342,7 +342,7 @@ public class ThingDescriptionParser
                 while (propIterator.hasNext()) {
                   switch (propIterator.next()) {
                     case "outputData":
-                      builder.setXsdType(inter.get("outputData").asText());
+                      builder.setValueType(inter.get("outputData").asText());
                       break;
                     case "writable":
                       builder.setWriteable(inter.get("writable").asBoolean());
@@ -411,7 +411,12 @@ public class ThingDescriptionParser
             while (it.hasNext()) {
               switch (it.next()) {
                 case "valueType":
-                  builder.setXsdType(prop.get("valueType").asText());
+                  JsonNode jn = prop.get("valueType");
+                  if(jn.isValueNode()) {
+                	builder.setValueType(jn.asText());
+                  } else {
+                	builder.setValueType(jn.toString());
+                  } 
                   break;
                 case "writable":
                   builder.setWriteable(prop.get("writable").asBoolean());
@@ -432,10 +437,20 @@ public class ThingDescriptionParser
             while (it.hasNext()) {
               switch (it.next()) {
                 case "inputData":
-                  builder.setInputType(action.get("inputData").get("valueType").asText());
+                  JsonNode jnI = action.get("inputData").get("valueType");
+                  if(jnI.isValueNode()) {
+                	builder.setInputType(jnI.asText());
+                  } else {
+                	builder.setInputType(jnI.toString());
+                  }
                   break;
                 case "outputData":
-                  builder.setOutputType(action.get("outputData").get("valueType").asText());
+                  JsonNode jnO = action.get("outputData").get("valueType");
+                  if(jnO.isValueNode()) {
+                	builder.setOutputType(jnO.asText());
+                  } else {
+                	builder.setOutputType(jnO.toString());
+                  }
                   break;
                 case "hrefs":
                   builder.setHrefs(stringOrArray(action.get("hrefs")));
@@ -453,7 +468,12 @@ public class ThingDescriptionParser
                 while (it.hasNext()) {
                   switch (it.next()) {
                     case "valueType":
-                      builder.setValueType(event.get("valueType").asText());
+                      JsonNode jn = event.get("valueType");
+                      if(jn.isValueNode()) {
+                      	builder.setValueType(jn.asText());
+                      } else {
+                      	builder.setValueType(jn.toString());
+                      }
                       break;
                     case "hrefs":
                       builder.setHrefs(stringOrArray(event.get("hrefs")));

@@ -209,5 +209,33 @@ public class ThingDescriptionParserTest {
 //        fail(e.getMessage());
 //      }
 //    }
+    
+    
+//    {
+//    	  "@context": ["http://w3c.github.io/wot/w3c-wot-td-context.jsonld"],
+//    	  "@type": "Thing",
+//    	  "name": "MyTemperatureThing",
+//    	  "uris": "coap://www.mytemp.com:5683/",
+//    	  "encodings": ["JSON"],
+//    	  "properties": [
+//    	    {
+//    	      "name": "temperature",
+//    	      "valueType": {
+//    	        "type": "integer",
+//    	        "maximum": 13
+//    	      },
+//    	      "writable": false,
+//    	      "hrefs": ["temp"]
+//    	    }
+//    	  ]
+//    	}
+    @Test
+    public void testJSONSchema1() throws Exception {
+    	String json = "{\n  \"@context\": [\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\"],\n  \"@type\": \"Thing\",\n  \"name\": \"MyTemperatureThing\",\n  \"uris\": \"coap://www.mytemp.com:5683/\",\n  \"encodings\": [\"JSON\"],\n  \"properties\": [\n    {\n      \"name\": \"temperature\",\n      \"valueType\": {\n        \"type\": \"integer\",\n        \"maximum\": 13\n      },\n      \"writable\": false,\n      \"hrefs\": [\"temp\"]\n    }\n  ]\n}";
+    	
+   		@SuppressWarnings("unused")
+		Thing td = ThingDescriptionParser.fromBytes(json.getBytes());
+   		// TODO any further checks?
+    }
 
 }
