@@ -47,12 +47,14 @@ public class JsPromise {
     private Consumer onSuccess;
     private Consumer onError;
 
-    public void resolve(Object param) {
+    public JsPromise resolve(Object param) {
         future.complete(param);
+        return this;
     }
 
-    public void reject(Object error) {
+    public JsPromise reject(Object error) {
         future.completeExceptionally(new RuntimeException(error.toString()));
+        return this;
     }
 
     public JsPromise then(Consumer onSuccessCallBack) {

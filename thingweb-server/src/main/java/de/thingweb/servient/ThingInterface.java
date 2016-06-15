@@ -25,6 +25,7 @@
 package de.thingweb.servient;
 
 import de.thingweb.thing.Action;
+import de.thingweb.thing.Event;
 import de.thingweb.thing.Property;
 
 import java.util.function.Consumer;
@@ -84,4 +85,10 @@ public interface ThingInterface {
     void onPropertyRead(Consumer<Object> callback);
 
     String getName();
+
+    void addProperty(Property prop);
+
+    void addAction(Action action);
+
+    void addEvent(Event event);
 }

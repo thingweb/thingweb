@@ -28,6 +28,7 @@ package de.thingweb.servient.impl;
 
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.thing.Action;
+import de.thingweb.thing.Event;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
 import org.slf4j.Logger;
@@ -188,9 +189,23 @@ public class ServedThing implements ThingInterface {
     }
     
  // TODO This should perhaps be a generic add interaction. But wait and watch how proposals develop.
-    //Taking this out, see Thing.addProperty
+
+    @Override
     public void addProperty(Property prop){
     	m_thingModel.addProperty(prop);
     	m_stateContainer.updateHandlers();
     }
+
+    @Override
+    public void addAction(Action action){
+        m_thingModel.addAction(action);
+        m_stateContainer.updateHandlers();
+    }
+
+    @Override
+    public void addEvent(Event event){
+        m_thingModel.addEvent(event);
+        m_stateContainer.updateHandlers();
+    }
+
 }
