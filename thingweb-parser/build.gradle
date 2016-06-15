@@ -25,8 +25,8 @@
 dependencies {
 	compile 'com.github.fge:json-schema-validator:2.2.6'
 	compile 'com.github.jsonld-java:jsonld-java:0.8.2'
-    compile group: 'com.siemens.ct.exi', name: 'exificient', version: '0.9.4'
-
+    // compile group: 'com.siemens.ct.exi', name: 'exificient-for-json', version: '0.9.6a-SNAPSHOT', changing: true
+	compile group: 'com.siemens.ct.exi', name: 'exificient-for-json', version: '0.9.6'
     compile project(":thingweb-common")
     runtime files("schema/td-schema.json")
     runtime files("../lib/jsonld-context.jar")

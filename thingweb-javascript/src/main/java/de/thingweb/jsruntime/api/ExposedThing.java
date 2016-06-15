@@ -25,13 +25,12 @@ public class ExposedThing {
         return new ExposedThing(servedThing);
     }
 
-    public ExposedThing onInvoke(String actionName, Function callback) {
+    public ExposedThing onInvokeAction(String actionName, Function callback) {
         thing.onActionInvoke(actionName,callback);
         return this;
     }
 
-
-    public ExposedThing onUpdate(String propertyName, Consumer callback) {
+    public ExposedThing onUpdateProperty(String propertyName, Consumer callback) {
         thing.onPropertyUpdate(propertyName,callback);
         return this;
     }

@@ -53,17 +53,7 @@ public class WotAPI {
         this.thingServer = thingServer;
     }
 
-    public ExposedThing exposeFromUri(String uri) {
-        try {
-            Thing thing = ThingDescriptionParser.fromURL(new URL(uri));
-            ThingInterface servedThing = getThingServer().addThing(thing);
-            return ExposedThing.from(servedThing);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public ConsumedThing consumeFromUri(String uri) {
+    public ConsumedThing consumeDescriptionUri(String uri) {
         try {
             return ConsumedThing.from(getClientFactory().getClientUrl(new URI(uri)));
         } catch (IOException | UnsupportedException | URISyntaxException e) {
@@ -71,7 +61,16 @@ public class WotAPI {
         }
     }
 
-    public ExposedThing expose(String jsonld)  {
+    public ConsumedThing consumeDescription(String jsonld) {
+        try {
+            Thing description = ThingDescriptionParser.fromBytes(jsonld.getBytes());
+            return ConsumedThing.from(getClientFactory().getClientFromTD(description));
+        } catch (IOException | UnsupportedException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ExposedThing createFomDescription(String jsonld)  {
         try {
             Thing thing = ThingDescriptionParser.fromBytes(jsonld.getBytes());
             ThingInterface servedThing = getThingServer().addThing(thing);
@@ -81,14 +80,16 @@ public class WotAPI {
         }
     }
 
-    public ConsumedThing consume(String jsonld) {
+    public ExposedThing createFomDescriptionUri(String uri)  {
         try {
-            Thing description = ThingDescriptionParser.fromBytes(jsonld.getBytes());
-            return ConsumedThing.from(getClientFactory().getClientFromTD(description));
-        } catch (IOException | UnsupportedException | URISyntaxException e) {
+            Thing thing = ThingDescriptionParser.fromURL(new URL(uri));
+            ThingInterface servedThing = getThingServer().addThing(thing);
+            return ExposedThing.from(servedThing);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 
     public ExposedThing getLocalThing(String name) {
         return ExposedThing.from(getThingServer().getThing(name));

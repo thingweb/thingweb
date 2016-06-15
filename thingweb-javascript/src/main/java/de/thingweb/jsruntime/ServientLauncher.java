@@ -36,10 +36,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * Created by Johannes on 02.02.2016.
@@ -68,6 +73,16 @@ public class ServientLauncher {
 
     public void start() throws Exception {
         ServientBuilder.start();
+        Files.walk(Paths.get("./autorun"))
+                .filter(Files::isRegularFile)
+                .map(Path::toFile)
+                .forEach(file -> {
+                    try {
+                        jsrt.runFile(file);
+                    } catch (FileNotFoundException | ScriptException e) {
+                        log.error("error running autostart file", e);
+                    }
+                });
     }
 
     public void addServientInterfaceHandlers(ThingServer server) throws IOException {
