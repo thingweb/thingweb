@@ -1,12 +1,13 @@
-print('js was called by nashorn!');
+// testTD is injected globally from the runtime
+print('js was called by runtime!');
 
 print('WoT API is ' + WoT + ':\nversion ' + WoT.getVersion());
 
-var srv = WoT.expose(testTD);
-var client = WoT.consume(testTD);
+var srv = WoT.createFromDescription(testTD);
+var client = WoT.consumeDescription(testTD);
 
 
-srv.onUpdate("number", function(nv) {
+srv.onUpdateProperty("number", function(nv) {
     print("this callback saw number changing to " + nv);
 });
 print("added change listener");
@@ -22,3 +23,4 @@ print("setting value via client");
 
 srv.setProperty("number",42);
 print("called change on server");
+

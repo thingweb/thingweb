@@ -7,19 +7,19 @@ import de.thingweb.servient.ServientBuilder;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.Thing;
-//import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.function.Function;
+
+//import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 /**
  * Created by Johannes on 09.12.2015.
  */
 public class WotAPI {
-    public static final String version = "0.0.1";
+    public static final String version = "0.0.2";
 
     public String getVersion() {
         return version;
@@ -70,7 +70,7 @@ public class WotAPI {
         }
     }
 
-    public ExposedThing createFomDescription(String jsonld)  {
+    public ExposedThing createFromDescription(String jsonld)  {
         try {
             Thing thing = ThingDescriptionParser.fromBytes(jsonld.getBytes());
             ThingInterface servedThing = getThingServer().addThing(thing);
@@ -80,7 +80,7 @@ public class WotAPI {
         }
     }
 
-    public ExposedThing createFomDescriptionUri(String uri)  {
+    public ExposedThing createFromDescriptionUri(String uri)  {
         try {
             Thing thing = ThingDescriptionParser.fromURL(new URL(uri));
             ThingInterface servedThing = getThingServer().addThing(thing);
