@@ -108,7 +108,7 @@ public class ConsumedThing {
         return promise;
     }
 
-    public JsPromise callAction(String actionName, Object param) {
+    public JsPromise invokeAction(String actionName, Object param) {
         JsPromise promise = new JsPromise();
 
         //do async:
