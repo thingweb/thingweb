@@ -22,6 +22,10 @@
  * THE SOFTWARE.
  */
 
+apply plugin: 'application'
+
+mainClassName = "de.thingweb.jsruntime.ServientLauncher"
+
 dependencies {
     compile project(":thingweb-common")
     compile project(":thingweb-parser")

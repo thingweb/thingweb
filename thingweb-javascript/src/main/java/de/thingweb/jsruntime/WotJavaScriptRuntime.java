@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
@@ -17,25 +18,36 @@ import java.io.FileReader;
 public class WotJavaScriptRuntime {
 
     private static final Logger log = LoggerFactory.getLogger(WotJavaScriptRuntime.class);
-    private final ScriptEngine engine;
     protected final WotAPI api;
+    private final ScriptEngine engine;
 
     private WotJavaScriptRuntime(ScriptEngine engine) {
         api = new WotAPI();
-        log.debug("injecting wot api v{}", api.getVersion());
-
-        engine.put("WoT", api);
+        polyfill(engine,api);
         this.engine = engine;
     }
 
     private WotJavaScriptRuntime(ScriptEngine engine,ThingServer thingServer) {
         api = new WotAPI(thingServer);
-        log.debug("injecting wot api v{}", api.getVersion());
-
-        engine.put("WoT", api);
+        polyfill(engine,api);
         this.engine = engine;
     }
 
+    private static void polyfill(ScriptEngine engine, WotAPI api) {
+        log.debug("injecting wot api v{}", api.getVersion());
+        engine.put("WoT", api);
+
+        // general polyfills
+        try {
+            engine.eval("var global = this;\n" +
+                    "var console = {};\n" +
+                    "console.debug = print;\n" +
+                    "console.warn = print;\n" +
+                    "console.log = print;");
+        } catch (ScriptException e) {
+            log.error("error in polyfill");
+        }
+    }
 
     public static WotJavaScriptRuntime create() {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
@@ -50,6 +62,11 @@ public class WotJavaScriptRuntime {
     public void runFile(String fname) throws FileNotFoundException, ScriptException {
         if(engine != null)
             engine.eval(new FileReader(fname));
+    }
+
+    public void runFile(File file) throws FileNotFoundException, ScriptException {
+        if(engine != null)
+            engine.eval(new FileReader(file));
     }
 
     public void runScript(String script) throws ScriptException {
