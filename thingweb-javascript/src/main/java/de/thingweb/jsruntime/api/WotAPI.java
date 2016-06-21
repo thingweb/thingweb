@@ -99,9 +99,10 @@ public class WotAPI {
 
         executor.submit(() -> {
             try {
-                Thing thing = ThingDescriptionParser.fromBytes(jsonld.getBytes());
-                ThingInterface servedThing = getThingServer().addThing(thing);
-                promise.resolve(ExposedThing.from(servedThing));
+                final Thing thing = ThingDescriptionParser.fromBytes(jsonld.getBytes());
+                final ThingInterface servedThing = getThingServer().addThing(thing);
+                final ExposedThing exposedThing = ExposedThing.from(servedThing, getThingServer());
+                promise.resolve(exposedThing);
             } catch (IOException e) {
                 promise.reject(new RuntimeException(e));
             }
@@ -115,9 +116,10 @@ public class WotAPI {
 
         executor.submit(() -> {
             try {
-                Thing thing = ThingDescriptionParser.fromURL(new URL(uri));
-                ThingInterface servedThing = getThingServer().addThing(thing);
-                promise.resolve(ExposedThing.from(servedThing));
+                final Thing thing = ThingDescriptionParser.fromURL(new URL(uri));
+                final ThingInterface servedThing = getThingServer().addThing(thing);
+                final ExposedThing exposedThing = ExposedThing.from(servedThing, getThingServer());
+                promise.resolve(exposedThing);
             } catch (IOException e) {
                 promise.reject(new RuntimeException(e));
             }
@@ -131,15 +133,17 @@ public class WotAPI {
         JsPromise promise = new JsPromise();
 
         executor.submit(() -> {
-            Thing thing = new Thing(name);
-            ThingInterface servedThing = getThingServer().addThing(thing);
-            promise.resolve(ExposedThing.from(servedThing));
+            final Thing thing = new Thing(name);
+            final ThingInterface servedThing = getThingServer().addThing(thing);
+            final ExposedThing exposedThing = ExposedThing.from(servedThing, getThingServer());
+            promise.resolve(exposedThing);
         });
 
         return promise;
     }
 
+
     public ExposedThing getLocalThing(String name) {
-        return ExposedThing.from(getThingServer().getThing(name));
+        return ExposedThing.from(getThingServer().getThing(name),getThingServer());
     }
 }

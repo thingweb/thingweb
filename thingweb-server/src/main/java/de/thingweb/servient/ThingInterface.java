@@ -27,6 +27,7 @@ package de.thingweb.servient;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Event;
 import de.thingweb.thing.Property;
+import de.thingweb.thing.Thing;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,6 +37,13 @@ import java.util.function.Function;
  * The ThingInterface provides methods for interacting with things.
  */
 public interface ThingInterface {
+    /**
+     * returns the model (= Thing Description for the Thing)
+     * @return Thing Model
+     */
+
+    Thing getThingModel();
+
     /**
      * <p>Sets a property to a new value.</p>
      * <p>

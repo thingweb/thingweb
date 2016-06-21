@@ -1,6 +1,7 @@
 package de.thingweb.jsruntime.api;
 
 import de.thingweb.servient.ThingInterface;
+import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -14,16 +15,17 @@ import java.util.function.Function;
 public class ExposedThing {
 
     private final ThingInterface thing;
-
     public final String name;
+    private final ThingServer servient;
 
-    protected ExposedThing(ThingInterface thing) {
+    protected ExposedThing(ThingInterface thing, ThingServer thingServer) {
         this.thing = thing;
         this.name = thing.getName();
+        this.servient = thingServer;
     }
 
-    public static ExposedThing from(ThingInterface servedThing) {
-        return new ExposedThing(servedThing);
+    public static ExposedThing from(ThingInterface servedThing, ThingServer thingServer) {
+        return new ExposedThing(servedThing,thingServer);
     }
 
     public ExposedThing onInvokeAction(String actionName, Function callback) {
@@ -61,6 +63,7 @@ public class ExposedThing {
                 .build();
 
         thing.addAction(action);
+        servient.rebind(name);
         return this;
     }
 
@@ -78,6 +81,7 @@ public class ExposedThing {
                 .build();
 
         thing.addProperty(prop);
+        servient.rebind(name);
         return this;
     }
 

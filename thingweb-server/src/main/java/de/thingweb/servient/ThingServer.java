@@ -41,6 +41,8 @@ public interface ThingServer {
 
     void rebindSec(String name, boolean enabled);
 
+    void rebind(String name);
+
     ThingInterface getThing(String thingName);
 
     Set<Thing> getThings();

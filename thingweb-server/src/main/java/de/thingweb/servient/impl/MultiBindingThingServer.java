@@ -148,6 +148,12 @@ public class MultiBindingThingServer implements ThingServer {
     }
 
     @Override
+    public void rebind(String name) {
+        final ServedThing servedThing = things.get(name.toLowerCase());
+        createBindings(servedThing,servedThing.getThingModel().isProtected());
+    }
+
+    @Override
     public ThingInterface getThing(String thingName) {
         return things.get(thingName);
     }

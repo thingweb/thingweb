@@ -57,6 +57,7 @@ public class ServedThing implements ThingInterface {
         this.m_stateContainer = new StateContainer(thing);
     }
 
+    @Override
     public Thing getThingModel() {
         return m_thingModel;
     }
