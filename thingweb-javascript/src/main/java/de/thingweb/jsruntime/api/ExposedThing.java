@@ -77,7 +77,7 @@ public class ExposedThing {
 
     public ExposedThing addProperty(String propName, String type) {
         Property prop = Property.getBuilder(propName)
-                .setXsdType(type)
+                .setValueType(type)
                 .build();
 
         thing.addProperty(prop);
