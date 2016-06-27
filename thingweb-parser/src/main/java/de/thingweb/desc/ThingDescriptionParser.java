@@ -403,6 +403,12 @@ public class ThingDescriptionParser
             thing.getMetadata().add("uris", uri);
           }
           break;
+        case "@type":
+          thing.getMetadata().add("@type", td.get("@type").asText());
+          break;
+        case "security":
+            thing.getMetadata().add("security", td.get("security").toString());
+            break;
           
         case "properties":
           for (JsonNode prop : td.get("properties")) {
@@ -418,12 +424,21 @@ public class ThingDescriptionParser
                 	builder.setValueType(jn.toString());
                   } 
                   break;
+                case "@type":
+                  builder.setPropertyType(prop.get("@type").asText());
+                  break;
                 case "writable":
                   builder.setWriteable(prop.get("writable").asBoolean());
                   break;
                 case "hrefs":
                   builder.setHrefs(stringOrArray(prop.get("hrefs")));
                   break;
+                case "security":
+                    builder.setSecurity(prop.get("security").toString());
+                    break;
+                case "stability":
+                    builder.setStability(prop.get("stability").asInt());
+                    break;
               }
             }
             thing.addProperty(builder.build());
@@ -452,9 +467,15 @@ public class ThingDescriptionParser
                 	builder.setOutputType(jnO.toString());
                   }
                   break;
+                case "@type":
+                    builder.setActionType(action.get("@type").asText());
+                    break;
                 case "hrefs":
                   builder.setHrefs(stringOrArray(action.get("hrefs")));
                   break;
+                case "security":
+                    builder.setSecurity(action.get("security").toString());
+                    break;
               }
             }
             thing.addAction(builder.build());
@@ -475,9 +496,15 @@ public class ThingDescriptionParser
                       	builder.setValueType(jn.toString());
                       }
                       break;
+                    case "@type":
+                        builder.setEventType(event.get("@type").asText());
+                        break;
                     case "hrefs":
                       builder.setHrefs(stringOrArray(event.get("hrefs")));
                       break;
+                    case "security":
+                        builder.setSecurity(event.get("security").toString());
+                        break;
                   }
                 }
                 thing.addEvent(builder.build());

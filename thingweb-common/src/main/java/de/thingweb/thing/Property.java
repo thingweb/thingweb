@@ -46,11 +46,13 @@ public class Property extends Observable {
 	private final boolean m_isReadable;
 	private final boolean m_isWritable;
 	private final List<String> m_hrefs;
+	private final Integer m_stability;
+	private final String m_security;
 	
 	
 
 	
-	protected Property(String name, String valueType, boolean isReadable, boolean isWritable, String propertyType, List<String> hrefs) {
+	protected Property(String name, String valueType, boolean isReadable, boolean isWritable, String propertyType, List<String> hrefs, Integer stability, String security) {
 		if (null == name) {
 			throw new IllegalArgumentException("name must not be null");
 		}
@@ -61,6 +63,8 @@ public class Property extends Observable {
 		m_isWritable = isWritable;
 		m_propertyType = propertyType;
 		m_hrefs = hrefs;
+		m_stability = stability;
+		m_security = security;
 	}
 
 	public static Property.Builder getBuilder(String name) {
@@ -95,6 +99,14 @@ public class Property extends Observable {
 	public List<String> getHrefs(){
 		return m_hrefs;
 	}
+	
+	public Integer getStability(){
+		return m_stability;
+	}
+	
+	public String getSecurity(){
+		return m_security;
+	}
 
 	public static class Builder {
 		private String name;
@@ -103,6 +115,14 @@ public class Property extends Observable {
 		private String valueType = "xsd:string";
 		private String propertyType = null;
 		private List<String> hrefs = new ArrayList<>();
+		/**
+		 * [optional] Expected period in ms the Property value is expected not to change (>0=estimated period; 0=irregular change; -1=static value)
+		 */
+		private Integer stability = null;
+		/**
+		 * [optional] Access metadata (self-contained) for protecting this Property and securely transmitting information. Compared to the security field that can be found in the Thing metadata, this field here can be used to apply specific security requirements that is only valid for this resource.
+		 */
+		private String security = null;
 
 		public Builder(String name) {
 			this.name = name;
@@ -136,9 +156,19 @@ public class Property extends Observable {
 			this.isWriteable = isWriteable;
 			return this;
 		}
+		
+		public Property.Builder setStability(Integer stability) {
+			this.stability = stability;
+			return this;
+		}
+		
+		public Property.Builder setSecurity(String security) {
+			this.security = security;
+			return this;
+		}
 
 		public Property build() {
-			return new Property(name, valueType, isReadable, isWriteable, propertyType, hrefs);
+			return new Property(name, valueType, isReadable, isWriteable, propertyType, hrefs, stability, security);
 		}
 	}
 

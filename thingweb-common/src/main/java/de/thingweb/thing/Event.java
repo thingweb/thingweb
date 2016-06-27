@@ -7,12 +7,16 @@ public class Event {
 	
 	private final String name;
 	private final String valueType;
+	private final String eventType;
 	private final List<String> hrefs;
+	private final String security;
 	 
-    protected Event(String name, String valueType, List<String> hrefs) {
+    protected Event(String name, String valueType, String eventType, List<String> hrefs, String security) {
         this.name = name;
+        this.eventType = eventType;
         this.valueType = valueType;
         this.hrefs = hrefs;
+        this.security = security;
     }
     
     /**
@@ -32,16 +36,27 @@ public class Event {
 	public String getValueType() {
 		return valueType;
 	}
+	
+	public String getEventType(){
+		return eventType;
+	}
 
 	public List<String> getHrefs(){
 		return hrefs;
 	}
 	
+	public String getSecurity(){
+		return security;
+	}
+	
+	
     public static class Builder {
 
         private final String name;
         private String valueType = "";
+        private String eventType = null;
         private List<String> hrefs = new ArrayList<String>();
+        private String security = null;
 
         private Builder(String name) {
             this.name = name;
@@ -52,17 +67,27 @@ public class Event {
             return this;
         }
         
+        public Builder setEventType(String eventType) {
+            this.eventType = eventType;
+            return this;
+        }
+        
         public Builder setHrefs(List<String> hrefs) {
           this.hrefs = hrefs;
           return this;
         }
+        
+		public Builder setSecurity(String security) {
+			this.security = security;
+			return this;
+		}
 
         /**
          * generate the event, finalize the Builder
          * @return the constructed Event
          */
         public Event build() {
-           return new Event(name, valueType, hrefs);
+           return new Event(name, valueType, eventType, hrefs, security);
         }
     }
 }

@@ -273,4 +273,17 @@ public final class Thing {
 
         return null;
     }
+    
+    public Event getEvent(String eventName) {
+        if (null == eventName) {
+            throw new IllegalArgumentException("eventName must not be null");
+        }
+
+        for (Event event : m_events) {
+            if (event.getName().equals(eventName))
+                return event;
+        }
+
+        return null;
+    }
 }
