@@ -31,27 +31,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.thingweb.thing.Property.Builder;
-
 public class Action {
 
     private final Map<String, String> params;
     private final String name;
     private final String inputType;
     private final String outputType;
+    private final String actionType;
     private final List<String> hrefs;
+    private final String security;
 
     @Deprecated
     protected Action(String name, Map<String, String> params) {
-        this(name, params.get("parm"), "", new ArrayList<String>());
+        this(name, params.get("parm"), "", null, new ArrayList<String>(), null);
     }
     
-    protected Action(String name, String inputType, String outputType, List<String> hrefs) {
+    protected Action(String name, String inputType, String outputType, String actionType, List<String> hrefs, String security) {
         this.params = new HashMap<>();
         this.name = name;
         this.inputType = inputType;
         this.outputType = outputType;
+        this.actionType = actionType;
         this.hrefs = hrefs;
+        this.security = security;
     }
 
     /**
@@ -70,6 +72,10 @@ public class Action {
     public String getOutputType() {
         return outputType;
     }
+    
+    public String getActionType() {
+        return actionType;
+    }
 
     @Deprecated
     public Map<String, String> getParams() {
@@ -83,6 +89,10 @@ public class Action {
     public List<String> getHrefs(){
       return hrefs;
     }
+    
+	public String getSecurity(){
+		return security;
+	}
 
     public static class Builder {
         private final Map<String,String> params = new HashMap<>();
@@ -90,7 +100,12 @@ public class Action {
         private final String name;
         private String inputType = "";
         private String outputType = "";
+        private String actionType = null;
         private List<String> hrefs = new ArrayList<String>();
+		/**
+		 * [optional] Access metadata (self-contained) for protecting this Property and securely transmitting information. Compared to the security field that can be found in the Thing metadata, this field here can be used to apply specific security requirements that is only valid for this resource.
+		 */
+		private String security = null;
 
         private Builder(String name) {
             this.name = name;
@@ -106,10 +121,20 @@ public class Action {
             return this;
         }
         
+		public Builder setActionType(String actionType) {
+			this.actionType = actionType;
+			return this;
+		}
+        
         public Builder setHrefs(List<String> hrefs) {
           this.hrefs = hrefs;
           return this;
         }
+        
+		public Builder setSecurity(String security) {
+			this.security = security;
+			return this;
+		}
 
         /**
          * add a parameter / input value to the action
@@ -130,7 +155,7 @@ public class Action {
          */
         public Action build() {
             if(params.size() == 0)
-                    return new Action(name,inputType,outputType, hrefs);
+                    return new Action(name,inputType,outputType, actionType, hrefs, security);
                else
                        return new Action(name,params);
         }
