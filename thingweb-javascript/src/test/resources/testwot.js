@@ -7,20 +7,24 @@ var srv = WoT.createFromDescription(testTD);
 var client = WoT.consumeDescription(testTD);
 
 
-srv.onUpdateProperty("number", function(nv) {
-    print("this callback saw number changing to " + nv);
-});
-print("added change listener");
-
-client.setProperty("number",66)
-    .then(function() {
-        print("returned success");
-    })
-    ._catch(function(err) {
-        print("got error " + err);
+srv.then(function(thing){
+    thing.onUpdateProperty("number", function(nv) {
+        print("this callback saw number changing to " + nv);
     });
-print("setting value via client");
+    print("added change listener");
 
-srv.setProperty("number",42);
-print("called change on server");
+    thing.setProperty("number",42);
+    print("called change on server");
+});
+
+client.then(function(thing){
+    client.setProperty("number",66)
+        .then(function() {
+            print("returned success");
+        })
+        ._catch(function(err) {
+            print("got error " + err);
+        });
+    print("setting value via client");
+});
 

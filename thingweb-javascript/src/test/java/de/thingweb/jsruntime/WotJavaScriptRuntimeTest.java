@@ -42,13 +42,13 @@ public class WotJavaScriptRuntimeTest {
         String testTD = TestTools.readResource("simplething.jsonld");
         jsrt.getEngine().put("testTD",testTD);
 
-        jsrt.runScript(script);
+        //jsrt.runScript(script);
     }
 
     public static void main(String[] args) throws Exception {
         //just done to avoid junit-sideffects
         WotJavaScriptRuntimeTest test = new WotJavaScriptRuntimeTest();
-        //test.testRunFile();
+        test.testRunFile();
     }
 
 }
