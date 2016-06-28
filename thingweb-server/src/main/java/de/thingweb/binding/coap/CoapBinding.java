@@ -50,7 +50,7 @@ public class CoapBinding implements Binding {
     public CoapBinding() {
         String hostname = null;
         try {
-            hostname = InetAddress.getLocalHost().getHostName();
+            hostname = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             hostname = "localhost";
         }

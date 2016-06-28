@@ -55,7 +55,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
 	public NanoHttpServer() throws IOException {
         super(DEFAULT_PORT);
-		String hostname = InetAddress.getLocalHost().getHostName();
+		String hostname = InetAddress.getLocalHost().getHostAddress();
 		baseuri = String.format("http://%s:%s",hostname, DEFAULT_PORT);
     }
 
