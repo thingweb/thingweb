@@ -64,7 +64,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
 	public NanoHttpServer(int port) throws IOException {
 		super(port);
-		String hostname = InetAddress.getLocalHost().getHostName();
+		String hostname = InetAddress.getLocalHost().getHostAddress();
 		baseuri = String.format("http://%s:%s",hostname, port);
 		resmap.put(WellKnownListener.WELL_KNOWN_URL, wellKnownListener);
 	}
