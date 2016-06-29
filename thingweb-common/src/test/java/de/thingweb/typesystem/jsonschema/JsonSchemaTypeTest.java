@@ -1,4 +1,4 @@
-package de.thingwebtypesystem.jsonschema;
+package de.thingweb.typesystem.jsonschema;
 
 import static org.junit.Assert.*;
 
