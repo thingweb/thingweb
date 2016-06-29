@@ -1,8 +1,11 @@
-package de.thingweb.util.typesystem;
+package de.thingweb.typesystem;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import de.thingweb.typesystem.TypeSystem;
+import de.thingweb.typesystem.TypeSystemChecker;
 
 public class TypeSystemCheckerTest {
 

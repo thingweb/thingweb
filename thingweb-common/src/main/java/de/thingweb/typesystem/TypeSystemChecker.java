@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package de.thingweb.util.typesystem;
+package de.thingweb.typesystem;
 
 import java.io.StringReader;
 import java.util.Arrays;

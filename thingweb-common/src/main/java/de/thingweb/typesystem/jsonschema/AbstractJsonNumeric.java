@@ -22,15 +22,32 @@
  * THE SOFTWARE.
  */
 
-package de.thingweb.util.typesystem;
+package de.thingweb.typesystem.jsonschema;
 
-public enum TypeSystem {
-	/** XML Schema Datatypes */
-	XML_SCHEMA_DATATYPES,
-	/** JSON Schema */
-	JSON_SCHEMA,
-	/** Schema.org */
-	SCHEMA_ORG,
-	/** Unknown type system */
-	UNKNOWN
+public abstract class AbstractJsonNumeric extends AbstractJsonType {
+	
+	boolean exclusiveMinimum = false;
+	boolean exclusiveMaximum = false;
+	
+	AbstractJsonNumeric(PrimitiveType primitiveType) {
+		super(primitiveType);
+	}
+	
+	void setExclusiveMinimum(boolean exclusiveMinimum) {
+		this.exclusiveMinimum = exclusiveMinimum;
+	}
+
+	void setExclusiveMaximum(boolean exclusiveMaximum) {
+		this.exclusiveMaximum = exclusiveMaximum;
+	}
+	
+	public boolean isExclusiveMinimum() {
+		return exclusiveMinimum;
+	}
+	
+	public boolean isExclusiveMaximum() {
+		return exclusiveMaximum;
+	}
+	
+
 }
