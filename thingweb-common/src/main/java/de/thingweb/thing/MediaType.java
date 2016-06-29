@@ -42,6 +42,10 @@ public enum MediaType {
 	APPLICATION_EXI("application/exi"),
 	/** application/json */
 	APPLICATION_JSON("application/json"),
+	/** application/gzip */
+	APPLICATION_GZIP("application/gzip"),
+	/** application/image */
+	APPLICATION_IMG_JPEG("image/jpeg"),
 	/** undefined/unknown */
 	UNDEFINED("undefined");
 	
@@ -53,6 +57,8 @@ public enum MediaType {
 		mediaTypes.put(APPLICATION_XML.mediaType, APPLICATION_XML);
 		mediaTypes.put(APPLICATION_EXI.mediaType, APPLICATION_EXI);
 		mediaTypes.put(APPLICATION_JSON.mediaType, APPLICATION_JSON);
+		mediaTypes.put(APPLICATION_GZIP.mediaType, APPLICATION_GZIP);
+		mediaTypes.put(APPLICATION_IMG_JPEG.mediaType, APPLICATION_IMG_JPEG);
 		// mediaTypes.put(UNDEFINED.mediaType, UNDEFINED);
 	}
 	

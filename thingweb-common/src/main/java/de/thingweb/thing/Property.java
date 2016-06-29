@@ -45,24 +45,32 @@ public class Property extends Interaction {
 	private final String m_valueType;
 	private final boolean m_isReadable;
 	private final boolean m_isWritable;
+	private final boolean m_isObservable;
 	private final List<String> m_hrefs;
 	
 	//TODO Experimental. Need to find a way to prevent recursion during async update.
 	public boolean isUnderAsyncUpdate = false;
+	public boolean isClientObserving = false;
+	public boolean isSubscribed = false;
 	
 
 	
-	public Property(String name, String xsdType, boolean isReadable, boolean isWritable, String propertyType, List<String> hrefs) {
+	public Property(String name, String xsdType, boolean isReadable, boolean isWritable, boolean isObservable, String propertyType, List<String> hrefs) {
 		if (null == name) {
 			throw new IllegalArgumentException("name must not be null");
 		}
 		
-		this.m_valueType = xsdType;
+		m_valueType = xsdType;
 		m_name = name;
 		m_isReadable = isReadable;
 		m_isWritable = isWritable;
 		m_propertyType = propertyType;
 		m_hrefs = hrefs;
+		m_isObservable = isObservable;
+	}
+	
+	public Property(String name, String xsdType, boolean isReadable, boolean isWritable, String propertyType, List<String> hrefs) {
+		this(name, xsdType, isReadable, isWritable, false, propertyType, hrefs);
 	}
 
 	public static Property.Builder getBuilder(String name) {
@@ -86,6 +94,10 @@ public class Property extends Interaction {
 	public boolean isWritable() {
 		return m_isWritable;
 	}
+	
+	public boolean isObservable() {
+		return m_isObservable;
+	}
 
 	public String getValueType() {
 		return m_valueType;
@@ -103,6 +115,7 @@ public class Property extends Interaction {
 		private String name;
 		private boolean isReadable = true;
 		private boolean isWriteable = false;
+		private boolean isObservable = false;
 		private String xsdType = "xsd:string";
 		private String propertyType = null;
 		private List<String> hrefs = new ArrayList<>();
@@ -139,9 +152,14 @@ public class Property extends Interaction {
 			this.isWriteable = isWriteable;
 			return this;
 		}
+		
+		public Property.Builder setObservable(boolean isObservable) {
+			this.isObservable = isObservable;
+			return this;
+		}
 
 		public Property build() {
-			return new Property(name, xsdType, isReadable, isWriteable, propertyType, hrefs);
+			return new Property(name, xsdType, isReadable, isWriteable, isObservable, propertyType, hrefs);
 		}
 	}
 

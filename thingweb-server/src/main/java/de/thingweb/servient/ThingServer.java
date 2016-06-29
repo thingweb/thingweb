@@ -38,6 +38,8 @@ import java.util.Set;
 public interface ThingServer {
 
     ThingInterface addThing(Thing thing);
+    
+    void removeThing(Thing thing);
 
     void rebindSec(String name, boolean enabled);
 

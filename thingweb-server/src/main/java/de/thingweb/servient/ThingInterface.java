@@ -65,7 +65,7 @@ public interface ThingInterface {
      */
     void setProperty(String propertyName, Object value);
 
-    void updateProperty(Property property, Object value);
+    Object updateProperty(Property property, Object value);
 
     Object getProperty(Property property);
 
@@ -87,7 +87,7 @@ public interface ThingInterface {
 
     void onPropertyRead(Consumer<Object> callback);
     
-    void onPropertyUpdate(BiConsumer<Object, Object> callback);
+    void onPropertyUpdate(BiFunction<Object, Object, Object> callback);
     
     void onActionInvoke(BiFunction<Object, Object, Object> callback);
 

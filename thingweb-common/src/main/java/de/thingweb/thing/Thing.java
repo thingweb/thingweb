@@ -28,6 +28,7 @@ package de.thingweb.thing;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 
 /**
@@ -48,7 +49,10 @@ public final class Thing {
 
     private final String m_name;
     private final ThingMetadata m_metadata;
+    private Consumer<Object> m_deleteCallback;
+    private Object m_tag;
 
+    public Object servedThing;
     /**
      * Creates a new thing model.
      * <p>
@@ -66,6 +70,15 @@ public final class Thing {
         m_name = name;
         m_metadata = new ThingMetadata();
     }
+    
+
+	public Object getTag() {
+		return m_tag;
+	}
+
+	public void setTag(Object m_tag) {
+		this.m_tag = m_tag;
+	}    
 
     public String getName() {
         return m_name;
@@ -273,4 +286,12 @@ public final class Thing {
 
         return null;
     }
+
+	public Consumer<Object> getDeleteCallback() {
+		return m_deleteCallback;
+	}
+
+	public void setDeleteCallback(Consumer<Object> m_deleteCallback) {
+		this.m_deleteCallback = m_deleteCallback;
+	}
 }

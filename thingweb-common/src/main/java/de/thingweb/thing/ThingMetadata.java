@@ -7,15 +7,16 @@ public class ThingMetadata extends Metadata {
 
 	public final static String METADATA_ELEMENT_URIS = "uris";
 	public final static String METADATA_ELEMENT_ENCODINGS = "encodings";
+	public final static String METADATA_ELEMENT_CONTEXT = "@context";
 
-	private Map<String, String> contexts = new HashMap<String, String>();
+	//private Map<String, String> contexts = new HashMap<String, String>();
 
-	public void addContext(String key, String value) {
-		contexts.put(key, value);
-	}
+	//public void addContext(String key, String value) {
+	//	contexts.put(key, value);
+	//}
 
-	public Map<String, String> getContexts() {
-		return contexts;
-	}
+	//public Map<String, String> getContexts() {
+	//	return contexts;
+	//}
 
 }

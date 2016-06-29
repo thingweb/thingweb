@@ -26,6 +26,7 @@ package de.thingweb.servient.impl;
 
 import de.thingweb.binding.AbstractRESTListener;
 import de.thingweb.thing.Content;
+import de.thingweb.thing.MediaType;
 import de.thingweb.thing.Property;
 import de.thingweb.util.encoding.ContentHelper;
 import org.slf4j.Logger;
@@ -41,13 +42,23 @@ public class PropertyListener extends AbstractRESTListener implements Observer {
     private static final Logger log = LoggerFactory.getLogger(PropertyListener.class);
     private final Property property;
     private final ServedThing servedThing;
+    private final boolean isObservable;
 
     public PropertyListener(ServedThing servedThing, Property property) {
         this.property = property;
         this.servedThing = servedThing;
+        this.isObservable = property.isObservable();
         property.addObserver(this);
     }
+    
+    public boolean isObservable(){
+    	return isObservable;
+    }
 
+    public void setClientObservationState(boolean isObserving){
+    	property.isClientObserving = isObserving;
+    }
+    
     @Override
     public Content onGet() throws Exception {
         if (!property.isReadable()) {
@@ -57,18 +68,31 @@ public class PropertyListener extends AbstractRESTListener implements Observer {
         Object res = servedThing.getProperty(property);
         if(res instanceof Exception)
         	throw (Exception)res;
-        return ContentHelper.makeJsonValue(res);
+        boolean containsMediaType = property.getMetadata().contains("encoding");
+        if(containsMediaType)
+        	return new Content((byte[])res, property.getMetadata().get("encoding"));
+        else
+        	return ContentHelper.makeStringValue((String)res);
+        //return ContentHelper.makeJsonValue(res);
 
     }
 
     @Override
-    public void onPut(Content data) {
+    public Content onPut(Content data) throws RuntimeException {
         if (!property.isWritable()) {
             throw new UnsupportedOperationException(property.getName() + " is not writable");
         }
-
-        Object o = ContentHelper.getValueFromJson(data);
-        servedThing.updateProperty(property, o);
+        String strContent = new String(data.getContent());
+        String valueJson;
+		try {
+			valueJson = ContentHelper.getValueStringFromJson(data);
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
+		}
+        Object res = servedThing.updateProperty(property, valueJson);
+        if(res instanceof Exception)
+        	throw (RuntimeException)res;
+        return ContentHelper.makeStringValue("{}");
     }
 
 

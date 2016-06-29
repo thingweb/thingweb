@@ -52,7 +52,7 @@ public class ActionListener extends AbstractRESTListener {
     public ActionListener(ServedThing servedThing, Action action) {
         this.action = action;
         this.servedThing = servedThing;
-        this.inputType = this.action.getParams().get("parm");
+        this.inputType = this.action.getInputType();//.getParams().get("parm");
     }
 
     @Override
@@ -61,33 +61,36 @@ public class ActionListener extends AbstractRESTListener {
     	List<HyperMediaLink> links = new ArrayList<>();
     	
     	links.add(new HyperMediaLink("invoke","_self","POST",inputType));
-    	links.add(new HyperMediaLink("parent","../"));
+    	//links.add(new HyperMediaLink("parent","../"));
     	
     	if(action.getMetadata().getAssociations().size() > 0)
     		links.addAll(action.getMetadata().getAssociations());
 
     	return HypermediaIndex.createContent(links);
     }
-
+/*
     @Override
-    public void onPut(Content data) {
+    public Content onPut(Content data) {
         log.warn("Action was called by PUT, which is a violation of the spec");
         Object param = ContentHelper.getValueFromJson(data);
         log.debug("invoking {}", action.getName());
-        servedThing.invokeAction(action, param);
+        Object result = servedThing.invokeAction(action, param);
+        return null;
     }
-
+*/
     @Override
     public Content onPost(Content data) {
         Object param = null;
-        if(data.getMediaType().equals(MediaType.APPLICATION_JSON)) {
+        //if(data.getMediaType().equals(MediaType.APPLICATION_JSON)) {
             param = ContentHelper.getValueFromJson(data);
-        } else if(data.getMediaType().equals(MediaType.TEXT_PLAIN)) {
+        //} else if(data.getMediaType().equals(MediaType.TEXT_PLAIN)) {
             param = new String(data.getContent());
-        }
+        //}
 
         log.debug("invoking {}", action.getName());
         Object response = servedThing.invokeAction(action, param);
-        return ContentHelper.wrap(response, MediaType.APPLICATION_JSON);
+        return onGet();
+        //return (Content)response;
+        //return ContentHelper.wrap(response, MediaType.APPLICATION_JSON);
     }
 }

@@ -29,6 +29,8 @@ package de.thingweb.binding;
 public interface ResourceBuilder {
 
 	void newResource(String url, RESTListener restListener);
+	
+	void removeResource(String url);
 
 	String getBase();
 

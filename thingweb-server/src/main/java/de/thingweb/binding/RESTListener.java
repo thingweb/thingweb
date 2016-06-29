@@ -30,7 +30,9 @@ import de.thingweb.security.SecurityTokenValidator;
 import de.thingweb.security.TokenExpiredException;
 import de.thingweb.security.UnauthorizedException;
 import de.thingweb.thing.Content;
+import javafx.util.Pair;
 
+import java.util.List;
 import java.util.Observer;
 
 public interface RESTListener {
@@ -43,12 +45,14 @@ public interface RESTListener {
 
 	Content onGet() throws UnsupportedOperationException, RuntimeException, Exception;
 
-	void onPut(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
+	Content onPut(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException;
 	
 	Content onPost(Content data) throws SecurityException,UnsupportedOperationException, IllegalArgumentException, RuntimeException;
 	
 	void onDelete() throws SecurityException ,UnsupportedOperationException,  RuntimeException;
 
 	void addObserver(Observer o);
+	
+	List<Pair<String, String>> getHeaders();
 
 }

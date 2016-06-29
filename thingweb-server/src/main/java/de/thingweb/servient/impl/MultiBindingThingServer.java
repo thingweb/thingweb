@@ -109,7 +109,7 @@ public class MultiBindingThingServer implements ThingServer {
         Collections.addAll(m_bindings, bindings);
         m_bindings.forEach(resourceBuilder ->
                 resourceBuilder.newResource(Defines.BASE_URL, new HypermediaIndex(
-                                new HyperMediaLink("things", Defines.BASE_THING_URL)
+                                new HyperMediaLink("things", Defines.BASE_URL)
                         )
                 )
         );
@@ -138,6 +138,30 @@ public class MultiBindingThingServer implements ThingServer {
         things.put(thing.getName(), servedThing);
         createBindings(servedThing, thing.isProtected());
         return servedThing;
+    }
+    
+    @Override
+    public void removeThing(Thing thing) {
+        if (null == thing) {
+            throw new IllegalArgumentException("thingModel must not be null");
+        }
+        ServedThing servedThing = null;
+        
+
+        servedThing = things.get(thing.getName());
+        
+        List<String> thingURIs = servedThing.getURIs(); //The Thing might be specified with part URL (i.e. without protocol binding and base)
+        boolean useNameAsURI = (thingURIs == null /*|| thingURIs.size() != m_bindings.size()*/);
+        int bindingIndex = 0;
+        for (ResourceBuilder binding : m_bindings) {
+            String thingurl = useNameAsURI ? urlize(thing.getName()) : thingURIs.get(bindingIndex);
+            thingurl = thingurl.replace(binding.getBase() + Defines.BASE_URL, "");
+            removeBinding(binding, bindingIndex, servedThing ,false, thingurl);
+            bindingIndex++;
+        }      
+        
+
+        things.remove(thing.getName());
     }
 
     @Override
@@ -198,27 +222,34 @@ public class MultiBindingThingServer implements ThingServer {
 
         
         List<String> thingURIs = thingModel.getURIs(); //The Thing might be specified with part URL (i.e. without protocol binding and base)
-        boolean useNameAsURI = (thingURIs == null || thingURIs.size() != m_bindings.size());
+        boolean useNameAsURI = (thingURIs == null /*|| thingURIs.size() != m_bindings.size()*/);
         int bindingIndex = 0;
         List<String> fullyFormedThingURIs = new ArrayList<>();
         // resources
         for (ResourceBuilder binding : m_bindings) {
             // update/create HATEOAS links to things
-            binding.newResource(Defines.BASE_THING_URL, RepoRestListener);
-            String thingurl = useNameAsURI ? urlize(thingModel.getName()) : thingURIs.get(bindingIndex++);
+            //binding.newResource(Defines.BASE_THING_URL, RepoRestListener);
+            String thingurl = useNameAsURI ? urlize(thingModel.getName()) : thingURIs.get(bindingIndex);
             //add thing
-            createBinding(binding, thingModel,isProtected, thingurl);
+            createBinding(binding, bindingIndex, thingModel,isProtected, thingurl);
 
             //update metadata
-            fullyFormedThingURIs.add(binding.getBase() + Defines.BASE_THING_URL + thingurl);
+            fullyFormedThingURIs.add(binding.getBase() + Defines.BASE_URL + thingurl);
+            bindingIndex++;
         }
+        
+        List<String> uris = thingModel.getThingModel().getMetadata().getAll(ThingMetadata.METADATA_ELEMENT_URIS);
         
         thingModel.getThingModel().getMetadata().remove(ThingMetadata.METADATA_ELEMENT_URIS);
         for(String uri : fullyFormedThingURIs)
         	thingModel.getThingModel().getMetadata().add(ThingMetadata.METADATA_ELEMENT_URIS, uri);
+        
+        for(int i = m_bindings.size(); i< uris.size(); i++)
+        	thingModel.getThingModel().getMetadata().add(ThingMetadata.METADATA_ELEMENT_URIS, uris.get(i));
+        	
     }
     
-    private void createBinding(ResourceBuilder resources, ServedThing servedThing, boolean isProtected, String thingurl) {
+    private void createBinding(ResourceBuilder resources, int index, ServedThing servedThing, boolean isProtected, String thingurl) {
         final Thing thingModel = servedThing.getThingModel();
 
         final Map<String, RESTListener> interactionListeners = new HashMap<>();
@@ -228,29 +259,42 @@ public class MultiBindingThingServer implements ThingServer {
 
         // collect properties
         for (Property property : thingModel.getProperties()) {
-            String url = thingurl + "/" + property.getName();
+        	
+            String url = thingurl + "/" + urlize(property.getName());
+            
+            if(property.getHrefs().size() > index)
+            	url = thingurl + "/" + property.getHrefs().remove(index); 
 
             final PropertyListener propertyListener = new PropertyListener(servedThing, property);
             if(isProtected) propertyListener.protectWith(getValidator());
             interactionListeners.put(url, propertyListener);
-            property.getHrefs().add(urlize(property.getName()));
-//            TODO I'll comment this out until we have /value on the microcontroller
-//            interactionListeners.put(url, new HypermediaIndex(
-//                    new HyperMediaLink("value","value"),
-//                    new HyperMediaLink("update","value","PUT","TBD")
-//            ));
-
-            interactionListeners.put(url + "/value", propertyListener);
+           	property.getHrefs().add(index, "/" + url);
         }
 
         // collect actions
         for (Action action : thingModel.getActions()) {
-            //TODO optimize by preconstructing strings and using format
-            final String url = thingurl + "/" + action.getName();
+            String url = thingurl + "/" + action.getName();
+            
+            if(action.getHrefs().size() > index)
+            	url = thingurl + "/" + action.getHrefs().remove(index); 
+            
             final ActionListener actionListener = new ActionListener(servedThing, action);
             if(isProtected) actionListener.protectWith(getValidator());
             interactionListeners.put(url, actionListener);
-            action.getHrefs().add(urlize(action.getName()));
+            action.getHrefs().add(index, "/" + url);
+
+        }
+        
+        // collect events..um..which are really actions.
+        for (Event event : thingModel.getEvents()) {
+            String url = thingurl + "/" + event.getName();
+            if(event.getHrefs().size() > index)
+            	url = thingurl + "/" + event.getHrefs().remove(index); 
+            
+            final ActionListener actionListener = new ActionListener(servedThing, event);
+            if(isProtected) actionListener.protectWith(getValidator());
+            interactionListeners.put(url, actionListener);
+            event.getHrefs().add(index, "/" + url);
         }
 
         //add listener for thing description
@@ -266,5 +310,48 @@ public class MultiBindingThingServer implements ThingServer {
         );
 
     }
+    
+    private void removeBinding(ResourceBuilder resources, int bindingIndex, ServedThing servedThing, boolean isProtected, String thingurl) {
+        final Thing thingModel = servedThing.getThingModel();
+
+        final Map<String, RESTListener> interactionListeners = new HashMap<>();
+        //final String thingurl = Defines.BASE_THING_URL + thingModel.getName().toLowerCase();
+
+        final ThingDescriptionRestListener tdRestListener = new ThingDescriptionRestListener(thingModel);
+
+        // collect properties
+        for (Property property : thingModel.getProperties()) {
+            //String url = thingurl + "/" + property.getName();
+        	String url = property.getHrefs().get(bindingIndex);
+            interactionListeners.put(url, null);
+        }
+
+        // collect actions
+        for (Action action : thingModel.getActions()) {
+            //final String url = thingurl + "/" + action.getName();
+        	String url = action.getHrefs().get(bindingIndex);
+            interactionListeners.put(url, null);
+        }
+        
+        // collect events
+        for (Event action : thingModel.getEvents()) {
+            //final String url = thingurl + "/" + action.getName();
+        	String url = action.getHrefs().get(bindingIndex);
+            interactionListeners.put(url, null);
+        }
+
+        //add listener for thing description
+        String tdUrl = thingurl + "/.td";
+        interactionListeners.put(tdUrl, tdRestListener);
+
+        // leaves last (side-effect of coap-binding)
+        interactionListeners.entrySet().stream().forEachOrdered(
+                entry -> resources.removeResource(entry.getKey())
+        );
+        
+        // thing root
+        //resources.removeResource(thingurl);
+
+    }    
 
 }

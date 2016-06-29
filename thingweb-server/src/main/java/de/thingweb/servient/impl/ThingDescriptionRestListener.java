@@ -40,10 +40,10 @@ import java.util.function.Consumer;
  */
 public class ThingDescriptionRestListener extends AbstractRESTListener {
     private final Thing thingModel;
-    private Consumer<Object> m_deleteCallback;
 
     public ThingDescriptionRestListener(Thing thingModel) {
         this.thingModel = thingModel;
+        
     }
 
     @Override
@@ -57,11 +57,9 @@ public class ThingDescriptionRestListener extends AbstractRESTListener {
 
     @Override
 	public void onDelete() {
-    	m_deleteCallback.accept(thingModel);
-		throw new UnsupportedOperationException();
+    	if(thingModel.getDeleteCallback() != null)
+    		thingModel.getDeleteCallback().accept(null);
+    	else
+    		throw new UnsupportedOperationException();
 	}
-    
-    public void addDeleteHandler(Consumer<Object> callback){
-    	m_deleteCallback = callback;
-    }
 }

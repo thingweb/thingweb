@@ -46,7 +46,7 @@ public class Metadata
    * or null if key does not exist
    */
   public String get(String key) {
-    return items.get(items).iterator().next();
+    return items.get(key).get(0);
   }
   
   public List<String> getAll(String key) {

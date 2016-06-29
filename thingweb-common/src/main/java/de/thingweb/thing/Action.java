@@ -134,5 +134,8 @@ public class Action extends Interaction {
                else
                        return new Action(name,params);
         }
+        public Event buildEvent() {
+        	return new Event(name,inputType,outputType, hrefs);
+        }
     }
 }

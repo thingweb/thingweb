@@ -29,6 +29,7 @@ package de.thingweb.binding.coap;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.security.TokenExpiredException;
 import de.thingweb.security.UnauthorizedException;
+import de.thingweb.servient.impl.PropertyListener;
 import de.thingweb.thing.Content;
 import de.thingweb.thing.MediaType;
 import org.eclipse.californium.core.CoapResource;
@@ -53,9 +54,10 @@ public class WotCoapResource extends CoapResource implements  Observer{
     public WotCoapResource(String name, RESTListener restListener) {
         super(name);
         this.m_restListener = restListener;
-
         restListener.addObserver(this);
-        this.setObservable(true);
+        if(restListener instanceof PropertyListener && ((PropertyListener)restListener).isObservable()){
+        	this.setObservable(true);
+        }
     }
 
     //TODO pull up into coap-spefic helper
@@ -95,7 +97,7 @@ public class WotCoapResource extends CoapResource implements  Observer{
 
     @Override
     public void handleRequest(Exchange exchange) {
-        final CoapExchange coapExchange = new CoapExchange(exchange, this);
+        final CoapExchange coapExchange = new CoapExchange(exchange, this);       
         try {
             final CoAP.Code code = exchange.getRequest().getCode();
             authorize(coapExchange, code.toString());
@@ -137,6 +139,15 @@ public class WotCoapResource extends CoapResource implements  Observer{
     @Override
     public void handleGET(CoapExchange exchange) {
         try {
+            boolean hasObs = exchange.getRequestOptions().hasObserve();
+            System.out.println("Request says it has obs=" + hasObs);
+            if(hasObs){
+            	Integer obsVal = exchange.getRequestOptions().getObserve();
+            	System.out.println("Request says it has obsval =" + obsVal) ;
+            	if(m_restListener instanceof PropertyListener)
+            		((PropertyListener)m_restListener).setClientObservationState(obsVal == 0);
+            }
+            
             Content response = m_restListener.onGet();
         	int contentFormat = getCoapContentFormat(response.getMediaType());
         	exchange.respond(CoAP.ResponseCode.CONTENT, response.getContent(), contentFormat);

@@ -46,14 +46,15 @@ public class HyperMediaLink {
     @JsonProperty("mediaType")
     private String mediaType;
 
-    public HyperMediaLink(String rel, String href) {
-        this.rel = rel;
-        this.href = href;
+    public HyperMediaLink(String rel, String href){
+    	this(rel, href, null, null);
     }
 
     public HyperMediaLink(String rel, String href, String method, String mediaType) {
         this.rel = rel;
         this.href = href;
+        if(!this.href.startsWith("/") && !this.href.contains(":")) //TODO find a  better to handle relative links
+        	this.href = "/" + this.href;
         this.method = method;
         this.mediaType = mediaType;
     }

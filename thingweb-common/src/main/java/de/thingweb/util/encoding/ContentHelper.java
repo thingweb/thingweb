@@ -27,6 +27,7 @@
 package de.thingweb.util.encoding;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.thingweb.thing.Content;
@@ -113,6 +114,58 @@ public class ContentHelper {
         if (data.getContent().length == 0) return null;
         Map map = (Map) parse(data, Map.class);
         return map.get("value");
+    }
+    
+    public static String getValueStringFromJson(Content data) throws Exception {
+    	try{
+	        if (data.getContent().length == 0) return null;
+	        String strContent = new String(data.getContent());
+	        //JsonNode node = mapper.readTree(strContent);
+	        //String valuePart = node.get("value").toString();
+	        //return valuePart;
+	        return strContent;
+    	}catch(Exception e){
+    		throw e;
+    	}
+    }
+    
+    public static boolean isValidJSON(final String json) {
+    	return json.startsWith("{") || json.startsWith("[");
+    	/*
+        boolean valid = true;
+        try{ 
+        	ObjectMapper objectMapper = new ObjectMapper();
+        	objectMapper.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            objectMapper.readTree(json);
+        } catch(Exception e){
+            valid = false;
+        }
+        return valid;
+        */
+    }
+    public static boolean isNumeric(String str)  
+    {  
+      try  
+      {  
+        double d = Double.parseDouble(str);  
+      }  
+      catch(NumberFormatException nfe)  
+      {  
+        return false;  
+      }  
+      return true;  
+    }
+    
+    public static Content makeStringValue(String jsonString){
+    	//boolean validJson = isValidJSON(jsonString);
+    	//if(!validJson){
+    		//if(isNumeric(jsonString))
+    			//jsonString = "{\"value\":" + jsonString + "}";
+    		//else
+    		//	jsonString = "{\"value\":\"" + jsonString + "\"}";
+    	//}
+        byte[] bytes = jsonString.getBytes();
+        return new Content(bytes, de.thingweb.thing.MediaType.APPLICATION_JSON);
     }
 
     public static Content makeJsonValue(Object data) {

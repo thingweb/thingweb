@@ -31,9 +31,11 @@ import de.thingweb.binding.ResourceBuilder;
 import de.thingweb.security.TokenExpiredException;
 import de.thingweb.security.UnauthorizedException;
 import de.thingweb.thing.Content;
+import de.thingweb.thing.HyperMediaLink;
 import de.thingweb.thing.MediaType;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
+import javafx.util.Pair;
 
 import org.jose4j.json.internal.json_simple.JSONObject;
 import org.slf4j.Logger;
@@ -54,17 +56,17 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 	private final Map<String,RESTListener> resmap = new LinkedHashMap<>();
 	private Logger log = LoggerFactory.getLogger(NanoHttpServer.class);
 	private final String baseuri;
+	private WellKnownListener wellKnownListener = new WellKnownListener();
 
 	public NanoHttpServer() throws IOException {
-        super(DEFAULT_PORT);
-		String hostname = InetAddress.getLocalHost().getHostName();
-		baseuri = String.format("http://%s:%s",hostname, DEFAULT_PORT);
+        this(DEFAULT_PORT);
     }
 
 	public NanoHttpServer(int port) throws IOException {
 		super(port);
 		String hostname = InetAddress.getLocalHost().getHostName();
 		baseuri = String.format("http://%s:%s",hostname, port);
+		resmap.put(WellKnownListener.WELL_KNOWN_URL, wellKnownListener);
 	}
 
     @Override
@@ -80,7 +82,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 			msg += resmap.keySet().stream().collect(Collectors.joining("\n"));
 
 			return new Response(Response.Status.NOT_FOUND,MIME_PLAINTEXT,msg);
-        }
+        }        
 
 		//validate token
 		if(listener.hasProtection()) {
@@ -110,7 +112,16 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 			    	Content resp = listener.onGet();
 			    	// TODO how to handle accepted mimeTypes
 			    	// e.g., accept=text/html,application/xhtml+xml,application/xml;
-			    	res = new Response(Status.OK, resp.getMediaType().mediaType,  new ByteArrayInputStream(resp.getContent()));
+			    	String mediaType = resp.getMediaType().mediaType;
+			    	if(resp.getMediaTypeEx() != null)
+			    		mediaType = resp.getMediaTypeEx();
+			    	
+			    	res = new Response(Status.OK, mediaType,  new ByteArrayInputStream(resp.getContent()));
+			    	if(listener.getHeaders() != null){
+			    		for(Pair<String,String> header : listener.getHeaders()){
+			    			res.addHeader(header.getKey(), header.getValue());
+			    		}
+			    	}
 					break;
 			    case PUT:
 			        listener.onPut(getPayload(session));
@@ -183,6 +194,8 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
     @Override
     public void newResource(String url, RESTListener restListener) {
         resmap.put("/" + url.toLowerCase(),restListener);
+        if(url.endsWith(".td"))
+        	wellKnownListener.addLink(new HyperMediaLink("thing", url));
     }
 
 	@Override
@@ -193,5 +206,11 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 	@Override
 	public String getIdentifier() {
 		return "HTTP";
+	}
+
+	@Override
+	public void removeResource(String url) {
+		// TODO Auto-generated method stub
+		
 	}
 }

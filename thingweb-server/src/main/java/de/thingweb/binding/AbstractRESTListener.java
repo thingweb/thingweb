@@ -31,7 +31,9 @@ import de.thingweb.security.TokenExpiredException;
 import de.thingweb.security.TokenRequirements;
 import de.thingweb.security.UnauthorizedException;
 import de.thingweb.thing.Content;
+import javafx.util.Pair;
 
+import java.util.List;
 import java.util.Observable;
 
 public class AbstractRESTListener extends Observable implements RESTListener {
@@ -66,7 +68,7 @@ public class AbstractRESTListener extends Observable implements RESTListener {
 	}
 
 	@Override
-	public void onPut(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException {
+	public Content onPut(Content data) throws UnsupportedOperationException, IllegalArgumentException, RuntimeException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -79,4 +81,10 @@ public class AbstractRESTListener extends Observable implements RESTListener {
 	public void onDelete() {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public List<Pair<String, String>> getHeaders() {
+		return null;
+	}
+	
 }

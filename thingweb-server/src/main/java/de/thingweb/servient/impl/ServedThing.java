@@ -56,7 +56,7 @@ public class ServedThing implements ThingInterface {
     private final Thing m_thingModel;
     private final StateContainer m_stateContainer;
     private Consumer<Object> m_propertyGetCallback;
-    private BiConsumer<Object, Object> m_propertyPutCallback;
+    private BiFunction<Object, Object, Object> m_propertyPutCallback;
     private BiFunction<Object, Object, Object> m_actionPostCallback;
 
     public ServedThing(Thing thing) {
@@ -69,9 +69,12 @@ public class ServedThing implements ThingInterface {
     }
     
     @Override
-    public void updateProperty(Property property, Object value) {
-        if(m_propertyPutCallback != null)
-        	m_propertyPutCallback.accept(property, value);
+    public Object updateProperty(Property property, Object value) {
+        if(m_propertyPutCallback != null){
+        	Object result = m_propertyPutCallback.apply(property, value);
+        	return result;
+        }
+        else return new Exception("No property update handler registered");
     }
 
     @Override
@@ -192,7 +195,7 @@ public class ServedThing implements ThingInterface {
     }
     
     @Override
-    public void onPropertyUpdate(BiConsumer<Object, Object> callback) {
+    public void onPropertyUpdate(BiFunction<Object, Object, Object> callback) {
     	m_propertyPutCallback = callback;
     }
     

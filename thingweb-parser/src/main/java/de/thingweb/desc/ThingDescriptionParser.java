@@ -64,6 +64,7 @@ import de.thingweb.thing.Event;
 import de.thingweb.thing.Metadata;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
+import de.thingweb.thing.ThingMetadata;
 
 public class ThingDescriptionParser
 {
@@ -92,7 +93,7 @@ public class ThingDescriptionParser
     try {
       return parse(root);
     } catch (Exception e) {
-      return parseOld(root);
+      return null;
     }
   }
 
@@ -145,7 +146,8 @@ public class ThingDescriptionParser
 			return parse(root);
 		} catch (Exception e) {
 			// try old parser if by chance it was an old TD
-			return parseOld(root);
+			//return parseOld(root);
+			return null;
 		}
 	}
 
@@ -177,26 +179,31 @@ public class ThingDescriptionParser
     
     ObjectNode td = factory.objectNode();
     //td.put("@context", WOT_TD_CONTEXT);
-    contexts.add(WOT_TD_CONTEXT);
-    Map<String, String> additionalContexts = thing.getMetadata().getContexts();
-    for(String key : additionalContexts.keySet()){
-	    ObjectNode context = factory.objectNode();
-	    context.put(key, additionalContexts.get(key));
+    
+    List<String> additionalContexts = thing.getMetadata().getAll(ThingMetadata.METADATA_ELEMENT_CONTEXT);
+    if(!additionalContexts.contains(WOT_TD_CONTEXT))
+    	contexts.add(WOT_TD_CONTEXT);
+    for(String context : additionalContexts){
 	    contexts.add(context);
     }
     td.put("@context", contexts);
     td.put("name", thing.getName());
-    td.putPOJO("associations", thing.getMetadata().getAssociations());
+    if(thing.getMetadata().getAssociations().size() > 0)
+    	td.putPOJO("associations", thing.getMetadata().getAssociations());
     
     Metadata metadata = thing.getMetadata();
     Map<String, List<String>> metadataItems = metadata.getItems();
     
     for(String key : metadataItems.keySet()){
-    	ArrayNode metadataElement = factory.arrayNode();
-        for (String e : thing.getMetadata().getAll(key)) {
-        	metadataElement.add(e);
-        }
-        td.put(key, metadataElement);
+    	if(thing.getMetadata().getAll(key).size() > 1){
+	    	ArrayNode metadataElement = factory.arrayNode();
+	        for (String e : thing.getMetadata().getAll(key)) {
+	        	metadataElement.add(e);
+	        }
+	        td.put(key, metadataElement);
+    	} else if (thing.getMetadata().getAll(key).size() == 1){
+    		td.put(key, thing.getMetadata().getAll(key).get(0));
+    	}
     }
 /*
     if (thing.getMetadata().contains("encodings")) {
@@ -221,6 +228,7 @@ public class ThingDescriptionParser
       ObjectNode p = factory.objectNode();
       p.put("name", prop.getName());
       p.put("writable", prop.isWritable());
+      p.put("observable", prop.isObservable());
       p.put("valueType", prop.getValueType());
 
       if (prop.getHrefs().size() > 1) {
@@ -234,6 +242,23 @@ public class ThingDescriptionParser
       }
       if(prop.getMetadata().getAssociations().size() > 0)
     	  p.putPOJO("associations", prop.getMetadata().getAssociations());
+      
+      Metadata propertyMetadata = prop.getMetadata();
+      Map<String, List<String>> propMetaItems = propertyMetadata.getItems();
+      
+      for(String key : propMetaItems.keySet()){
+    	  if(prop.getMetadata().getAll(key).size() > 1){
+    		  ArrayNode metadataElements = factory.arrayNode();
+	          for (String e : prop.getMetadata().getAll(key)) {
+	          	metadataElements.add(e);
+	          }
+	          p.put(key, metadataElements);
+    	  }else{
+    		  p.put(key, prop.getMetadata().get(key));
+    	  }
+    		  
+      }
+      
       properties.add(p);
     }
     td.put("properties", properties);
@@ -266,6 +291,18 @@ public class ThingDescriptionParser
       }
       if(action.getMetadata().getAssociations().size() > 0)
     	  a.putPOJO("associations", action.getMetadata().getAssociations());
+      
+      Metadata actionMetadata = action.getMetadata();
+      Map<String, List<String>> actionMetaItems = actionMetadata.getItems();
+      
+      for(String key : actionMetaItems.keySet()){
+      	ArrayNode metadataElement = factory.arrayNode();
+          for (String e : action.getMetadata().getAll(key)) {
+          	metadataElement.add(e);
+          }
+          a.put(key, metadataElement);
+      }
+      
       actions.add(a);
     }
     td.put("actions", actions);
@@ -275,11 +312,17 @@ public class ThingDescriptionParser
       ObjectNode n = factory.objectNode();
       n.put("name", event.getName());
 
-      if (!event.getValueType().isEmpty()) {
+      if (!event.getInputType().isEmpty()) {
         ObjectNode in = factory.objectNode();
-        in.put("valueType", event.getValueType());
+        in.put("inputType", event.getInputType());
         n.put("inputData", in);
       }
+      
+      if (!event.getOutputType().isEmpty()) {
+          ObjectNode out = factory.objectNode();
+          out.put("valueType", event.getOutputType());
+          n.put("outputData", out);
+        }      
 
       if (event.getHrefs().size() > 1) {
         ArrayNode hrefs = factory.arrayNode();
@@ -328,90 +371,7 @@ public class ThingDescriptionParser
     }
   }
   
-  @Deprecated
-  private static Thing parseOld(JsonNode td) throws IOException {
-    try {
-      Thing thing = new Thing(td.get("metadata").get("name").asText());
-      
-      Iterator<String> tdIterator = td.fieldNames();
-      while (tdIterator.hasNext()) {
-        switch (tdIterator.next()) {
-          case "metadata":
-            Iterator<String> metaIterator = td.get("metadata").fieldNames();
-            while (metaIterator.hasNext()) {
-              switch (metaIterator.next()) {
-                case "encodings":
-                  for (JsonNode encoding : td.get("metadata").get("encodings")) {
-                    thing.getMetadata().add("encodings", encoding.asText());
-                  }
-                  break;
-                  
-                case "protocols":
-                  TreeMap<Long, String> orderedURIs = new TreeMap<>();
-                  for (JsonNode protocol : td.get("metadata").get("protocols")) {
-                    orderedURIs.put(protocol.get("priority").asLong(), protocol.get("uri").asText());
-                  }
-                  for (String uri : orderedURIs.values()) {
-                    // values returned in ascending order
-                    thing.getMetadata().add("uris", uri);
-                  }
-                  break;
-              }
-            }
-            break;
-            
-          case "interactions":
-            for (JsonNode inter : td.get("interactions")) {
-              if (inter.get("@type").asText().equals("Property")) {
-                Property.Builder builder = Property.getBuilder(inter.get("name").asText());
-                Iterator<String> propIterator = inter.fieldNames();
-                while (propIterator.hasNext()) {
-                  switch (propIterator.next()) {
-                    case "outputData":
-                      builder.setXsdType(inter.get("outputData").asText());
-                      break;
-                    case "writable":
-                      builder.setWriteable(inter.get("writable").asBoolean());
-                      break;
-                  }
-                }
-                thing.addProperty(builder.build());
-              } else if (inter.get("@type").asText().equals("Action")) {
-                Action.Builder builder = Action.getBuilder(inter.get("name").asText());
-                Iterator<String> actionIterator = inter.fieldNames();
-                while (actionIterator.hasNext()) {
-                  switch (actionIterator.next()) {
-                    case "inputData":
-                      builder.setInputType(inter.get("inputData").asText());
-                      break;
-                    case "outputData":
-                      builder.setOutputType(inter.get("outputData").asText());
-                      break;
-                  }
-                }
-                thing.addAction(builder.build());
-              } else if (inter.get("@type").asText().equals("Event")) {
-                  Event.Builder builder = Event.getBuilder(inter.get("name").asText());
-                  Iterator<String> actionIterator = inter.fieldNames();
-                  while (actionIterator.hasNext()) {
-                    switch (actionIterator.next()) {
-                      case "outputData":
-                        builder.setValueType(inter.get("outputData").asText());
-                        break;
-                    }
-                  }
-                  thing.addEvent(builder.build());
-              }
-            }
-            break;
-        }
-      }
-      
-      return thing;
-    } catch (Exception e) { // anything could happen here
-      throw new IOException("unable to parse Thing Description");
-    }
-  }
+ 
   
   private static Thing parse(JsonNode td) throws Exception {
 //    ProcessingReport report = JsonSchemaFactory.byDefault().getValidator().validate(TD_SCHEMA, td);
@@ -423,7 +383,8 @@ public class ThingDescriptionParser
     
     Iterator<String> tdIterator = td.fieldNames();
     while (tdIterator.hasNext()) {
-      switch (tdIterator.next()) {
+      String thingField = tdIterator.next();
+      switch (thingField) {
         case "uris":
           for (String uri : stringOrArray(td.get("uris"))) {
             thing.getMetadata().add("uris", uri);
@@ -434,29 +395,42 @@ public class ThingDescriptionParser
           for (JsonNode prop : td.get("properties")) {
             Property.Builder builder = Property.getBuilder(prop.get("name").asText());
             Iterator<String> it = prop.fieldNames();
+            HashMap<String, JsonNode> metadataNodes = new HashMap<>();
             while (it.hasNext()) {
-              switch (it.next()) {
+            	String s = it.next();
+              switch (s) {
                 case "valueType":
-                  builder.setXsdType(prop.get("valueType").asText());
+                  builder.setXsdType(prop.get("valueType").toString());
                   break;
                 case "writable":
                   builder.setWriteable(prop.get("writable").asBoolean());
                   break;
+                case "observable":
+                    builder.setObservable(prop.get("observable").asBoolean());
+                    break;                  
                 case "hrefs":
                   builder.setHrefs(stringOrArray(prop.get("hrefs")));
                   break;
+                default:
+                	metadataNodes.put(s,prop.get(s));
               }
             }
-            thing.addProperty(builder.build());
+            Property property = builder.build();
+            for(String key : metadataNodes.keySet()){
+            	property.getMetadata().add(key, metadataNodes.get(key).asText());
+            }
+            thing.addProperty(property);
           }
           break;
           
         case "actions":
           for (JsonNode action : td.get("actions")) {
             Action.Builder builder = Action.getBuilder(action.get("name").asText());
+            HashMap<String, JsonNode> metadataNodes = new HashMap<>();
             Iterator<String> it = action.fieldNames();
             while (it.hasNext()) {
-              switch (it.next()) {
+              String s = it.next();
+              switch (s) {
                 case "inputData":
                   builder.setInputType(action.get("inputData").get("valueType").asText());
                   break;
@@ -466,35 +440,60 @@ public class ThingDescriptionParser
                 case "hrefs":
                   builder.setHrefs(stringOrArray(action.get("hrefs")));
                   break;
+                default:
+                	metadataNodes.put(s, action.get(s));                  
               }
             }
-            thing.addAction(builder.build());
+            Action a = builder.build();
+            for(String key : metadataNodes.keySet()){
+            	a.getMetadata().add(key, metadataNodes.get(key).asText());
+            }
+            thing.addAction(a);
           }
           break;
           
         case "events":
             for (JsonNode event : td.get("events")) {
                 Event.Builder builder = Event.getBuilder(event.get("name").asText());
+                HashMap<String, JsonNode> metadataNodes = new HashMap<>();
                 Iterator<String> it = event.fieldNames();
                 while (it.hasNext()) {
-                  switch (it.next()) {
-                    case "valueType":
-                      builder.setValueType(event.get("valueType").asText());
+                  String s = it.next();
+                  switch (s) {
+                  case "inputData":
+                      builder.setInputType(event.get("inputData").get("valueType").asText());
+                      break;
+                    case "outputData":
+                      builder.setOutputType(event.get("outputData").get("valueType").asText());
                       break;
                     case "hrefs":
                       builder.setHrefs(stringOrArray(event.get("hrefs")));
                       break;
+                    default:
+                    	metadataNodes.put(s, event.get(s));                      
                   }
                 }
-                thing.addEvent(builder.build());
+                Event e = builder.buildEvent();
+                for(String key : metadataNodes.keySet()){
+                	e.getMetadata().add(key, metadataNodes.get(key).asText());
+                }                
+                thing.addEvent(e);
               }
               break;
-          
-        case "encodings":
-          for (JsonNode encoding : td.get("encodings")) {
-            thing.getMetadata().add("encodings", encoding.asText());
-          }
-          break;
+        
+        case "@context":
+            for (JsonNode context : td.get("@context")) {
+            		thing.getMetadata().add("@context", context.toString());
+            }
+            break;          
+
+        default:
+        	if(thingField == "name")
+        		continue;
+            for (String meta : stringOrArray(td.get(thingField))) {
+                thing.getMetadata().add(thingField, meta);
+              }
+            break;  
       }
     }
     

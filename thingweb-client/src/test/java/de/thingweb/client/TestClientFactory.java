@@ -70,7 +70,7 @@ public class TestClientFactory extends TestCase {
 		// events
 		assertTrue(!client.getThing().getEvents().isEmpty());
 		assertTrue(client.getThing().getEvents().get(0).getName().equals("stateChanged"));
-		assertTrue(client.getThing().getEvents().get(0).getValueType().equals("xsd:boolean"));
+		assertTrue(client.getThing().getEvents().get(0).getInputType().equals("xsd:boolean"));
 		
 		// TODO add more tests such as events, properties
 		

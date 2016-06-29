@@ -98,6 +98,33 @@ public class CoapBinding implements Binding {
 
                 current.add(newRes);
             }
+			
+			@Override
+            public void removeResource(String url) {
+                String[] parts = url.split("/");
+                if(parts.length == 0) return;
+
+                Resource current = m_coapServer.getRoot();
+
+                for (int i = 0; i < parts.length - 1; i++) {
+                    if (parts[i].isEmpty()) {
+                        continue;
+                    }
+                    Resource child = current.getChild(parts[i]);
+                    current = child;
+                }
+
+                String lastPart = parts[parts.length - 1];
+                Resource existing = current.getChild(lastPart);
+                
+                while(true){
+                	Resource parent = existing.getParent();
+                	parent.remove(existing);
+                	if(parent.getChildren().size() != 0)
+                		break;
+                	existing = parent;
+                }               
+            }			
 
             @Override
             public String getBase() {

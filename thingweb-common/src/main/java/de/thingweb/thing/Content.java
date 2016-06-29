@@ -28,14 +28,26 @@ public class Content {
 	
 	final byte[] content;
 	final MediaType mediaType;
+	final String mediaTypeEx;
 	
 	public Content(byte[] content, MediaType mediaType) {
 		this.content = content;
 		this.mediaType = mediaType;
+		this.mediaTypeEx = null;
+	}
+	
+	public Content(byte[] content, String mediaType) {
+		this.content = content;
+		this.mediaTypeEx = mediaType;
+		this.mediaType = MediaType.UNDEFINED;
 	}
 	
 	public MediaType getMediaType() {
 		return this.mediaType;
+	}
+
+	public String getMediaTypeEx() {
+		return this.mediaTypeEx;
 	}
 	
 	public byte[] getContent() {
