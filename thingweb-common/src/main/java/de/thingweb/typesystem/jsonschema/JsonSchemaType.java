@@ -119,11 +119,11 @@ public class JsonSchemaType {
 						jtype = new JsonInteger();
 						JsonNode minimumNode = jsonSchemaNode.findValue("minimum");
 						if(minimumNode != null && minimumNode.getNodeType() == JsonNodeType.NUMBER) {
-							((JsonInteger)jtype).setMinimum(minimumNode.asInt());
+							((JsonInteger)jtype).setMinimum(minimumNode.asLong());
 						}
 						JsonNode maximumNode = jsonSchemaNode.findValue("maximum");
 						if(maximumNode != null && maximumNode.getNodeType() == JsonNodeType.NUMBER) {
-							((JsonInteger)jtype).setMaximum(maximumNode.asInt());
+							((JsonInteger)jtype).setMaximum(maximumNode.asLong());
 						}
 					} else {
 						assert("number".equals(typeNode.asText()));

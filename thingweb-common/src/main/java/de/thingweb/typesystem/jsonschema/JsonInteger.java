@@ -26,26 +26,26 @@ package de.thingweb.typesystem.jsonschema;
 
 public class JsonInteger extends AbstractJsonNumeric {
 
-	Integer minimum;
-	Integer maximum;
+	Long minimum;
+	Long maximum;
 	
 	public JsonInteger() {
 		super(PrimitiveType.INTEGER);
 	}
 	
-	protected void setMinimum(int minimum) {
+	protected void setMinimum(long minimum) {
 		this.minimum = minimum;
 	}
 	
-	protected void setMaximum(int maximum) {
+	protected void setMaximum(long maximum) {
 		this.maximum = maximum;
 	}
 	
-	public Integer getMinimum() {
+	public Long getMinimum() {
 		return minimum;
 	}
 	
-	public Integer getMaximum() {
+	public Long getMaximum() {
 		return maximum;
 	}
 }
