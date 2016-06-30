@@ -54,14 +54,12 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 	private final String baseuri;
 
 	public NanoHttpServer() throws IOException {
-        super(DEFAULT_PORT);
-		String hostname = InetAddress.getLocalHost().getHostAddress();
-		baseuri = String.format("http://%s:%s",hostname, DEFAULT_PORT);
+        this(DEFAULT_PORT);
     }
 
 	public NanoHttpServer(int port) throws IOException {
 		super(port);
-		String hostname = InetAddress.getLocalHost().getHostName();
+		String hostname = InetAddress.getLocalHost().getHostAddress();
 		baseuri = String.format("http://%s:%s",hostname, port);
 	}
 
