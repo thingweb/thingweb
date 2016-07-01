@@ -8,6 +8,7 @@ import de.thingweb.servient.ServientBuilder;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.Thing;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import java.io.IOException;
 import java.net.URI;
@@ -55,6 +56,35 @@ public class WotAPI {
 
     public WotAPI(ThingServer thingServer) {
         this.thingServer = thingServer;
+    }
+
+    public JsPromise discover(String method, ScriptObjectMirror filter) {
+        JsPromise promise = new JsPromise();
+
+        executor.submit(() -> {
+                if(method.equals("registry")) {
+                    /*
+                        try {
+                            promise.resolve(
+                                //ConsumedThing.from();
+                            );
+                        } catch (IOException | UnsupportedException | URISyntaxException e) {
+                            throw new RuntimeException(e);
+                        }
+                    */
+                } else if(method.equals("local")) {
+                    if(filter.containsKey("name")) {
+                        final String name = (String) filter.getMember("name");
+                        promise.resolve(
+                                getLocalThing(name)
+                        );
+                    } else {
+                        promise.reject(new RuntimeException("No name given for local discovery"));
+                    }
+                }
+        });
+
+        return promise;
     }
 
     public JsPromise consumeDescriptionUri(String uri) {
