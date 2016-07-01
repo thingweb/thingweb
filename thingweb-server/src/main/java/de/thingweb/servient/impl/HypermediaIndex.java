@@ -43,8 +43,9 @@ import java.util.Observer;
  *  Resource index for Hypermedia-based navigation (HATEOAS)
  */
 public class HypermediaIndex extends AbstractRESTListener {
+	private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+    private static final ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
 
     private Content myContent;
 
@@ -63,7 +64,8 @@ public class HypermediaIndex extends AbstractRESTListener {
     public static Content createContent(List<HyperMediaLink> links) {
         String json = null;
         try {
-            json = ow.writeValueAsString(links);
+        	json = mapper.writeValueAsString(links);
+            //json = ow.writeValueAsString(links);
         } catch (JsonProcessingException e) {
             json = "{ \"error\" : \" " + e.getMessage() + "\"  }";
         }

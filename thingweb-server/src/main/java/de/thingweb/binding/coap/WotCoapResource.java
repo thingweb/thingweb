@@ -186,9 +186,17 @@ public class WotCoapResource extends CoapResource implements  Observer{
             Content request = new Content(reqPayload, mt);
         	Content response = m_restListener.onPost(request);
         	int contentFormat = getCoapContentFormat(response.getMediaType());
-
-            //TODO: add Location Option to response
-        	exchange.respond(CoAP.ResponseCode.CREATED, response.getContent(), contentFormat);
+        	if(response.getLocationPath() != null)        		
+        		exchange.setLocationPath(response.getLocationPath());
+        	
+        	CoAP.ResponseCode responseCode = CoAP.ResponseCode.CREATED;
+        	
+        	if(response.getResponseType() == Content.ResponseType.UPDATED)
+        		responseCode = CoAP.ResponseCode.CHANGED;
+        	else if(response.getResponseType() == Content.ResponseType.ERROR)
+        		responseCode = CoAP.ResponseCode.NOT_ACCEPTABLE;
+        	
+        	exchange.respond(responseCode, response.getContent(), contentFormat);
         } catch (UnsupportedOperationException e) {
             exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
         } catch (IllegalArgumentException e) {

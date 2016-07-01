@@ -29,6 +29,10 @@ public class Content {
 	final byte[] content;
 	final MediaType mediaType;
 	final String mediaTypeEx;
+	private String locationPath;
+	private ResponseType responseType = ResponseType.UNDEFINED;
+	
+	public enum ResponseType {CREATED, READ, UPDATED, DELETED, SUBSCRIBED, ERROR, UNDEFINED};
 	
 	public Content(byte[] content, MediaType mediaType) {
 		this.content = content;
@@ -52,6 +56,22 @@ public class Content {
 	
 	public byte[] getContent() {
 		return this.content;
+	}
+
+	public String getLocationPath() {
+		return locationPath;
+	}
+
+	public void setLocationPath(String locationPath) {
+		this.locationPath = locationPath;
+	}
+	
+	public ResponseType getResponseType(){
+		return responseType;
+	}
+	
+	public void setResponseType(ResponseType responseType){
+		this.responseType = responseType;
 	}
 	
 }
