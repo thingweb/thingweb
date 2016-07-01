@@ -41,6 +41,8 @@
          basicLed = things[0];
 
           voter.onUpdateProperty('votes', function(votes) {
+            if(!basicLed) throw new Error("Led not found!")
+
              if(votes < 0) {
                  // make led blue
                  console.log("setting LED blue");

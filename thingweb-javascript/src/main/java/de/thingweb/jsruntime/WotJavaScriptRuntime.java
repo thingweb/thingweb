@@ -36,14 +36,11 @@ public class WotJavaScriptRuntime {
     private static void polyfill(ScriptEngine engine, WotAPI api) {
         log.debug("injecting wot api v{}", api.getVersion());
         engine.put("WoT", api);
+        engine.put("console", new Console());
 
         // general polyfills
         try {
-            engine.eval("var global = this;\n" +
-                    "var console = {};\n" +
-                    "console.debug = print;\n" +
-                    "console.warn = print;\n" +
-                    "console.log = print;");
+            engine.eval("var global = this;");
         } catch (ScriptException e) {
             log.error("error in polyfill");
         }
@@ -81,5 +78,19 @@ public class WotJavaScriptRuntime {
 
     public WotAPI getApi() {
         return api;
+    }
+
+    public static final class Console {
+        public void log(String message) {
+            log.info(message);
+        }
+
+        public void debug(String message) {
+            log.debug(message);
+        }
+
+        public void error(String message) {
+            log.error(message);
+        }
     }
 }

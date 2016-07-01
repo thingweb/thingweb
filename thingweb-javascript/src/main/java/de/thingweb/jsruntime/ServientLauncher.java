@@ -44,7 +44,6 @@ import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 /**
  * Created by Johannes on 02.02.2016.
@@ -80,7 +79,7 @@ public class ServientLauncher {
                     try {
                         jsrt.runFile(file);
                     } catch (FileNotFoundException | ScriptException e) {
-                        log.error("error running autostart file", e);
+                        log.error("error running autostart file " + file, e);
                     }
                 });
     }
