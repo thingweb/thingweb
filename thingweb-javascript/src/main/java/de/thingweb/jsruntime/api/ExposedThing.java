@@ -25,7 +25,10 @@ public class ExposedThing {
     }
 
     public static ExposedThing from(ThingInterface servedThing, ThingServer thingServer) {
-        return new ExposedThing(servedThing,thingServer);
+        if(servedThing != null && thingServer != null)
+                return new ExposedThing(servedThing,thingServer);
+        else
+            return null;
     }
 
     public ExposedThing onInvokeAction(String actionName, Function callback) {

@@ -75,9 +75,9 @@ public class WotAPI {
                 } else if(method.equals("local")) {
                     if(filter.containsKey("name")) {
                         final String name = (String) filter.getMember("name");
-                        promise.resolve(
-                                getLocalThing(name)
-                        );
+                        final ExposedThing localThing = getLocalThing(name);
+                        final ExposedThing[] things = {localThing};
+                        promise.resolve(things);
                     } else {
                         promise.reject(new RuntimeException("No name given for local discovery"));
                     }
@@ -174,6 +174,7 @@ public class WotAPI {
 
 
     public ExposedThing getLocalThing(String name) {
-        return ExposedThing.from(getThingServer().getThing(name),getThingServer());
+        final ThingInterface thing = getThingServer().getThing(name);
+        return ExposedThing.from(thing,getThingServer());
     }
 }
