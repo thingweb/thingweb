@@ -1,5 +1,6 @@
- //just an example script - to be moved into other repo
+//just an example script - to be moved into other repo
 
+// this script reacts to changes in the votes and changes the color of the LED accordingly
 
 var basicLed = null;
 var voter = null;
@@ -18,14 +19,20 @@ var voter = null;
      voter.onUpdateProperty('votes', function(votes) {
         if(votes < 0) {
             // make led blue
-            //basicLed.setProperty(...)
+            basicLed.setProperty("rgbValueRed",0);
+            basicLed.setProperty("rgbValueGreen",0);
+            basicLed.setProperty("rgbValueBlue",255);
         } else if(votes > 0) {
             // make led red
-            //basicLed.setProperty(...)
+            basicLed.setProperty("rgbValueRed",255);
+            basicLed.setProperty("rgbValueGreen",0);
+            basicLed.setProperty("rgbValueBlue",0);
         }  else  { // (votes == 0)
             // make led white
-            //basicLed.setProperty(...)
-        } else
+            basicLed.setProperty("rgbValueRed",255);
+            basicLed.setProperty("rgbValueGreen",255);
+            basicLed.setProperty("rgbValueBlue",255);
+        };
      });
   })
 
