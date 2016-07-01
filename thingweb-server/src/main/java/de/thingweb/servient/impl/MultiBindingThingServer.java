@@ -137,6 +137,10 @@ public class MultiBindingThingServer implements ThingServer {
         ServedThing servedThing = new ServedThing(thing);
         things.put(thing.getName(), servedThing);
         createBindings(servedThing, thing.isProtected());
+        
+        // update TD repository
+        ServedThingRepository.updateTDRepository(thing);
+        
         return servedThing;
     }
 
