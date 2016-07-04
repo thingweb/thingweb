@@ -28,6 +28,12 @@ public class Metadata
       items.get(key).add(v);
     }
   }
+
+  public void clear(String key) {
+    if (items.containsKey(key)) {
+      items.get(key).clear();
+    }
+  }
   
   /**
    * 

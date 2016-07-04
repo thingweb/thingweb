@@ -205,7 +205,7 @@ public class MultiBindingThingServer implements ThingServer {
                 .collect(Collectors.toList());
 
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);*/
-
+        thingModel.getThingModel().getMetadata().clear("uris");
 
         // resources
         for (ResourceBuilder binding : m_bindings) {
@@ -236,7 +236,8 @@ public class MultiBindingThingServer implements ThingServer {
             final PropertyListener propertyListener = new PropertyListener(servedThing, property);
             if(isProtected) propertyListener.protectWith(getValidator());
             interactionListeners.put(url, propertyListener);
-            property.getHrefs().add(urlize(property.getName()));
+            if(property.getHrefs().size() < m_bindings.size())
+                property.getHrefs().add(urlize(property.getName()));
 //            TODO I'll comment this out until we have /value on the microcontroller
 //            interactionListeners.put(url, new HypermediaIndex(
 //                    new HyperMediaLink("value","value"),
@@ -253,7 +254,8 @@ public class MultiBindingThingServer implements ThingServer {
             final ActionListener actionListener = new ActionListener(servedThing, action);
             if(isProtected) actionListener.protectWith(getValidator());
             interactionListeners.put(url, actionListener);
-            action.getHrefs().add(urlize(action.getName()));
+            if(action.getHrefs().size() < m_bindings.size())
+                action.getHrefs().add(urlize(action.getName()));
         }
 
         //add listener for thing description
