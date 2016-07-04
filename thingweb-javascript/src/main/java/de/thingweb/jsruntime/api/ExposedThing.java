@@ -5,6 +5,8 @@ import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Property;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -13,6 +15,8 @@ import java.util.function.Function;
  * Created by Johannes on 09.12.2015.
  */
 public class ExposedThing {
+
+    private final static Logger log = LoggerFactory.getLogger(ExposedThing.class);
 
     private final ThingInterface thing;
     public final String name;
@@ -59,6 +63,20 @@ public class ExposedThing {
         //return this;
     }
 
+    public ExposedThing addAction(String actionName, ScriptObjectMirror inputType, ScriptObjectMirror outputType) {
+        String realInputType = inputType.toString();
+        String realOutputType = outputType.toString();
+
+        return addAction(actionName,realInputType,realOutputType);
+    }
+
+
+    public ExposedThing addAction(String actionName, ScriptObjectMirror inputType) {
+        String realInputType = inputType.toString();
+
+        return addAction(actionName,realInputType,null);
+    }
+
     public ExposedThing addAction(String actionName, String inputType, String outputType) {
         Action action = Action.getBuilder(actionName)
                 .setInputType(inputType)
@@ -75,7 +93,7 @@ public class ExposedThing {
     }
 
     public ExposedThing addAction(String actionName) {
-        return addAction(actionName, null, null);
+        return addAction(actionName, (String) null, (String) null);
     }
 
     public ExposedThing addProperty(String propName, String type) {
@@ -88,5 +106,9 @@ public class ExposedThing {
         return this;
     }
 
+    public ExposedThing addProperty(String propName, ScriptObjectMirror type) {
+        String realType = type.toString();
+        return addProperty(propName,realType);
+    }
 
 }

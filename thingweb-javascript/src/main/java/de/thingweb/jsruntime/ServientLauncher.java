@@ -72,6 +72,10 @@ public class ServientLauncher {
 
     public void start() throws Exception {
         ServientBuilder.start();
+        runAutostart();
+    }
+
+    public void runAutostart() throws IOException {
         Files.walk(Paths.get("./autorun"))
                 .filter(Files::isRegularFile)
                 .map(Path::toFile)
