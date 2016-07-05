@@ -26,6 +26,9 @@
 
 package de.thingweb.thing;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,18 +38,18 @@ public class Action {
 
     private final Map<String, String> params;
     private final String name;
-    private final String inputType;
-    private final String outputType;
+    private final JsonNode inputType;
+    private final JsonNode outputType;
     private final String actionType;
     private final List<String> hrefs;
     private final String security;
 
     @Deprecated
     protected Action(String name, Map<String, String> params) {
-        this(name, params.get("parm"), "", null, new ArrayList<String>(), null);
+        this(name, null,null, null, new ArrayList<String>(), null);
     }
     
-    protected Action(String name, String inputType, String outputType, String actionType, List<String> hrefs, String security) {
+    protected Action(String name, JsonNode inputType, JsonNode outputType, String actionType, List<String> hrefs, String security) {
         this.params = new HashMap<>();
         this.name = name;
         this.inputType = inputType;
@@ -65,11 +68,11 @@ public class Action {
         return new Action.Builder(name);
     }
 
-    public String getInputType() {
+    public JsonNode getInputType() {
         return inputType;
     }
 
-    public String getOutputType() {
+    public JsonNode getOutputType() {
         return outputType;
     }
     
@@ -98,8 +101,8 @@ public class Action {
         private final Map<String,String> params = new HashMap<>();
 
         private final String name;
-        private String inputType = "";
-        private String outputType = "";
+        private JsonNode inputType = null;
+        private JsonNode outputType = null;
         private String actionType = null;
         private List<String> hrefs = new ArrayList<String>();
 		/**
@@ -111,13 +114,15 @@ public class Action {
             this.name = name;
         }
 
+        @Deprecated
         public Builder setInputType(String inputType) {
-            this.inputType = (inputType == null) ? "" : inputType;
+            this.inputType = JsonNodeFactory.instance.textNode(inputType);
             return this;
         }
 
+        @Deprecated
         public Builder setOutputType(String outputType) {
-            this.outputType = (outputType == null) ? "" : outputType;
+            this.outputType = JsonNodeFactory.instance.textNode(outputType);
             return this;
         }
         
@@ -158,6 +163,16 @@ public class Action {
                     return new Action(name,inputType,outputType, actionType, hrefs, security);
                else
                        return new Action(name,params);
+        }
+
+        public Builder setInputType(JsonNode jnI) {
+            this.inputType = jnI;
+            return this;
+        }
+
+        public Builder setOutputType(JsonNode jnO) {
+            this.outputType = jnO;
+            return this;
         }
     }
 }

@@ -24,25 +24,6 @@
 
 package de.thingweb.desc;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,16 +38,24 @@ import com.siemens.ct.exi.EXIFactory;
 import com.siemens.ct.exi.exceptions.EXIException;
 import com.siemens.ct.exi.helpers.DefaultEXIFactory;
 import com.siemens.ct.exi.json.EXIforJSONParser;
-
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Event;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
 
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+
 public class ThingDescriptionParser
 {
 
   private static final String WOT_TD_CONTEXT = "http://w3c.github.io/wot/w3c-wot-td-context.jsonld";
+  private static final JsonNodeFactory factory = new JsonNodeFactory(false);
+  private static final ObjectMapper mapper = new ObjectMapper();
 
 //  private static final JsonNode TD_SCHEMA;
 //  
@@ -159,7 +148,6 @@ public class ThingDescriptionParser
     ObjectNode td = toJsonObject(thing);
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    ObjectMapper mapper = new ObjectMapper();
 
     //TODO catch the IOException here and throw a runtimeexception
     // as this is no case where a developer could react
@@ -170,7 +158,6 @@ public class ThingDescriptionParser
 
   // TODO set as private (and check it is not called elsewhere)
   public static ObjectNode toJsonObject(Thing thing) {
-    JsonNodeFactory factory = new JsonNodeFactory(false);
 
     ObjectNode td = factory.objectNode();
     td.put("@context", WOT_TD_CONTEXT);
@@ -219,13 +206,13 @@ public class ThingDescriptionParser
       ObjectNode a = factory.objectNode();
       a.put("name", action.getName());
 
-      if (!action.getInputType().isEmpty()) {
+      if (action.getInputType() != null) {
         ObjectNode in = factory.objectNode();
         in.put("valueType", action.getInputType());
         a.put("inputData", in);
       }
 
-      if (!action.getOutputType().isEmpty()) {
+      if (action.getOutputType() != null) {
         ObjectNode out = factory.objectNode();
         out.put("valueType", action.getOutputType());
         a.put("outputData", out);
@@ -418,11 +405,7 @@ public class ThingDescriptionParser
               switch (it.next()) {
                 case "valueType":
                   JsonNode jn = prop.get("valueType");
-                  if(jn.isValueNode()) {
-                	builder.setValueType(jn.asText());
-                  } else {
-                	builder.setValueType(jn.toString());
-                  } 
+                	builder.setValueType(jn);
                   break;
                 case "@type":
                   builder.setPropertyType(prop.get("@type").asText());
@@ -453,19 +436,11 @@ public class ThingDescriptionParser
               switch (it.next()) {
                 case "inputData":
                   JsonNode jnI = action.get("inputData").get("valueType");
-                  if(jnI.isValueNode()) {
-                	builder.setInputType(jnI.asText());
-                  } else {
-                	builder.setInputType(jnI.toString());
-                  }
+                	builder.setInputType(jnI);
                   break;
                 case "outputData":
                   JsonNode jnO = action.get("outputData").get("valueType");
-                  if(jnO.isValueNode()) {
-                	builder.setOutputType(jnO.asText());
-                  } else {
-                	builder.setOutputType(jnO.toString());
-                  }
+                	builder.setOutputType(jnO);
                   break;
                 case "@type":
                     builder.setActionType(action.get("@type").asText());
@@ -490,11 +465,7 @@ public class ThingDescriptionParser
                   switch (it.next()) {
                     case "valueType":
                       JsonNode jn = event.get("valueType");
-                      if(jn.isValueNode()) {
-                      	builder.setValueType(jn.asText());
-                      } else {
                       	builder.setValueType(jn.toString());
-                      }
                       break;
                     case "@type":
                         builder.setEventType(event.get("@type").asText());

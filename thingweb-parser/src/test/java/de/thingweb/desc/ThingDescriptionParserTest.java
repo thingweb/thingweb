@@ -24,29 +24,6 @@
 
 package de.thingweb.desc;
 
-import static org.junit.Assert.*;
-
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.StringReader;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,11 +31,17 @@ import com.siemens.ct.exi.EXIFactory;
 import com.siemens.ct.exi.exceptions.EXIException;
 import com.siemens.ct.exi.helpers.DefaultEXIFactory;
 import com.siemens.ct.exi.json.EXIforJSONGenerator;
-
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Event;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
+import org.junit.*;
+
+import java.io.*;
+import java.net.URL;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ThingDescriptionParserTest {
 
@@ -245,7 +228,7 @@ public class ThingDescriptionParserTest {
    		Property p = td.getProperty("temperature");
    		assertTrue("No valueType", p.getValueType() != null);
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode valueType = mapper.readValue(new StringReader(p.getValueType()), JsonNode.class);
+		JsonNode valueType = p.getValueType();
 		assertTrue(valueType.findValue("type").asText().equals("integer"));
 		assertTrue(valueType.findValue("maximum").asInt() == 13);
     }
@@ -261,7 +244,7 @@ public class ThingDescriptionParserTest {
    		Property p = td.getProperty("temperature");
    		assertTrue("No valueType", p.getValueType() != null);
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode valueType = mapper.readValue(new StringReader(p.getValueType()), JsonNode.class);
+		JsonNode valueType = p.getValueType();
 		assertTrue(valueType.findValue("type").asText().equals("number"));
     }
     
@@ -278,7 +261,7 @@ public class ThingDescriptionParserTest {
 	   		Property p = td.getProperty("status");
 	   		assertTrue("No valueType", p.getValueType() != null);
 			ObjectMapper mapper = new ObjectMapper();
-			JsonNode valueType = mapper.readValue(new StringReader(p.getValueType()), JsonNode.class);
+			JsonNode valueType = p.getValueType();
 			assertTrue(valueType.findValue("type").asText().equals("boolean"));			
 		}
 
@@ -287,7 +270,7 @@ public class ThingDescriptionParserTest {
 	   		Action a1 = td.getAction("fadeIn");
 	   		assertTrue("No inputType", a1.getInputType() != null);
 			ObjectMapper mapper = new ObjectMapper();
-			JsonNode valueType = mapper.readValue(new StringReader(a1.getInputType()), JsonNode.class);
+			JsonNode valueType = a1.getInputType();
 			assertTrue(valueType.findValue("type").asText().equals("integer"));
 		}
 		{
@@ -295,7 +278,7 @@ public class ThingDescriptionParserTest {
 	   		Action a2 = td.getAction("fadeOut");
 	   		assertTrue("No inputType", a2.getInputType() != null);
 			ObjectMapper mapper = new ObjectMapper();
-			JsonNode valueType = mapper.readValue(new StringReader(a2.getInputType()), JsonNode.class);
+			JsonNode valueType = a2.getInputType();
 			assertTrue(valueType.findValue("type").asText().equals("integer"));
 		}
 		
@@ -323,7 +306,7 @@ public class ThingDescriptionParserTest {
    		Property p = td.getProperty("obj");
    		assertTrue("No valueType", p.getValueType() != null);
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode valueType = mapper.readValue(new StringReader(p.getValueType()), JsonNode.class);
+		JsonNode valueType = p.getValueType();
 		assertTrue(valueType.findValue("type").asText().equals("object"));
 		assertTrue(valueType.findValue("properties") != null);
 		assertTrue(valueType.findValue("required") != null);	
@@ -341,7 +324,7 @@ public class ThingDescriptionParserTest {
    		Property p = td.getProperty("arr");
    		assertTrue("No valueType", p.getValueType() != null);
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode valueType = mapper.readValue(new StringReader(p.getValueType()), JsonNode.class);
+		JsonNode valueType = p.getValueType();
 		assertTrue(valueType.findValue("type").asText().equals("array"));
 		assertTrue(valueType.findValue("items") != null);
 		assertTrue(valueType.findValue("minItems").asInt() == 3);

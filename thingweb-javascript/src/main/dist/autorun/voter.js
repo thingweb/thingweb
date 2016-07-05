@@ -3,7 +3,7 @@
  WoT.newThing("voter")
     .then(function(thing) {
         console.log("created " + thing.name);
-        thing.addProperty("votes",{ "type" : "number"})
+        thing.addProperty("votes","number")
             .setProperty("votes",0)
             .onUpdateProperty("votes",
                 function(newValue, oldValue) {
