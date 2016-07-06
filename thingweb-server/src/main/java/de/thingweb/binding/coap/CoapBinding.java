@@ -66,9 +66,9 @@ public class CoapBinding implements Binding {
     @Override
 	public void initialize() {
     	if(port == null) {
-    		m_coapServer = new CoapServer(port);
-    	} else {
     		m_coapServer = new CoapServer();
+    	} else {
+    		m_coapServer = new CoapServer(port);
     	}
 	}
 
