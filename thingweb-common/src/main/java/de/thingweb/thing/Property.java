@@ -176,6 +176,8 @@ public class Property extends Observable {
 			this.valueTypeJson = jn;
 			return this;
 		}
+
+
 	}
 
 }

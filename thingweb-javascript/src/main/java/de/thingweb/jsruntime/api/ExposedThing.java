@@ -1,5 +1,8 @@
 package de.thingweb.jsruntime.api;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.Action;
@@ -8,6 +11,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -106,9 +110,17 @@ public class ExposedThing {
         return this;
     }
 
-    public ExposedThing addProperty(String propName, ScriptObjectMirror type) {
-        String realType = type.toString();
-        return addProperty(propName,realType);
+    public ExposedThing addProperty(String propName, Map<String,String> type) {
+        ObjectMapper om = new ObjectMapper();
+        JsonNode jn = om.convertValue(type, JsonNode.class);
+
+        Property prop = Property.getBuilder(propName)
+                .setValueType(jn)
+                .build();
+
+        thing.addProperty(prop);
+        servient.rebind(name);
+        return this;
     }
 
 }
