@@ -417,7 +417,7 @@ public class ThingDescriptionParser
                   builder.setHrefs(stringOrArray(prop.get("hrefs")));
                   break;
                 case "security":
-                    builder.setSecurity(prop.get("security").toString());
+                    builder.setSecurity(prop.get("security"));
                     break;
                 case "stability":
                     builder.setStability(prop.get("stability").asInt());
@@ -449,7 +449,7 @@ public class ThingDescriptionParser
                   builder.setHrefs(stringOrArray(action.get("hrefs")));
                   break;
                 case "security":
-                    builder.setSecurity(action.get("security").toString());
+                    builder.setSecurity(action.get("security"));
                     break;
               }
             }
@@ -474,7 +474,7 @@ public class ThingDescriptionParser
                       builder.setHrefs(stringOrArray(event.get("hrefs")));
                       break;
                     case "security":
-                        builder.setSecurity(event.get("security").toString());
+                        builder.setSecurity(event.get("security"));
                         break;
                   }
                 }

@@ -214,8 +214,7 @@ public class TestClientFactory extends TestCase {
 			assertTrue(p.getStability().equals(10));	
 			assertTrue(p.getSecurity() != null || !p.getSecurity().equals(""));	
 			{
-				ObjectMapper mapper = new ObjectMapper();
-				JsonNode valueType = mapper.readValue(new StringReader(p.getSecurity()), JsonNode.class);
+				JsonNode valueType = p.getSecurity();
 				assertTrue(valueType.findValue("cat").asText().equals("token:jwt"));
 				assertTrue(valueType.findValue("alg").asText().equals("HS256"));
 				assertTrue(valueType.findValue("as").asText().equals("https://authority-issuing.example.org"));
