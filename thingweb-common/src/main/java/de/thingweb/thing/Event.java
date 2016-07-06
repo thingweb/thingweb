@@ -4,16 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 public class Event {
 	
 	private final String name;
-	private final String valueType;
+	private final JsonNode valueType;
 	private final String eventType;
 	private final List<String> hrefs;
 	private final JsonNode security;
 	 
-    protected Event(String name, String valueType, String eventType, List<String> hrefs, JsonNode security) {
+    protected Event(String name, JsonNode valueType, String eventType, List<String> hrefs, JsonNode security) {
         this.name = name;
         this.eventType = eventType;
         this.valueType = valueType;
@@ -35,7 +36,7 @@ public class Event {
         return name;
     }
     
-	public String getValueType() {
+	public JsonNode getValueType() {
 		return valueType;
 	}
 	
@@ -55,7 +56,7 @@ public class Event {
     public static class Builder {
 
         private final String name;
-        private String valueType = "";
+        private JsonNode valueType;
         private String eventType = null;
         private List<String> hrefs = new ArrayList<String>();
         private JsonNode security = null;
@@ -64,8 +65,13 @@ public class Event {
             this.name = name;
         }
 
+        @Deprecated
         public Builder setValueType(String valueType) {
-            this.valueType = (valueType == null) ? "" : valueType;
+        	return setValueType(JsonNodeFactory.instance.textNode(valueType));
+        }
+        
+        public Builder setValueType(JsonNode valueType) {
+            this.valueType = valueType;
             return this;
         }
         

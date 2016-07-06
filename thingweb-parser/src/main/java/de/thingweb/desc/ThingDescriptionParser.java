@@ -237,7 +237,7 @@ public class ThingDescriptionParser
       ObjectNode a = factory.objectNode();
       a.put("name", event.getName());
 
-      if (!event.getValueType().isEmpty()) {
+      if (event.getValueType()!=null) {
         ObjectNode in = factory.objectNode();
         in.put("valueType", event.getValueType());
       }
@@ -329,7 +329,7 @@ public class ThingDescriptionParser
                 while (propIterator.hasNext()) {
                   switch (propIterator.next()) {
                     case "outputData":
-                      builder.setValueType(inter.get("outputData").asText());
+                      builder.setValueType(inter.get("outputData"));
                       break;
                     case "writable":
                       builder.setWriteable(inter.get("writable").asBoolean());
@@ -357,7 +357,7 @@ public class ThingDescriptionParser
                   while (actionIterator.hasNext()) {
                     switch (actionIterator.next()) {
                       case "outputData":
-                        builder.setValueType(inter.get("outputData").asText());
+                        builder.setValueType(inter.get("outputData"));
                         break;
                     }
                   }
@@ -465,7 +465,7 @@ public class ThingDescriptionParser
                   switch (it.next()) {
                     case "valueType":
                       JsonNode jn = event.get("valueType");
-                      	builder.setValueType(jn.toString());
+                      	builder.setValueType(jn);
                       break;
                     case "@type":
                         builder.setEventType(event.get("@type").asText());

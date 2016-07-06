@@ -227,7 +227,6 @@ public class ThingDescriptionParserTest {
    		assertTrue("No Property temperature", td.getProperty("temperature") != null);
    		Property p = td.getProperty("temperature");
    		assertTrue("No valueType", p.getValueType() != null);
-		ObjectMapper mapper = new ObjectMapper();
 		JsonNode valueType = p.getValueType();
 		assertTrue(valueType.findValue("type").asText().equals("integer"));
 		assertTrue(valueType.findValue("maximum").asInt() == 13);
@@ -243,7 +242,6 @@ public class ThingDescriptionParserTest {
    		assertTrue("No Property temperature", td.getProperty("temperature") != null);
    		Property p = td.getProperty("temperature");
    		assertTrue("No valueType", p.getValueType() != null);
-		ObjectMapper mapper = new ObjectMapper();
 		JsonNode valueType = p.getValueType();
 		assertTrue(valueType.findValue("type").asText().equals("number"));
     }
@@ -260,7 +258,6 @@ public class ThingDescriptionParserTest {
 	   		assertTrue("No Property status", td.getProperty("status") != null);
 	   		Property p = td.getProperty("status");
 	   		assertTrue("No valueType", p.getValueType() != null);
-			ObjectMapper mapper = new ObjectMapper();
 			JsonNode valueType = p.getValueType();
 			assertTrue(valueType.findValue("type").asText().equals("boolean"));			
 		}
@@ -269,7 +266,6 @@ public class ThingDescriptionParserTest {
 	   		assertTrue("No Action fadeIn", td.getAction("fadeIn") != null);
 	   		Action a1 = td.getAction("fadeIn");
 	   		assertTrue("No inputType", a1.getInputType() != null);
-			ObjectMapper mapper = new ObjectMapper();
 			JsonNode valueType = a1.getInputType();
 			assertTrue(valueType.findValue("type").asText().equals("integer"));
 		}
@@ -277,7 +273,6 @@ public class ThingDescriptionParserTest {
 	   		assertTrue("No Action fadeOut", td.getAction("fadeOut") != null);
 	   		Action a2 = td.getAction("fadeOut");
 	   		assertTrue("No inputType", a2.getInputType() != null);
-			ObjectMapper mapper = new ObjectMapper();
 			JsonNode valueType = a2.getInputType();
 			assertTrue(valueType.findValue("type").asText().equals("integer"));
 		}
@@ -286,8 +281,7 @@ public class ThingDescriptionParserTest {
 	   		assertTrue("No Event criticalCondition", td.getEvent("criticalCondition") != null);
 	   		Event e = td.getEvent("criticalCondition");
 	   		assertTrue("No valueType", e.getValueType() != null);
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode valueType = mapper.readValue(new StringReader(e.getValueType()), JsonNode.class);
+			JsonNode valueType = e.getValueType();
 			assertTrue(valueType.findValue("type").asText().equals("string"));
 		}
 

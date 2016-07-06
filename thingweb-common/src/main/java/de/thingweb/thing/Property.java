@@ -28,6 +28,7 @@ package de.thingweb.thing;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +112,7 @@ public class Property extends Observable {
 		private String name;
 		private boolean isReadable = true;
 		private boolean isWriteable = false;
-		private String valueType = "xsd:string";
+//		private String valueType = "xsd:string";
 		private String propertyType = null;
 		private List<String> hrefs = new ArrayList<>();
 		/**
@@ -128,9 +129,9 @@ public class Property extends Observable {
 			this.name = name;
 		}
 
+		@Deprecated
 		public Builder setValueType(String valueType) {
-			this.valueType = valueType;
-			return this;
+			return setValueType(JsonNodeFactory.instance.textNode(valueType));
 		}
 		
 		public Builder setPropertyType(String propertyType) {
