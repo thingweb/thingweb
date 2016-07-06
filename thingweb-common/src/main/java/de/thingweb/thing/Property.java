@@ -128,6 +128,7 @@ public class Property extends Observable {
 			this.name = name;
 		}
 
+		@Deprecated
 		public Builder setValueType(String valueType) {
 			this.valueType = valueType;
 			return this;
@@ -175,6 +176,8 @@ public class Property extends Observable {
 			this.valueTypeJson = jn;
 			return this;
 		}
+
+
 	}
 
 }
