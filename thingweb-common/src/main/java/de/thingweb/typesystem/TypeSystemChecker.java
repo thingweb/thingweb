@@ -24,12 +24,11 @@
 
 package de.thingweb.typesystem;
 
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 /**
  * The idea is to provide a simple mean to decide which type-system is used in a
@@ -41,7 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class TypeSystemChecker {
 	
-	public static TypeSystem getTypeSystem(String type) {
+	public static TypeSystem getTypeSystem(JsonNode type) {
 		TypeSystem ts = TypeSystem.UNKNOWN;
 		
 		if(isXmlSchemaType(type)) {
@@ -54,55 +53,36 @@ public class TypeSystemChecker {
 		return ts;
 	}
 
-	public static boolean isXmlSchemaType(String type) {
+	public static boolean isXmlSchemaType(JsonNode type) {
 		boolean isXsd = false;
-
-		if (type != null) {
+		
+		if (type != null && type.getNodeType() == JsonNodeType.STRING) {
 			// very naive and simple for now
-			isXsd = type.trim().startsWith("xsd:");
+			isXsd = type.asText().trim().startsWith("xsd:");
 		}
 
 		return isXsd;
 	}
 
-	public static boolean isSchemaOrg(String type) {
+	public static boolean isSchemaOrg(JsonNode type) {
 		boolean isSchemaOrg = false;
-
-		if (type != null) {
-			type = type.trim();
-			// very naive and simple for now
-			// TODO check whether schema.org types are referenced with
-			// http://schema.org prefix or differently just by stating the name
-			// (http://schema.org/Integer vs. Integer)
-			isSchemaOrg = type.startsWith("http://schema.org/") || type.startsWith("https://schema.org/");
-		}
-
+		
+		// TODO check how schema.org types are referenced/used
 		return isSchemaOrg;
 	}
 	
 	/** JSON Schema defines seven primitive types for JSON values (see http://json-schema.org/latest/json-schema-core.html#anchor8) */
 	static final List<String> JSON_SCHEMA_PRIMITIVE_TYPES = Arrays.asList("array", "boolean", "integer", "number", "null", "object", "string");
 
-	public static boolean isJsonSchemaType(String type) {
+	public static boolean isJsonSchemaType(JsonNode type) {
 		boolean isJsonSchema = false;
 		
-		try {
-			// TODO use JSON schema parser
-			if (type != null) {
-				
-				ObjectMapper mapper = new ObjectMapper();
-				JsonNode valueType = mapper.readValue(new StringReader(type), JsonNode.class);
-				if(valueType != null) {
-					JsonNode value = valueType.findValue("type");
-					if(value != null) {
-						isJsonSchema =  JSON_SCHEMA_PRIMITIVE_TYPES.contains(value.asText());
-					}
-				}
-				
-
+		// TODO use JSON schema parser
+		if (type != null && type.getNodeType() == JsonNodeType.OBJECT) {
+			JsonNode value = type.findValue("type");
+			if(value != null) {
+				isJsonSchema =  JSON_SCHEMA_PRIMITIVE_TYPES.contains(value.asText());
 			}
-		} catch (Exception e) {
-			// failure --> no JSON schema
 		}
 		
 		return isJsonSchema;
