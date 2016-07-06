@@ -41,7 +41,7 @@ import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
 
 /**
- * Demo class allowing to fake an actual device by setting & reading properties
+ * Demo class allowing to fake an actual device by setting and reading properties
  * 
  * <p>Note: By registering functions one can define how to report values</p>
  * 
