@@ -46,6 +46,7 @@ import org.jose4j.lang.JoseException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -139,7 +140,10 @@ public class MultiBindingThingServer implements ThingServer {
         createBindings(servedThing, thing.isProtected());
         
         // update TD repository
-        ServedThingRepository.updateTDRepository(thing);
+        Thread t = new Thread(() -> {
+            ServedThingRepository.updateTDRepository(thing);
+        },"TdUpload" );
+        t.start();
         
         return servedThing;
     }
