@@ -3,15 +3,17 @@ package de.thingweb.thing;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class Event {
 	
 	private final String name;
 	private final String valueType;
 	private final String eventType;
 	private final List<String> hrefs;
-	private final String security;
+	private final JsonNode security;
 	 
-    protected Event(String name, String valueType, String eventType, List<String> hrefs, String security) {
+    protected Event(String name, String valueType, String eventType, List<String> hrefs, JsonNode security) {
         this.name = name;
         this.eventType = eventType;
         this.valueType = valueType;
@@ -45,7 +47,7 @@ public class Event {
 		return hrefs;
 	}
 	
-	public String getSecurity(){
+	public JsonNode getSecurity(){
 		return security;
 	}
 	
@@ -56,7 +58,7 @@ public class Event {
         private String valueType = "";
         private String eventType = null;
         private List<String> hrefs = new ArrayList<String>();
-        private String security = null;
+        private JsonNode security = null;
 
         private Builder(String name) {
             this.name = name;
@@ -77,7 +79,7 @@ public class Event {
           return this;
         }
         
-		public Builder setSecurity(String security) {
+		public Builder setSecurity(JsonNode security) {
 			this.security = security;
 			return this;
 		}

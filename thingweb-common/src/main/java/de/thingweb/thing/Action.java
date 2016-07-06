@@ -42,14 +42,14 @@ public class Action {
     private final JsonNode outputType;
     private final String actionType;
     private final List<String> hrefs;
-    private final String security;
+    private final JsonNode security;
 
     @Deprecated
     protected Action(String name, Map<String, String> params) {
         this(name, null,null, null, new ArrayList<String>(), null);
     }
     
-    protected Action(String name, JsonNode inputType, JsonNode outputType, String actionType, List<String> hrefs, String security) {
+    protected Action(String name, JsonNode inputType, JsonNode outputType, String actionType, List<String> hrefs, JsonNode security) {
         this.params = new HashMap<>();
         this.name = name;
         this.inputType = inputType;
@@ -93,7 +93,7 @@ public class Action {
       return hrefs;
     }
     
-	public String getSecurity(){
+	public JsonNode getSecurity(){
 		return security;
 	}
 
@@ -108,7 +108,7 @@ public class Action {
 		/**
 		 * [optional] Access metadata (self-contained) for protecting this Property and securely transmitting information. Compared to the security field that can be found in the Thing metadata, this field here can be used to apply specific security requirements that is only valid for this resource.
 		 */
-		private String security = null;
+		private JsonNode security = null;
 
         private Builder(String name) {
             this.name = name;
@@ -136,7 +136,7 @@ public class Action {
           return this;
         }
         
-		public Builder setSecurity(String security) {
+		public Builder setSecurity(JsonNode security) {
 			this.security = security;
 			return this;
 		}

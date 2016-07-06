@@ -49,9 +49,9 @@ public class Property extends Observable {
 	private final boolean m_isWritable;
 	private final List<String> m_hrefs;
 	private final Integer m_stability;
-	private final String m_security;
+	private final JsonNode m_security;
 
-	public Property(String name, JsonNode valueTypeJson, boolean isReadable, boolean isWriteable, String propertyType, List<String> hrefs, Integer stability, String security) {
+	public Property(String name, JsonNode valueTypeJson, boolean isReadable, boolean isWriteable, String propertyType, List<String> hrefs, Integer stability, JsonNode security) {
 		if (null == name) {
 			throw new IllegalArgumentException("name must not be null");
 		}
@@ -103,7 +103,7 @@ public class Property extends Observable {
 		return m_stability;
 	}
 	
-	public String getSecurity(){
+	public JsonNode getSecurity(){
 		return m_security;
 	}
 
@@ -121,7 +121,7 @@ public class Property extends Observable {
 		/**
 		 * [optional] Access metadata (self-contained) for protecting this Property and securely transmitting information. Compared to the security field that can be found in the Thing metadata, this field here can be used to apply specific security requirements that is only valid for this resource.
 		 */
-		private String security = null;
+		private JsonNode security = null;
 		private JsonNode valueTypeJson = null;
 
 		public Builder(String name) {
@@ -162,7 +162,7 @@ public class Property extends Observable {
 			return this;
 		}
 		
-		public Property.Builder setSecurity(String security) {
+		public Property.Builder setSecurity(JsonNode security) {
 			this.security = security;
 			return this;
 		}
