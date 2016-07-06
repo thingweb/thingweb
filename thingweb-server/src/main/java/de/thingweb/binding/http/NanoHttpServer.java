@@ -26,6 +26,7 @@
 
 package de.thingweb.binding.http;
 
+import de.thingweb.binding.BindingTools;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
 import de.thingweb.security.TokenExpiredException;
@@ -39,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -59,7 +59,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
 	public NanoHttpServer(int port) throws IOException {
 		super(port);
-		String hostname = InetAddress.getLocalHost().getHostAddress();
+		String hostname = BindingTools.getIpAddress();
 		baseuri = String.format("http://%s:%s",hostname, port);
 	}
 

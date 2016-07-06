@@ -27,6 +27,7 @@
 package de.thingweb.binding.coap;
 
 import de.thingweb.binding.Binding;
+import de.thingweb.binding.BindingTools;
 import de.thingweb.binding.RESTListener;
 import de.thingweb.binding.ResourceBuilder;
 import org.eclipse.californium.core.CoapResource;
@@ -36,8 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collection;
 
 
@@ -51,8 +50,8 @@ public class CoapBinding implements Binding {
     public CoapBinding() {
         String hostname = null;
         try {
-            hostname = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
+            hostname = BindingTools.getIpAddress();
+        } catch (IOException e) {
             hostname = "localhost";
         }
         baseuri = String.format("coap://%s",hostname);;
