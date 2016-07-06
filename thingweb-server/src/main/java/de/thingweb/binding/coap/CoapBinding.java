@@ -46,6 +46,7 @@ public class CoapBinding implements Binding {
     private static final Logger log = LoggerFactory.getLogger(CoapBinding.class);
 	private CoapServer m_coapServer;
     private final String baseuri;
+    private Integer port;
 
     public CoapBinding() {
         String hostname = null;
@@ -56,10 +57,19 @@ public class CoapBinding implements Binding {
         }
         baseuri = String.format("coap://%s",hostname);;
     }
+    
+    public CoapBinding(int port) {
+    	this();
+    	this.port = port;
+    }
 
     @Override
 	public void initialize() {
-		m_coapServer = new CoapServer();
+    	if(port == null) {
+    		m_coapServer = new CoapServer(port);
+    	} else {
+    		m_coapServer = new CoapServer();
+    	}
 	}
 
 	@Override
