@@ -49,7 +49,7 @@ public class MockupLauncherExample {
 		
 		MockupLauncher launcher = new MockupLauncher(basicLedDesc);
 		
-		// Note: no function registration means reporting value that have been set
+		// Note: no function registration means reporting values that have been set
 		
 		// increment existing input value by 1
 		Function<Object, Object> funcBrightness = (input) -> {

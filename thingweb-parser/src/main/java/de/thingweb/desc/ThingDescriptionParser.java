@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
@@ -160,29 +161,41 @@ public class ThingDescriptionParser
   public static ObjectNode toJsonObject(Thing thing) {
 
     ObjectNode td = factory.objectNode();
-    td.put("@context", WOT_TD_CONTEXT);
+    if(thing.getMetadata().get("@context") == null || thing.getMetadata().get("@context").getNodeType() == JsonNodeType.NULL) {
+    	td.put("@context", factory.textNode(WOT_TD_CONTEXT));
+    } else {
+    	td.put("@context", thing.getMetadata().get("@context"));
+    }
     td.put("name", thing.getName());
 
+    
+    if (thing.getMetadata().contains("security")) {
+    	td.put("security", thing.getMetadata().get("security"));
+    }
+    
     if (thing.getMetadata().contains("encodings")) {
-      ArrayNode encodings = factory.arrayNode();
-      for (String e : thing.getMetadata().getAll("encodings")) {
-        encodings.add(e);
-      }
-      td.put("encodings", encodings);
+//      ArrayNode encodings = factory.arrayNode();
+//      for (String e : thing.getMetadata().getAll("encodings")) {
+//        encodings.add(e);
+//      }
+      td.put("encodings", thing.getMetadata().get("encodings"));
     }
 
     if (thing.getMetadata().contains("uris")) {
-      ArrayNode uris = factory.arrayNode();
-      for (String uri : thing.getMetadata().getAll("uris")) {
-        uris.add(uri);
-      }
-      // TODO array even if single value?
-      td.put("uris", uris);
+//      ArrayNode uris = factory.arrayNode();
+//      for (String uri : thing.getMetadata().getAll("uris")) {
+//        uris.add(uri);
+//      }
+//      // TODO array even if single value?
+      td.put("uris", thing.getMetadata().get("uris"));
     }
 
     ArrayNode properties = factory.arrayNode();
     for (Property prop : thing.getProperties()) {
       ObjectNode p = factory.objectNode();
+      if(prop.getPropertyType() != null && prop.getPropertyType().length() > 0) {
+    	  p.put("@type", prop.getPropertyType());
+      }
       p.put("name", prop.getName());
       p.put("writable", prop.isWritable());
       p.put("valueType", prop.getValueType());
@@ -196,6 +209,9 @@ public class ThingDescriptionParser
       } else if (prop.getHrefs().size() == 1) {
         p.put("hrefs", factory.textNode(prop.getHrefs().get(0)));
       }
+      if(prop.getStability() != null) {
+    	  p.put("stability", prop.getStability());
+      }
 
       properties.add(p);
     }
@@ -204,6 +220,9 @@ public class ThingDescriptionParser
     ArrayNode actions = factory.arrayNode();
     for (Action action : thing.getActions()) {
       ObjectNode a = factory.objectNode();
+      if(action.getActionType() != null && action.getActionType().length() > 0) {
+    	  a.put("@type", action.getActionType());
+      }
       a.put("name", action.getName());
 
       if (action.getInputType() != null) {
@@ -235,11 +254,13 @@ public class ThingDescriptionParser
     ArrayNode events = factory.arrayNode();
     for (Event event : thing.getEvents()) {
       ObjectNode a = factory.objectNode();
+      if(event.getEventType() != null && event.getEventType().length() > 0) {
+    	  a.put("@type", event.getEventType());
+      }
       a.put("name", event.getName());
 
       if (event.getValueType()!=null) {
-        ObjectNode in = factory.objectNode();
-        in.put("valueType", event.getValueType());
+        a.put("valueType", event.getValueType());
       }
 
       if (event.getHrefs().size() > 1) {
@@ -254,7 +275,7 @@ public class ThingDescriptionParser
 
       events.add(a);
     }
-    td.put("events", actions);
+    td.put("events", events);
 
     return td;
   }
@@ -303,7 +324,7 @@ public class ThingDescriptionParser
               switch (metaIterator.next()) {
                 case "encodings":
                   for (JsonNode encoding : td.get("metadata").get("encodings")) {
-                    thing.getMetadata().add("encodings", encoding.asText());
+                    thing.getMetadata().add("encodings", encoding);
                   }
                   break;
                   
@@ -312,10 +333,17 @@ public class ThingDescriptionParser
                   for (JsonNode protocol : td.get("metadata").get("protocols")) {
                     orderedURIs.put(protocol.get("priority").asLong(), protocol.get("uri").asText());
                   }
-                  for (String uri : orderedURIs.values()) {
-                    // values returned in ascending order
-                    thing.getMetadata().add("uris", uri);
+                  if(orderedURIs.size() == 1) {
+                	  thing.getMetadata().add("uris", factory.textNode(orderedURIs.get(0)));
+                  } else {
+                	  ArrayNode an = factory.arrayNode();
+                      for (String uri : orderedURIs.values()) {
+                          // values returned in ascending order
+                    	  an.add(uri);
+                        }
+                      thing.getMetadata().add("uris", an);
                   }
+
                   break;
               }
             }
@@ -385,16 +413,21 @@ public class ThingDescriptionParser
     Iterator<String> tdIterator = td.fieldNames();
     while (tdIterator.hasNext()) {
       switch (tdIterator.next()) {
-        case "uris":
-          for (String uri : stringOrArray(td.get("uris"))) {
-            thing.getMetadata().add("uris", uri);
+        case "@context":
+          if(td.get("@context") == null || td.get("@context").getNodeType() == JsonNodeType.NULL) {
+        	  thing.getMetadata().add("@context", factory.textNode(WOT_TD_CONTEXT));
+          } else {
+        	  thing.getMetadata().add("@context", td.get("@context"));
           }
           break;
+        case "uris":
+          thing.getMetadata().add("uris", td.get("uris"));
+          break;
         case "@type":
-          thing.getMetadata().add("@type", td.get("@type").asText());
+          thing.getMetadata().add("@type", td.get("@type"));
           break;
         case "security":
-            thing.getMetadata().add("security", td.get("security").toString());
+            thing.getMetadata().add("security", td.get("security"));
             break;
           
         case "properties":
@@ -483,9 +516,7 @@ public class ThingDescriptionParser
               break;
           
         case "encodings":
-          for (JsonNode encoding : td.get("encodings")) {
-            thing.getMetadata().add("encodings", encoding.asText());
-          }
+          thing.getMetadata().add("encodings", td.get("encodings"));
           break;
       }
     }

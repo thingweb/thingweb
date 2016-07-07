@@ -172,14 +172,73 @@ public class ThingDescriptionParserTest {
     @Test
     public void testToBytes() throws Exception
     {
-      String filename = "jsonld" + File.separator + "led.v2.plain.jsonld";
+      // String filename = "jsonld" + File.separator + "led.v2.plain.jsonld";
+      String tdSample = "{\r\n" + 
+      		"  \"@context\": [\r\n" + 
+      		"    \"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\",\r\n" + 
+      		"    { \"actuator\": \"http://example.org/actuator#\" }\r\n" + 
+      		"  ],\r\n" + 
+//      		"  \"@type\": \"Thing\",\r\n" + 
+      		"  \"name\": \"MyLEDThing\",\r\n" + 
+      		"  \"uris\": [\r\n" + 
+      		"    \"coap://myled.example.com:5683/\",\r\n" + 
+      		"    \"http://mything.example.com:8080/myled/\"\r\n" + 
+      		"  ],\r\n" + 
+      		"  \"encodings\": [ \"JSON\",\"EXI\"],\r\n" + 
+      		"  \"security\": {\r\n" + 
+      		"    \"cat\": \"token:jwt\",\r\n" + 
+      		"    \"alg\": \"HS256\",\r\n" + 
+      		"    \"as\": \"https://authority-issuing.example.org\"\r\n" + 
+      		"  },\r\n" + 
+      		"  \"properties\": [\r\n" + 
+      		"    {\r\n" + 
+      		"      \"@type\": \"actuator:onOffStatus\",\r\n" + 
+      		"      \"name\": \"status\",\r\n" + 
+      		"      \"valueType\": { \"type\": \"boolean\" },\r\n" + 
+      		"      \"writable\": true,\r\n" + 
+      		"      \"hrefs\": [ \"pwr\", \"status\" ]\r\n" + 
+      		"    }\r\n" + 
+      		"  ],\r\n" + 
+      		"  \"actions\": [\r\n" + 
+      		"    {\r\n" + 
+      		"      \"@type\": \"actuator:fadeIn\",\r\n" + 
+      		"      \"name\": \"fadeIn\",\r\n" + 
+      		"      \"inputData\": {\r\n" + 
+      		"        \"valueType\": { \"type\": \"integer\" }"
+//      		+ ",\r\n" + 
+//      		"        \"actuator:unit\": \"actuator:ms\"\r\n"
+      		+ 
+      		"      },\r\n" + 
+      		"      \"hrefs\": [\"in\", \"led/in\"  ]\r\n" + 
+      		"    },\r\n" + 
+      		"    {\r\n" + 
+      		"      \"@type\": \"actuator:fadeOut\",\r\n" + 
+      		"      \"name\": \"fadeOut\",\r\n" + 
+      		"      \"inputData\": {\r\n" + 
+      		"        \"valueType\": { \"type\": \"integer\" }"
+//      		+ ",\r\n" + 
+//      		"        \"actuator:unit\": \"actuator:ms\"\r\n"
+      		+ 
+      		"      },\r\n" + 
+      		"      \"hrefs\": [\"out\", \"led/out\" ]\r\n" + 
+      		"    }\r\n" + 
+      		"  ],\r\n" + 
+      		"  \"events\": [\r\n" + 
+      		"    {\r\n" + 
+      		"      \"@type\": \"actuator:alert\",\r\n" + 
+      		"      \"name\": \"criticalCondition\",\r\n" + 
+      		"      \"valueType\": { \"type\": \"string\" },\r\n" + 
+      		"      \"hrefs\": [ \"ev\", \"alert\" ]\r\n" + 
+      		"    }\r\n" + 
+      		"  ]\r\n" + 
+      		"}";
+    	
       ObjectMapper mapper = new ObjectMapper();
       
-      JsonNode original = mapper.readValue(new File(filename), JsonNode.class);
-      JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromFile(filename)), JsonNode.class);
+      JsonNode original = mapper.readValue(tdSample, JsonNode.class);
+      JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes())), JsonNode.class);
       
-      // TODO uncomment as soon as events got parsed
-//      assertTrue(original.equals(generated));
+      assertTrue(original.equals(generated));
     }
     
 //    @Test

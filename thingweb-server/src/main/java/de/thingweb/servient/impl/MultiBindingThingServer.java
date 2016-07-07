@@ -221,7 +221,7 @@ public class MultiBindingThingServer implements ThingServer {
 
             //update metadata
             thingModel.getThingModel().getMetadata()
-                    .add("uris", binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName()));
+                    .add("uris", jsonNodeFactory.textNode(binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName())));
         }
     }
     
