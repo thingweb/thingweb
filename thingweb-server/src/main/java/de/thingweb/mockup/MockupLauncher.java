@@ -57,17 +57,16 @@ public class MockupLauncher {
 	private static final Logger log = LoggerFactory.getLogger(MockupLauncher.class);
 
 	ThingInterface ti;
+	
+	Map<String, Function<Object, Object>> propertyFunctions = new HashMap<>();
 
+	// TODO should we allow multiple things?
 	public MockupLauncher(final Thing thingDesc) throws Exception {
 		ServientBuilder.initialize();
 		final TokenRequirements tokenRequirements = NicePlugFestTokenReqFactory.createTokenRequirements();
 		ThingServer server = ServientBuilder.newThingServer(tokenRequirements);
 
 		ti = server.addThing(thingDesc);
-	}
-
-	public void setNumberStrategy() {
-
 	}
 
 	public ThingInterface start() throws Exception {
@@ -78,7 +77,6 @@ public class MockupLauncher {
 		return ti;
 	}
 
-	Map<String, Function<Object, Object>> propertyFunctions = new HashMap<>();
 
 	public void registerOnPropertyUpdate(String propertyName, Function<Object, Object> func) {
 		propertyFunctions.put(propertyName, func);
