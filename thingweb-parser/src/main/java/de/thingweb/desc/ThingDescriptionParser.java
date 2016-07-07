@@ -58,20 +58,6 @@ public class ThingDescriptionParser
   private static final JsonNodeFactory factory = new JsonNodeFactory(false);
   private static final ObjectMapper mapper = new ObjectMapper();
 
-//  private static final JsonNode TD_SCHEMA;
-//  
-//  static {
-//    File f = new File("schema", "td-schema.json");
-//    try
-//    {
-//      TD_SCHEMA = JsonLoader.fromFile(f);
-//    }
-//    catch (IOException e)
-//    {
-//      throw new RuntimeException("Expected location for TD JSON schema: schema/td-schema.json", e);
-//    }
-//  }
-
   public static Thing fromJavaMap(Object json) throws IOException
   {
     ObjectMapper mapper = new ObjectMapper();
@@ -167,7 +153,9 @@ public class ThingDescriptionParser
     	td.put("@context", thing.getMetadata().get("@context"));
     }
     td.put("name", thing.getName());
-
+    if(thing.getMetadata().contains("@type")) {
+    	td.put("@type", thing.getMetadata().get("@type"));
+    }
     
     if (thing.getMetadata().contains("security")) {
     	td.put("security", thing.getMetadata().get("security"));

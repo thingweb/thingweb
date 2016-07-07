@@ -178,7 +178,7 @@ public class ThingDescriptionParserTest {
       		"    \"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\",\r\n" + 
       		"    { \"actuator\": \"http://example.org/actuator#\" }\r\n" + 
       		"  ],\r\n" + 
-//      		"  \"@type\": \"Thing\",\r\n" + 
+      		"  \"@type\": \"Thing\",\r\n" + 
       		"  \"name\": \"MyLEDThing\",\r\n" + 
       		"  \"uris\": [\r\n" + 
       		"    \"coap://myled.example.com:5683/\",\r\n" + 
