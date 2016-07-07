@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package de.thingweb.launcher.demo;
+package de.thingweb.mockup;
 
 import java.util.function.Function;
 
@@ -30,7 +30,7 @@ import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.thing.Thing;
 
 /**
- * This class uses the FakeDemoLauncher and registers functions (e.g., by incrementing values)
+ * This class uses the MockupLauncher and registers functions (e.g., by incrementing values)
  * 
  * <p>Note: Any functions are possible such as random values et cetera</p>
  * 
@@ -38,16 +38,16 @@ import de.thingweb.thing.Thing;
  *
  */
 
-public class FakeDemoLauncherExample {
+public class MockupLauncherExample {
 
 	
 	public static void main(String[] args) throws Exception {
 		// load/parse thing description
-		final Thing basicLedDesc = ThingDescriptionParser.fromBytes(basic_led.getBytes());
+		final Thing basicLedDesc = ThingDescriptionParser.fromBytes(basic_led_beijing.getBytes());
 		// final Thing basicLedDesc = ThingDescriptionParser.fromFile("basic_led.jsonld");
 		
 		
-		FakeDemoLauncher launcher = new FakeDemoLauncher(basicLedDesc);
+		MockupLauncher launcher = new MockupLauncher(basicLedDesc);
 		
 		// Note: no function registration means reporting value that have been set
 		
@@ -77,6 +77,65 @@ public class FakeDemoLauncherExample {
 		
 		launcher.start();
 	}
+	
+	final static String basic_led_beijing = "{\r\n" + 
+			"	\"@context\": [\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\"],\r\n" + 
+			"	\"@type\": \"Thing\",\r\n" + 
+			"	\"name\": \"basicLed\",\r\n" + 
+			"	\"encodings\": [\"JSON\"],\r\n" + 
+			"	\"properties\": [{\r\n" + 
+			"		\"name\": \"brightness\",\r\n" + 
+			"		\"valueType\": {\r\n" + 
+			"			\"type\": \"integer\",\r\n" + 
+			"			\"minimum\": 0,\r\n" + 
+			"			\"maximum\": 255\r\n" + 
+			"		},\r\n" + 
+			"		\"writable\": true,\r\n" + 
+			"		\"hrefs\": [\"brightness\"]\r\n" + 
+			"	}, {\r\n" + 
+			"		\"name\": \"rgbValueRed\",\r\n" + 
+			"		\"valueType\": {\r\n" + 
+			"			\"type\": \"integer\",\r\n" + 
+			"			\"minimum\": 0,\r\n" + 
+			"			\"maximum\": 255\r\n" + 
+			"		},\r\n" + 
+			"		\"writable\": true,\r\n" + 
+			"		\"hrefs\": [\"rgbValueRed\"]\r\n" + 
+			"	}, {\r\n" + 
+			"		\"name\": \"rgbValueGreen\",\r\n" + 
+			"		\"valueType\": {\r\n" + 
+			"			\"type\": \"integer\",\r\n" + 
+			"			\"minimum\": 0,\r\n" + 
+			"			\"maximum\": 255\r\n" + 
+			"		},\r\n" + 
+			"		\"writable\": true,\r\n" + 
+			"		\"hrefs\": [\"rgbValueGreen\"]\r\n" + 
+			"	}, {\r\n" + 
+			"		\"name\": \"rgbValueBlue\",\r\n" + 
+			"		\"valueType\": {\r\n" + 
+			"			\"type\": \"integer\",\r\n" + 
+			"			\"minimum\": 0,\r\n" + 
+			"			\"maximum\": 255\r\n" + 
+			"		},\r\n" + 
+			"		\"writable\": true,\r\n" + 
+			"		\"hrefs\": [\"rgbValueBlue\"]\r\n" + 
+			"	}, {\r\n" + 
+			"		\"name\": \"snakes\",\r\n" + 
+			"		\"valueType\": {\r\n" + 
+			"			\"type\": \"integer\"\r\n" + 
+			"		},\r\n" + 
+			"		\"writable\": false,\r\n" + 
+			"		\"hrefs\": [\"snakes\"]\r\n" + 
+			"	}],\r\n" + 
+			"	\"actions\": [{\r\n" + 
+			"		\"name\": \"startSnake\",\r\n" + 
+			"		\"hrefs\": [\"startSnake\"]\r\n" + 
+			"	}, {\r\n" + 
+			"		\"name\": \"stopSnake\",\r\n" + 
+			"		\"hrefs\": [\"stopSnake\"]\r\n" + 
+			"	}]\r\n" + 
+			"}"; 
+	
 	
 	final static String basic_led = "{\r\n" + 
 			"  \"@context\": \"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\",\r\n" + 
