@@ -40,39 +40,52 @@ import de.thingweb.thing.Thing;
 
 public class MockupLauncherExample {
 
+	static final boolean composed = false;
 	
 	public static void main(String[] args) throws Exception {
 		// load/parse thing description
-		final Thing basicLedDesc = ThingDescriptionParser.fromBytes(basic_led_beijing.getBytes());
+		final Thing basicLedDesc;
+		if(composed) {
+			basicLedDesc = ThingDescriptionParser.fromBytes(basic_led_composed.getBytes());
+		} else {
+			basicLedDesc = ThingDescriptionParser.fromBytes(basic_led_beijing.getBytes());
+		}
 		// final Thing basicLedDesc = ThingDescriptionParser.fromFile("basic_led.jsonld");
 		
 		
 		MockupLauncher launcher = new MockupLauncher(basicLedDesc);
 		
-		// Note: no function registration means reporting values that have been set
 		
-		// increment existing input value by 1
-		Function<Object, Object> funcBrightness = (input) -> {
-			if(input instanceof Number) {
-				Number n = (Number) input;
-				return n.intValue() + 1;
-			} else {
-				return 0;
-			}
-		};
+		if(composed) {
+			// Note: no function registration means reporting values that have been set
+		} else {
+			// increment existing input value by 1
+			Function<Object, Object> funcBrightness = (input) -> {
+				if(input instanceof Number) {
+					Number n = (Number) input;
+					return n.intValue() + 1;
+				} else {
+					return 0;
+				}
+			};
+			
+			// increment existing input value by 2
+			Function<Object, Object> funcRest = (input) -> {
+				if(input instanceof Number) {
+					Number n = (Number) input;
+					return n.intValue() + 2;
+				} else {
+					return 0;
+				}
+			};
+			
+			launcher.registerOnPropertyUpdate("brightness", funcBrightness);
+			launcher.registerOnPropertyUpdate(null, funcRest); // for all other properties
+		}
 		
-		// increment existing input value by 2
-		Function<Object, Object> funcRest = (input) -> {
-			if(input instanceof Number) {
-				Number n = (Number) input;
-				return n.intValue() + 2;
-			} else {
-				return 0;
-			}
-		};
 		
-		launcher.registerOnPropertyUpdate("brightness", funcBrightness);
-		launcher.registerOnPropertyUpdate(null, funcRest); // for all other properties
+		
+
 		
 		
 		launcher.start();
@@ -184,5 +197,42 @@ public class MockupLauncherExample {
 			"}\r\n" + 
 			"";
 
+	
+	static final String basic_led_composed = "{\r\n" + 
+			"  \"@context\": [\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\"],\r\n" + 
+			"  \"@type\": \"Thing\",\r\n" + 
+			"  \"name\": \"MyComposedRGBThing\",\r\n" + 
+			"  \"uris\": [\"coap://mytemp.example.com:5683/\"],\r\n" + 
+			"  \"encodings\": [\"JSON\"],\r\n" + 
+			"  \"properties\": [\r\n" + 
+			"    {\r\n" + 
+			"		\"name\": \"RGB\",\r\n" + 
+			"		\"valueType\": {\r\n" + 
+			"			\"title\": \"RGB color\",\r\n" + 
+			"			\"type\": \"object\",\r\n" + 
+			"			\"properties\": {\r\n" + 
+			"				\"red\": {\r\n" + 
+			"					\"type\": \"integer\",\r\n" + 
+			"					\"minimum\": 0,\r\n" + 
+			"					\"maximum\": 255\r\n" + 
+			"				},\r\n" + 
+			"				\"green\": {\r\n" + 
+			"					\"type\": \"integer\",\r\n" + 
+			"					\"minimum\": 0,\r\n" + 
+			"					\"maximum\": 255\r\n" + 
+			"				},\r\n" + 
+			"				\"blue\": {\r\n" + 
+			"					\"type\": \"integer\",\r\n" + 
+			"					\"minimum\": 0,\r\n" + 
+			"					\"maximum\": 255\r\n" + 
+			"				}\r\n" + 
+			"			},\r\n" + 
+			"			\"required\": [\"red\", \"green\", \"blue\"]\r\n" + 
+			"		},\r\n" + 
+			"		\"writable\": true,\r\n" + 
+			"		\"hrefs\": [\"rgb\"]\r\n" + 
+			"    }\r\n" + 
+			"  ]\r\n" + 
+			"}";
 	
 }

@@ -69,11 +69,15 @@ public class ContentHelper {
     }
 
     public static Object parseJSON(byte[] json, Class expected) throws IOException {
-        return mapper.readValue(json,expected);
+    	JsonNode jn = mapper.readTree(json);
+    	return mapper.treeToValue(jn, expected); // allow composed values
+//        return mapper.readValue(json,expected);
     }
 
     public static Object parseJSON(String json, Class expected) throws IOException {
-        return mapper.readValue(json,expected);
+    	JsonNode jn = mapper.readTree(json);
+    	return mapper.treeToValue(jn, expected); // allow composed values
+//        return mapper.readValue(json,expected);
     }
 
     public static JsonNode readJSON(byte[] json) throws IOException {
