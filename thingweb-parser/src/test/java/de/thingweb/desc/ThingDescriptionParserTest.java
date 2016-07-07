@@ -24,6 +24,22 @@
 
 package de.thingweb.desc;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,17 +47,11 @@ import com.siemens.ct.exi.EXIFactory;
 import com.siemens.ct.exi.exceptions.EXIException;
 import com.siemens.ct.exi.helpers.DefaultEXIFactory;
 import com.siemens.ct.exi.json.EXIforJSONGenerator;
+
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Event;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
-import org.junit.*;
-
-import java.io.*;
-import java.net.URL;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class ThingDescriptionParserTest {
 
@@ -170,7 +180,7 @@ public class ThingDescriptionParserTest {
     }
     
     @Test
-    public void testToBytes() throws Exception
+    public void testRoundtrip1() throws Exception
     {
     	// TODO shall we test round tripping of any node? e.g, "actuator:unit": "actuator:ms" as part of inputData
     	
@@ -241,6 +251,50 @@ public class ThingDescriptionParserTest {
       JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes())), JsonNode.class);
       
       assertTrue(original.equals(generated));
+    }
+    
+    @Test
+    public void testRoundtrip2() throws Exception
+    {
+    	// e.g, JSON  Object, see http://w3c.github.io/wot/current-practices/wot-practices.html#td-context
+//    	{
+//    		  "@context": {
+//    		    "name": "http://www.w3c.org/wot/td#name",
+//    		    "uris": "http://www.w3c.org/wot/td#associatedUri",
+//    		    "unit": "http://purl.oclc.org/NET/ssnx/qu/qu-rec20#unit",
+//    		    "Thing": "http://www.w3c.org/wot/td#Thing",
+//    		    ...
+//    		  }
+//    		}
+    	
+    	String tdSample = "{\r\n" + 
+    			"	\"@context\": {\r\n" + 
+    			"		\"name\": \"http://www.w3c.org/wot/td#name\",\r\n" + 
+    			"		\"uris\": \"http://www.w3c.org/wot/td#associatedUri\",\r\n" + 
+    			"		\"unit\": \"http://purl.oclc.org/NET/ssnx/qu/qu-rec20#unit\",\r\n" + 
+    			"		\"Thing\": \"http://www.w3c.org/wot/td#Thing\"\r\n" + 
+    			"	},\r\n" + 
+    			"	\"name\": \"Test\",\r\n" + 
+    			"	\"properties\": [],\r\n" + 
+    			"	\"actions\": [],\r\n" + 
+    			"	\"events\": []\r\n" + 
+    			"}";
+    	
+//    	Thing t = new Thing("myName");
+//    	ObjectNode on = factory.objectNode();
+//    	on.put("name", factory.textNode("http://www.w3c.org/wot/td#name"));
+//    	on.put("uris", factory.textNode("http://www.w3c.org/wot/td#associatedUri"));
+//    	on.put("unit", factory.textNode("http://purl.oclc.org/NET/ssnx/qu/qu-rec20#unit"));
+//    	on.put("Thing", factory.textNode("http://www.w3c.org/wot/td#Thing"));
+//    	t.getMetadata().add("@context", on);
+    	
+        ObjectMapper mapper = new ObjectMapper();
+        
+        JsonNode original = mapper.readValue(tdSample, JsonNode.class);
+        JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes())), JsonNode.class);
+        
+        assertTrue(original.equals(generated));
+        
     }
     
 //    @Test
