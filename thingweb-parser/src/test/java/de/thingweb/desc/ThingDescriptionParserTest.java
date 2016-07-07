@@ -172,6 +172,8 @@ public class ThingDescriptionParserTest {
     @Test
     public void testToBytes() throws Exception
     {
+    	// TODO shall we test round tripping of any node? e.g, "actuator:unit": "actuator:ms" as part of inputData
+    	
       // String filename = "jsonld" + File.separator + "led.v2.plain.jsonld";
       String tdSample = "{\r\n" + 
       		"  \"@context\": [\r\n" + 
@@ -358,7 +360,6 @@ public class ThingDescriptionParserTest {
    		assertTrue("No Property obj", td.getProperty("obj") != null);
    		Property p = td.getProperty("obj");
    		assertTrue("No valueType", p.getValueType() != null);
-		ObjectMapper mapper = new ObjectMapper();
 		JsonNode valueType = p.getValueType();
 		assertTrue(valueType.findValue("type").asText().equals("object"));
 		assertTrue(valueType.findValue("properties") != null);
@@ -376,7 +377,6 @@ public class ThingDescriptionParserTest {
    		assertTrue("No Property arr", td.getProperty("arr") != null);
    		Property p = td.getProperty("arr");
    		assertTrue("No valueType", p.getValueType() != null);
-		ObjectMapper mapper = new ObjectMapper();
 		JsonNode valueType = p.getValueType();
 		assertTrue(valueType.findValue("type").asText().equals("array"));
 		assertTrue(valueType.findValue("items") != null);

@@ -45,8 +45,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
-import javax.json.JsonArray;
-
 public class ClientFactory {
 	
 	private static final Logger log = LoggerFactory.getLogger(ClientFactory.class);
