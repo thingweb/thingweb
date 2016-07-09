@@ -25,6 +25,7 @@ public class ExposedThing {
     private final ThingInterface thing;
     public final String name;
     private final ThingServer servient;
+    private static final ObjectMapper objMapper = new ObjectMapper();
 
     protected ExposedThing(ThingInterface thing, ThingServer thingServer) {
         this.thing = thing;
@@ -111,8 +112,7 @@ public class ExposedThing {
     }
 
     public ExposedThing addProperty(String propName, Map<String,String> type) {
-        ObjectMapper om = new ObjectMapper();
-        JsonNode jn = om.convertValue(type, JsonNode.class);
+        JsonNode jn = objMapper.convertValue(type, JsonNode.class);
 
         Property prop = Property.getBuilder(propName)
                 .setValueType(jn)
