@@ -53,13 +53,14 @@ public class ServientLauncher {
     private static final Logger log = LoggerFactory.getLogger(ServientLauncher.class);
     private static final ExecutorService executor = Executors.newCachedThreadPool();
     private final WotJavaScriptRuntime jsrt;
+    private final ThingServer server;
 
 
     public ServientLauncher() throws Exception {
         ServientBuilder.getHttpBinding().setPort(8088);
         ServientBuilder.initialize();
 
-        ThingServer server = ServientBuilder.newThingServer();
+        server = ServientBuilder.newThingServer();
         jsrt = WotJavaScriptRuntime.createOn(server);
 
         addServientInterfaceHandlers(server);
@@ -72,7 +73,24 @@ public class ServientLauncher {
 
     public void start() throws Exception {
         ServientBuilder.start();
+        runAutoLoad();
         runAutostart();
+    }
+
+    public void runAutoLoad() throws IOException {
+        String sAutoLoadFolder = "./autoload";
+        Path p = Paths.get(sAutoLoadFolder);
+        if (Files.exists(p)) {
+            Files.walk(p)
+                    .filter(Files::isRegularFile)
+                    .forEach(path -> {
+                        try {
+                            server.addThing(ThingDescriptionParser.fromFile(path.toString()));
+                        } catch (IOException e) {
+                            log.error("error loading thing description file " + path, e);
+                        }
+                    });
+        }
     }
 
     public void runAutostart() throws IOException {
