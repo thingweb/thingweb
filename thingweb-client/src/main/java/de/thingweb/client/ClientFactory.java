@@ -25,6 +25,9 @@
 package de.thingweb.client;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 import de.thingweb.client.impl.CoapClientImpl;
 import de.thingweb.client.impl.HttpClientImpl;
@@ -100,23 +103,45 @@ public class ClientFactory {
 		// TODO if anything is wrong or inconsistent with thingweb-repository, put glue code here...
 	}
 
+	
+	private void checkUri(String suri, List<Client> clients) throws URISyntaxException {
+        URI uri = new URI(suri);
+        if(isCoapScheme(uri.getScheme())) {
+          clients.add(new CoapClientImpl(suri, thing));
+          log.info("Found matching client '" + CoapClientImpl.class.getName() + "'");
+        } else if(isHttpScheme(uri.getScheme())) {
+          clients.add(new HttpClientImpl(suri, thing));
+          log.info("Found matching client '" + HttpClientImpl.class.getName() + "'");
+        } 
+	}
+	
 	protected Client pickClient() throws UnsupportedException, URISyntaxException {
 		// check for right protocol&encoding
 		List<Client> clients = new ArrayList<>(); // it is assumed URIs are ordered by priority
 		
-		List<String> uris = thing.getMetadata().getAll("uris");
+		JsonNode uris = thing.getMetadata().get("uris");
     if (uris != null) {
-      int prio = 1;
-      for (String suri : uris) {
-        URI uri = new URI(suri);
-        if(isCoapScheme(uri.getScheme())) {
-          clients.add(new CoapClientImpl(suri, thing));
-          log.info("Found matching client '" + CoapClientImpl.class.getName() + "' with priority " + prio++);
-        } else if(isHttpScheme(uri.getScheme())) {
-          clients.add(new HttpClientImpl(suri, thing));
-          log.info("Found matching client '" + HttpClientImpl.class.getName() + "' with priority " + prio++);
-        } 
-      }
+    	if(uris.getNodeType() == JsonNodeType.STRING) {
+    		checkUri(uris.asText(), clients);
+    	} else if(uris.getNodeType() == JsonNodeType.ARRAY) {
+    		ArrayNode an = (ArrayNode)uris;
+    		for(int i=0; i<an.size(); i++) {
+    			checkUri(an.get(i).asText(), clients);
+    		}
+    	}
+    	
+      // int prio = 1;
+//      for (JsonNode juri : uris) {
+//    	String suri = juri.asText();
+//        URI uri = new URI(suri);
+//        if(isCoapScheme(uri.getScheme())) {
+//          clients.add(new CoapClientImpl(suri, thing));
+//          log.info("Found matching client '" + CoapClientImpl.class.getName() + "' with priority " + prio++);
+//        } else if(isHttpScheme(uri.getScheme())) {
+//          clients.add(new HttpClientImpl(suri, thing));
+//          log.info("Found matching client '" + HttpClientImpl.class.getName() + "' with priority " + prio++);
+//        } 
+//      }
     }
 		
 		// take priority into account

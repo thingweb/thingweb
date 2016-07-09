@@ -61,6 +61,12 @@ public class CoapBinding implements Binding {
     	this();
     	this.port = port;
     }
+    
+    public void setPort(int port) {
+    	// TODO should be set only server hasn't been started yet. How to detect it?
+    	this.port = port;
+    }
+    
 
     @Override
 	public void initialize() {

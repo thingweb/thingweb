@@ -3,6 +3,9 @@ package de.thingweb.client;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+
 import de.thingweb.client.impl.CoapClientImpl;
 import de.thingweb.client.impl.HttpClientImpl;
 import de.thingweb.thing.*;
@@ -17,6 +20,8 @@ import java.util.List;
 
 public class TestClientFactory extends TestCase {
 
+	private static final JsonNodeFactory factory = new JsonNodeFactory(false);
+	
 	@Test
 	public void testUrlTutorialDoor_OldTD() throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
 		URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/door.jsonld");
@@ -101,16 +106,18 @@ public class TestClientFactory extends TestCase {
 		Metadata md = t.getMetadata();
 		
 		// encodings
-		List<String> encs = md.getAll("encodings");
-		assertTrue(encs.equals(Arrays.asList("JSON", "EXI")));
+		ArrayNode an = factory.arrayNode();
+		an.add("JSON");
+		an.add("EXI");
+		JsonNode encs = md.get("encodings");
+		assertTrue(encs.equals(an));
 		// String enc = md.get("encodings");
 		
 		// security
-		String sec = md.get("security");
+		JsonNode sec = md.get("security");
 		assertTrue(sec != null);
 		{
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode valueType = mapper.readValue(new StringReader(sec), JsonNode.class);
+			JsonNode valueType = sec;
 			assertTrue(valueType.findValue("cat").asText().equals("token:jwt"));
 			assertTrue(valueType.findValue("alg").asText().equals("HS256"));
 			assertTrue(valueType.findValue("as").asText().equals("https://authority-issuing.example.org"));
@@ -192,12 +199,15 @@ public class TestClientFactory extends TestCase {
 		Metadata md = t.getMetadata();
 		
 		// encodings
-		List<String> encs = md.getAll("encodings");
-		assertTrue(encs.equals(Arrays.asList("JSON", "EXI")));
+		ArrayNode an = factory.arrayNode();
+		an.add("JSON");
+		an.add("EXI");
+		JsonNode encs = md.get("encodings");
+		assertTrue(encs.equals(an));
 		// String enc = md.get("encodings");
 		
 		// security
-		String sec = md.get("security");
+		JsonNode sec = md.get("security");
 		assertTrue(sec == null);
 
 		// properties
