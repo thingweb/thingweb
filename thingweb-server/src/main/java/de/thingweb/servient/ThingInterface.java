@@ -99,4 +99,6 @@ public interface ThingInterface {
     void addAction(Action action);
 
     void addEvent(Event event);
+
+    void publishToRepo();
 }

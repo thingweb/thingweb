@@ -195,18 +195,30 @@ public class ServedThing implements ThingInterface {
     public void addProperty(Property prop){
     	m_thingModel.addProperty(prop);
     	m_stateContainer.updateHandlers();
+        this.publishToRepo();
     }
 
     @Override
     public void addAction(Action action){
         m_thingModel.addAction(action);
         m_stateContainer.updateHandlers();
+        this.publishToRepo();
     }
 
     @Override
     public void addEvent(Event event){
         m_thingModel.addEvent(event);
         m_stateContainer.updateHandlers();
+        this.publishToRepo();
     }
 
+    @Override
+    public void publishToRepo() {
+        log.info("publishing TD");
+        // update TD repository
+        Thread t = new Thread(() -> {
+            ServedThingRepository.updateTDRepository(this.getThingModel());
+        },"TdUpload" );
+        t.start();
+    }
 }

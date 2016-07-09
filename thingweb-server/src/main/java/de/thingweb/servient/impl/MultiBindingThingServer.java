@@ -140,10 +140,7 @@ public class MultiBindingThingServer implements ThingServer {
         createBindings(servedThing, thing.isProtected());
         
         // update TD repository
-        Thread t = new Thread(() -> {
-            ServedThingRepository.updateTDRepository(thing);
-        },"TdUpload" );
-        t.start();
+        servedThing.publishToRepo();
         
         return servedThing;
     }
