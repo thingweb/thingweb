@@ -52,9 +52,9 @@ public class Metadata
 	  }
   }
   
-//  public List<JsonNode> getAll(String key) {
-//    return items.get(key);
-//  }
+  public List<JsonNode> getAll(String key) {
+    return items.get(key);
+ }
   
   public boolean contains(String key) {
     return items.containsKey(key);

@@ -165,12 +165,12 @@ public class ThingDescriptionParser {
 		}
 
 		if (thing.getMetadata().contains("uris")) {
-			// ArrayNode uris = factory.arrayNode();
-			// for (String uri : thing.getMetadata().getAll("uris")) {
-			// uris.add(uri);
-			// }
+			 ArrayNode uris = factory.arrayNode();
+			 for (JsonNode uri : thing.getMetadata().getAll("uris")) {
+				 uris.add(uri);
+			 }
 			// // TODO array even if single value?
-			td.put("uris", thing.getMetadata().get("uris"));
+			td.put("uris", uris);
 		}
 
 		ArrayNode properties = factory.arrayNode();
