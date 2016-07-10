@@ -3,12 +3,14 @@ package de.thingweb.jsruntime.api;
 import de.thingweb.client.ClientFactory;
 import de.thingweb.client.UnsupportedException;
 import de.thingweb.desc.ThingDescriptionParser;
+import de.thingweb.discovery.TDRepository;
 import de.thingweb.jsruntime.JsPromise;
 import de.thingweb.servient.ServientBuilder;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.Thing;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URI;
@@ -63,15 +65,29 @@ public class WotAPI {
 
         executor.submit(() -> {
                 if(method.equals("registry")) {
-                    /*
+                    String name = null;
+                    if(filter.containsKey("name")) {
+                        name = (String) filter.getMember("name");
+                    } else {
+                        promise.reject(new RuntimeException("No name given for registry-based discovery"));
+                        return;
+                    }
+
+                    String registry;
+                    if(filter.containsKey("registry")) {
+                        registry = (String) filter.getMember("registry");
+                    } else {
+                        promise.reject(new RuntimeException("No registry given for registry-based discovery"));
+                        return;
+                    }
                         try {
-                            promise.resolve(
-                                //ConsumedThing.from();
-                            );
-                        } catch (IOException | UnsupportedException | URISyntaxException e) {
-                            throw new RuntimeException(e);
+                            final TDRepository repo = new TDRepository(registry);
+                            final JSONObject jsonObject = repo.tdFreeTextSearch(name);
+                            promise.resolve(jsonObject);
+                        } catch (Exception e) {
+                            promise.reject(e);
+                            return;
                         }
-                    */
                 } else if(method.equals("local")) {
                     if(filter.containsKey("name")) {
                         final String name = (String) filter.getMember("name");
