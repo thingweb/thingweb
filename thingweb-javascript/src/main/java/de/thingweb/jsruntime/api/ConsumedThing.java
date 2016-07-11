@@ -90,7 +90,7 @@ public class ConsumedThing {
         Callback myCb = new AbstractCallback() {
             @Override
             public void onGet(String propertyName, Content response) {
-                promise.resolve(response.getContent());
+                promise.resolve(ContentHelper.getValueFromJson(response));
             }
 
             @Override
