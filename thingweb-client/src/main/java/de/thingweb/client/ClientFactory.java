@@ -103,14 +103,17 @@ public class ClientFactory {
 		// TODO if anything is wrong or inconsistent with thingweb-repository, put glue code here...
 	}
 
-	
 	private void checkUri(String suri, List<Client> clients) throws URISyntaxException {
+		checkUri(suri, -1, clients);
+	}
+	
+	private void checkUri(String suri, int uriIndex, List<Client> clients) throws URISyntaxException {
         URI uri = new URI(suri);
         if(isCoapScheme(uri.getScheme())) {
-          clients.add(new CoapClientImpl(suri, thing));
+          clients.add(new CoapClientImpl(thing, uriIndex));
           log.info("Found matching client '" + CoapClientImpl.class.getName() + "'");
         } else if(isHttpScheme(uri.getScheme())) {
-          clients.add(new HttpClientImpl(suri, thing));
+          clients.add(new HttpClientImpl(thing, uriIndex));
           log.info("Found matching client '" + HttpClientImpl.class.getName() + "'");
         } 
 	}
@@ -126,7 +129,7 @@ public class ClientFactory {
     	} else if(uris.getNodeType() == JsonNodeType.ARRAY) {
     		ArrayNode an = (ArrayNode)uris;
     		for(int i=0; i<an.size(); i++) {
-    			checkUri(an.get(i).asText(), clients);
+    			checkUri(an.get(i).asText(), i, clients);
     		}
     	}
     	

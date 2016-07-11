@@ -30,8 +30,6 @@ import de.thingweb.thing.Thing;
 public interface Client {
 	
 	public Thing getThing();
-	
-	public String getUsedProtocolURI();
 
 	public void put(String propertyName, Content propertyValue, Callback callback) throws UnsupportedException;
 	

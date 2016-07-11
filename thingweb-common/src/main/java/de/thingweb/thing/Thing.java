@@ -29,6 +29,12 @@ package de.thingweb.thing;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.sun.org.apache.xerces.internal.util.URI;
+import com.sun.org.apache.xerces.internal.util.URI.MalformedURIException;
+
 
 /**
  * The Thing class provides the "model" of a thing, the components and
@@ -69,6 +75,64 @@ public final class Thing {
 
     public String getName() {
         return m_name;
+    }
+    
+	public URI getUri(int index) {
+		JsonNode uris = getMetadata().get("uris");
+		if (uris != null) {
+			try {
+				if (uris.getNodeType() == JsonNodeType.STRING) {
+					return new URI(uris.asText());
+				} else if (uris.getNodeType() == JsonNodeType.ARRAY) {
+					ArrayNode an = (ArrayNode)uris;
+					return new URI(an.get(index).asText());
+				}
+			} catch (MalformedURIException e) {
+				throw new RuntimeException("TD with malformed base uris");
+			}
+		} else {
+			throw new RuntimeException("TD without base uris field");
+		}
+		// should never be reached
+		return new URI();
+	}
+    
+    public String resolvePropertyUri(String name, int index) {
+    	
+    	URI uri = getUri(index);
+    	
+    	Property p = getProperty(name);
+    	
+    	if (p!=null) {
+    		try {
+				uri.appendPath( p.getHrefs().get(index) );
+			} catch (MalformedURIException e) {
+				throw new RuntimeException("TD with malformed hrefs");
+			}
+    	} else {
+    		throw new RuntimeException("No such Property");
+    	}
+    	
+    	return uri.toString();
+    }
+    
+    public String resolveActionUri(String name, int index) {
+    	
+    	URI uri = getUri(index);
+    	
+    	Action a = getAction(name);
+    	
+    	if (a!=null) {
+    		try {
+				uri.appendPath( a.getHrefs().get(index) );
+			} catch (MalformedURIException e) {
+				throw new RuntimeException("TD with malformed hrefs");
+			}
+    	} else {
+    		throw new RuntimeException("No such Property");
+    	}
+    	
+    	return uri.toString();
     }
 
     public Metadata getMetadata() {

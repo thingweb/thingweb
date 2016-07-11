@@ -63,14 +63,14 @@ public class ConsumedThing {
             }
 
             @Override
-            public void onPutError(String propertyName) {
-                promise.reject("error setting property " + propertyName);
+            public void onPutError(String propertyName, String message) {
+                promise.reject("error setting property " + propertyName + ": " + message);
             }
         };
 
         try {
             client.put(propertyName,ContentHelper.makeJsonValue(property),myCb);
-        } catch (UnsupportedException e) {
+        } catch (Exception e) {
             promise.reject(e);
         }
 

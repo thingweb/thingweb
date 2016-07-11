@@ -58,6 +58,7 @@ public class ServientLauncher {
 
     public ServientLauncher() throws Exception {
         ServientBuilder.getHttpBinding().setPort(8088);
+        ServientBuilder.getCoapBinding().setPort(5688);
         ServientBuilder.initialize();
 
         server = ServientBuilder.newThingServer();

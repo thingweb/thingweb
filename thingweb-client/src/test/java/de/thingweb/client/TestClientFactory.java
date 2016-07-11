@@ -63,7 +63,7 @@ public class TestClientFactory extends TestCase {
 		System.out.println(client);
 		
 		assertTrue(client instanceof HttpClientImpl);
-		assertTrue("http://www.example.com:80/door".equals(client.getUsedProtocolURI()));
+		assertTrue("http://www.example.com:80/door".equals(client.getThing().getUri(0)));
 		assertTrue("MyDoor".equals(client.getThing().getName()));
 		// actions
 		assertTrue(client.getThing().getActions() == null || client.getThing().getActions().isEmpty());
@@ -96,9 +96,9 @@ public class TestClientFactory extends TestCase {
 		
 		assertTrue(client instanceof HttpClientImpl || client instanceof CoapClientImpl);
 		if(client instanceof HttpClientImpl) {
-			assertTrue("http://mything.example.com:8080/myled/".equals(client.getUsedProtocolURI()));
+			assertTrue("http://mything.example.com:8080/myled/".equals(client.getThing().getUri(1)));
 		} else {
-			assertTrue("coap://myled.example.com:5683/".equals(client.getUsedProtocolURI()));
+			assertTrue("coap://myled.example.com:5683/".equals(client.getThing().getUri(0)));
 		}
 		
 		Thing t = client.getThing();
@@ -189,9 +189,9 @@ public class TestClientFactory extends TestCase {
 		
 		assertTrue(client instanceof HttpClientImpl || client instanceof CoapClientImpl);
 		if(client instanceof HttpClientImpl) {
-			assertTrue("http://mything.example.com:8080/temperature/".equals(client.getUsedProtocolURI()));
+			assertTrue("http://mything.example.com:8080/temperature/".equals(client.getThing().getUri(1)));
 		} else {
-			assertTrue("coap://myled.example.com:5683/".equals(client.getUsedProtocolURI()));
+			assertTrue("coap://myled.example.com:5683/".equals(client.getThing().getUri(0)));
 		}
 		
 		Thing t = client.getThing();
