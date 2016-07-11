@@ -140,7 +140,7 @@ public class NanoHttpServer extends NanoHTTPD  implements ResourceBuilder {
 
 	private Response addCORSHeaders(Response resp) {
 		// TODO defaulting cors - should be configurable
-		final String DEFAULT_ALLOWED_HEADERS = "origin,accept,content-type";
+		final String DEFAULT_ALLOWED_HEADERS = "Authorization,origin,accept,content-type";
 		final String ALLOWED_METHODS = "GET, POST, PUT, DELETE, OPTIONS, HEAD";
 
 		resp.addHeader("Access-Control-Allow-Origin","*");
