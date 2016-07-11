@@ -26,14 +26,15 @@
 
 package de.thingweb.thing;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.sun.org.apache.xerces.internal.util.URI;
-import com.sun.org.apache.xerces.internal.util.URI.MalformedURIException;
 
 
 /**
@@ -87,14 +88,14 @@ public final class Thing {
 					ArrayNode an = (ArrayNode)uris;
 					return new URI(an.get(index).asText());
 				}
-			} catch (MalformedURIException e) {
+			} catch (URISyntaxException e) {
 				throw new RuntimeException("TD with malformed base uris");
 			}
 		} else {
 			throw new RuntimeException("TD without base uris field");
 		}
 		// should never be reached
-		return new URI();
+		throw new RuntimeException("Unexpected error while retrieving uri at index " + index);
 	}
     
     public String resolvePropertyUri(String name, int index) {
@@ -105,8 +106,15 @@ public final class Thing {
     	
     	if (p!=null) {
     		try {
-				uri.appendPath( p.getHrefs().get(index) );
-			} catch (MalformedURIException e) {
+    			// String scheme, String userInfo, String host, int port, String path, String query, String fragment
+    			String path = uri.getPath();
+    			if(path.endsWith("/")) {
+    				path = path + p.getHrefs().get(index);
+    			} else {
+    				path = path + "/" + p.getHrefs().get(index);
+    			}
+    			uri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), path, uri.getQuery(), uri.getFragment());
+			} catch (URISyntaxException e) {
 				throw new RuntimeException("TD with malformed hrefs");
 			}
     	} else {
@@ -124,8 +132,14 @@ public final class Thing {
     	
     	if (a!=null) {
     		try {
-				uri.appendPath( a.getHrefs().get(index) );
-			} catch (MalformedURIException e) {
+    			String path = uri.getPath();
+    			if(path.endsWith("/")) {
+    				path = path + a.getHrefs().get(index);
+    			} else {
+    				path = path + "/" + a.getHrefs().get(index);
+    			}
+    			uri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), path, uri.getQuery(), uri.getFragment());
+			} catch (URISyntaxException e) {
 				throw new RuntimeException("TD with malformed hrefs");
 			}
     	} else {

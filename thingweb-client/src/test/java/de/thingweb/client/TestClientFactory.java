@@ -13,6 +13,7 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
@@ -45,14 +46,14 @@ public class TestClientFactory extends TestCase {
 		pout.write("	{");
 		pout.write("		\"name\": \"stateOpen\",");
 		pout.write("		\"valueType\": \"xsd:boolean\",");
-		pout.write("		\"href\": \"stateOpen\"");
+		pout.write("		\"hrefs\": \"stateOpen\"");
 		pout.write("	}");
 		pout.write("  ],");
 		pout.write("  \"events\": [");
 		pout.write("    {");
 		pout.write("      \"name\": \"stateChanged\",");
 		pout.write("	  \"valueType\": \"xsd:boolean\",");
-		pout.write("      \"href\": [ \"ev\", \"myled/event\" ]");
+		pout.write("      \"hrefs\": [ \"ev\", \"myled/event\" ]");
 		pout.write("    }");
 		pout.write("  ]");
 		pout.write("}");
@@ -63,7 +64,7 @@ public class TestClientFactory extends TestCase {
 		System.out.println(client);
 		
 		assertTrue(client instanceof HttpClientImpl);
-		assertTrue("http://www.example.com:80/door".equals(client.getThing().getUri(0)));
+		assertTrue(new URI("http://www.example.com:80/door").equals(client.getThing().getUri(0)));
 		assertTrue("MyDoor".equals(client.getThing().getName()));
 		// actions
 		assertTrue(client.getThing().getActions() == null || client.getThing().getActions().isEmpty());
@@ -71,12 +72,16 @@ public class TestClientFactory extends TestCase {
 		assertTrue(!client.getThing().getProperties().isEmpty());
 		assertTrue(client.getThing().getProperties().get(0).getName().equals("stateOpen"));
 		assertTrue(client.getThing().getProperties().get(0).getValueType().asText().equals("xsd:boolean"));
+		assertTrue(client.getThing().getProperties().get(0).getHrefs().size() == 1);
+		assertTrue("http://www.example.com:80/door/stateOpen".equals(client.getThing().resolvePropertyUri("stateOpen", 0)));
 		// events
 		assertTrue(!client.getThing().getEvents().isEmpty());
 		assertTrue(client.getThing().getEvents().get(0).getName().equals("stateChanged"));
 		assertTrue(client.getThing().getEvents().get(0).getValueType().asText().equals("xsd:boolean"));
+		assertTrue(client.getThing().getEvents().get(0).getHrefs().size() == 2);
 		
 		// TODO add more tests such as events, properties
+		
 		
 	}
 	
@@ -84,7 +89,61 @@ public class TestClientFactory extends TestCase {
 	@Test
 	// CP Document: Example 3: More Capabilities
 	public void testJSONSchema3_More_Capabilities() throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
-		String json = "{\n  \"@context\": [\n    \"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\",\n    { \"actuator\": \"http://example.org/actuator#\" }\n  ],\n  \"@type\": \"Thing\",\n  \"name\": \"MyLEDThing\",\n  \"uris\": [\n    \"coap://myled.example.com:5683/\",\n    \"http://mything.example.com:8080/myled/\"\n  ],\n  \"encodings\": [ \"JSON\",\"EXI\"],\n  \"security\": {\n    \"cat\": \"token:jwt\",\n    \"alg\": \"HS256\",\n    \"as\": \"https://authority-issuing.example.org\"\n  },\n  \"properties\": [\n    {\n      \"@type\": \"actuator:onOffStatus\",\n      \"name\": \"status\",\n      \"valueType\": { \"type\": \"boolean\" },\n      \"writable\": true,\n      \"hrefs\": [ \"pwr\", \"status\" ]\n    }\n  ],\n  \"actions\": [\n    {\n      \"@type\": \"actuator:fadeIn\",\n      \"name\": \"fadeIn\",\n      \"inputData\": {\n        \"valueType\": { \"type\": \"integer\" },\n        \"actuator:unit\": \"actuator:ms\"\n      },\n      \"hrefs\": [\"in\", \"led/in\"  ]\n    },\n    {\n      \"@type\": \"actuator:fadeOut\",\n      \"name\": \"fadeOut\",\n      \"inputData\": {\n        \"valueType\": { \"type\": \"integer\" },\n        \"actuator:unit\": \"actuator:ms\"\n      },\n      \"hrefs\": [\"out\", \"led/out\" ]\n    }\n  ],\n  \"events\": [\n    {\n      \"@type\": \"actuator:alert\",\n      \"name\": \"criticalCondition\",\n      \"valueType\": { \"type\": \"string\" },\n      \"hrefs\": [ \"ev\", \"alert\" ]\n    }\n  ]\n}";
+		String json = "{\r\n" + 
+				"  \"@context\": [\r\n" + 
+				"    \"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\",\r\n" + 
+				"    { \"actuator\": \"http://example.org/actuator#\" }\r\n" + 
+				"  ],\r\n" + 
+				"  \"@type\": \"Thing\",\r\n" + 
+				"  \"name\": \"MyLEDThing\",\r\n" + 
+				"  \"uris\": [\r\n" + 
+				"    \"coap://myled.example.com:5683/\",\r\n" + 
+				"    \"http://mything.example.com:8080/myled/\"\r\n" + 
+				"  ],\r\n" + 
+				"  \"encodings\": [ \"JSON\",\"EXI\"],\r\n" + 
+				"  \"security\": {\r\n" + 
+				"    \"cat\": \"token:jwt\",\r\n" + 
+				"    \"alg\": \"HS256\",\r\n" + 
+				"    \"as\": \"https://authority-issuing.example.org\"\r\n" + 
+				"  },\r\n" + 
+				"  \"properties\": [\r\n" + 
+				"    {\r\n" + 
+				"      \"@type\": \"actuator:onOffStatus\",\r\n" + 
+				"      \"name\": \"status\",\r\n" + 
+				"      \"valueType\": { \"type\": \"boolean\" },\r\n" + 
+				"      \"writable\": true,\r\n" + 
+				"      \"hrefs\": [ \"pwr\", \"status\" ]\r\n" + 
+				"    }\r\n" + 
+				"  ],\r\n" + 
+				"  \"actions\": [\r\n" + 
+				"    {\r\n" + 
+				"      \"@type\": \"actuator:fadeIn\",\r\n" + 
+				"      \"name\": \"fadeIn\",\r\n" + 
+				"      \"inputData\": {\r\n" + 
+				"        \"valueType\": { \"type\": \"integer\" },\r\n" + 
+				"        \"actuator:unit\": \"actuator:ms\"\r\n" + 
+				"      },\r\n" + 
+				"      \"hrefs\": [\"in\", \"led/in\"  ]\r\n" + 
+				"    },\r\n" + 
+				"    {\r\n" + 
+				"      \"@type\": \"actuator:fadeOut\",\r\n" + 
+				"      \"name\": \"fadeOut\",\r\n" + 
+				"      \"inputData\": {\r\n" + 
+				"        \"valueType\": { \"type\": \"integer\" },\r\n" + 
+				"        \"actuator:unit\": \"actuator:ms\"\r\n" + 
+				"      },\r\n" + 
+				"      \"hrefs\": [\"out\", \"led/out\" ]\r\n" + 
+				"    }\r\n" + 
+				"  ],\r\n" + 
+				"  \"events\": [\r\n" + 
+				"    {\r\n" + 
+				"      \"@type\": \"actuator:alert\",\r\n" + 
+				"      \"name\": \"criticalCondition\",\r\n" + 
+				"      \"valueType\": { \"type\": \"string\" },\r\n" + 
+				"      \"hrefs\": [ \"ev\", \"alert\" ]\r\n" + 
+				"    }\r\n" + 
+				"  ]\r\n" + 
+				"}";
     	File f = File.createTempFile("jsonTest3", "jsonld");
     	BufferedWriter out = new BufferedWriter(new FileWriter(f));
         out.write(json);
@@ -94,11 +153,14 @@ public class TestClientFactory extends TestCase {
 		Client client = cf.getClientFile(f.getAbsolutePath());
 		System.out.println(client);
 		
+		String coapBaseUri = "coap://myled.example.com:5683/";
+		String httpBaseUri = "http://mything.example.com:8080/myled/";
+		
 		assertTrue(client instanceof HttpClientImpl || client instanceof CoapClientImpl);
 		if(client instanceof HttpClientImpl) {
-			assertTrue("http://mything.example.com:8080/myled/".equals(client.getThing().getUri(1)));
+			assertTrue(new URI(httpBaseUri).equals(client.getThing().getUri(1)));
 		} else {
-			assertTrue("coap://myled.example.com:5683/".equals(client.getThing().getUri(0)));
+			assertTrue(new URI(coapBaseUri).equals(client.getThing().getUri(0)));
 		}
 		
 		Thing t = client.getThing();
@@ -133,7 +195,10 @@ public class TestClientFactory extends TestCase {
 			assertTrue(p.getValueType().toString().contains("boolean"));
 			assertTrue(p.isWritable() == true);
 			assertTrue(p.getHrefs().equals(Arrays.asList("pwr", "status")));
-			assertTrue(p.getSecurity() == null || p.getSecurity().equals(""));			
+			assertTrue(p.getSecurity() == null || p.getSecurity().equals(""));		
+			assertTrue(p.getHrefs().size() == 2);
+			assertTrue((coapBaseUri + "pwr").equals(client.getThing().resolvePropertyUri("status", 0)));
+			assertTrue((httpBaseUri + "status").equals(client.getThing().resolvePropertyUri("status", 1)));
 		}
 
 		
@@ -147,6 +212,9 @@ public class TestClientFactory extends TestCase {
 			assertTrue(a.getInputType() != null);
 			assertTrue(a.getHrefs().equals(Arrays.asList("in", "led/in")));
 			assertTrue(a.getSecurity() == null || a.getSecurity().equals(""));	
+			assertTrue(a.getHrefs().size() == 2);
+			assertTrue((coapBaseUri + "in").equals(client.getThing().resolveActionUri("fadeIn", 0)));
+			assertTrue((httpBaseUri + "led/in").equals(client.getThing().resolveActionUri("fadeIn", 1)));
 		}
 		{
 			assertTrue(t.getAction("fadeOut") != null);
@@ -156,6 +224,9 @@ public class TestClientFactory extends TestCase {
 			assertTrue(a.getInputType() != null);
 			assertTrue(a.getHrefs().equals(Arrays.asList("out", "led/out")));
 			assertTrue(a.getSecurity() == null || a.getSecurity().equals(""));	
+			assertTrue(a.getHrefs().size() == 2);
+			assertTrue((coapBaseUri + "out").equals(client.getThing().resolveActionUri("fadeOut", 0)));
+			assertTrue((httpBaseUri + "led/out").equals(client.getThing().resolveActionUri("fadeOut", 1)));
 		}
 
 		// events
@@ -189,9 +260,9 @@ public class TestClientFactory extends TestCase {
 		
 		assertTrue(client instanceof HttpClientImpl || client instanceof CoapClientImpl);
 		if(client instanceof HttpClientImpl) {
-			assertTrue("http://mything.example.com:8080/temperature/".equals(client.getThing().getUri(1)));
+			assertTrue(new URI("http://mything.example.com:8080/temperature/").equals(client.getThing().getUri(1)));
 		} else {
-			assertTrue("coap://myled.example.com:5683/".equals(client.getThing().getUri(0)));
+			assertTrue(new URI("coap://myled.example.com:5683/").equals(client.getThing().getUri(0)));
 		}
 		
 		Thing t = client.getThing();
