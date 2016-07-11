@@ -34,7 +34,7 @@ public interface Callback {
 	
 	public void onPut(String propertyName, Content response);
 	
-	public void onPutError(String propertyName);
+	public void onPutError(String propertyName, String message);
 	
 	public void onObserve(String propertyName, Content response);
 	

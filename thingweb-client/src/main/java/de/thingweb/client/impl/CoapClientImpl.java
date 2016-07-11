@@ -43,6 +43,7 @@ import de.thingweb.client.Callback;
 import de.thingweb.thing.Content;
 import de.thingweb.thing.MediaType;
 import de.thingweb.thing.Thing;
+import de.thingweb.util.encoding.ContentHelper;
 
 public class CoapClientImpl extends AbstractClientImpl {
 	
@@ -53,8 +54,8 @@ public class CoapClientImpl extends AbstractClientImpl {
 	
 	Map<String, ObserveRelation> observes = new HashMap<>();
 	
-	public CoapClientImpl(String uri, Thing thing) {
-		super(uri, thing);
+	public CoapClientImpl(Thing thing, int uriIndex) {
+		super(thing, uriIndex);
 	}
 	
 	
@@ -67,11 +68,12 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	protected void put(final String propertyName, final Content propertyValue, final Callback callback, final String securityAsToken, final boolean useValue) {
-		String uriPart = URI_PART_PROPERTIES;
-		final String curi = uri + uriPart + propertyName + (useValue ? VALUE_STRING : "");
+		
+		final String curi = this.getThing().resolvePropertyUri(propertyName, index);
+		
 		CoapClient coap = new CoapClient(curi);
 		
-		log.info("CoAP put " + coap.getURI() + " (Security=" + securityAsToken + ")");
+		log.info("CoAP PUT " + coap.getURI() + " (Security=" + securityAsToken + ") with: " + new String(propertyValue.getContent()));
 		
 		Request request = Request.newPut();
 		request.setPayload(propertyValue.getContent());
@@ -90,23 +92,17 @@ public class CoapClientImpl extends AbstractClientImpl {
 					Content content = new Content(response.getPayload(), getMediaType(response.getOptions()));
 					callback.onPut(propertyName, content);
 				} else {
-					error();
+					error(response.getCode().name());
 				}
 			}
 
-			void error() {
-				if(useValueInUrlFirst == useValue) {
-					// try the other URL form as well before reporting error
-					log.warn("The PUT uri='" + curi + "' was not successull. Try with /value form next: " + !useValue);
-					put(propertyName, propertyValue, callback, securityAsToken, !useValue);
-				} else {
-					callback.onPutError(propertyName);
-				}
+			void error(String message) {
+				callback.onPutError(propertyName, message);
 			}
 			
 			@Override
 			public void onError() {
-				error();
+				error("Network error");
 			}
 		}, request);	
 	}
@@ -120,7 +116,9 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	protected void get(final String propertyName, final Callback callback, final String securityAsToken, final boolean useValue) {
-		final String curi = uri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
+		
+		final String curi = this.getThing().resolvePropertyUri(propertyName, index);
+		
 		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP get " + coap.getURI() + " (Security=" + securityAsToken + ")");
@@ -170,7 +168,9 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	protected void observe(final String propertyName, final Callback callback, final String securityAsToken, final boolean useValue) {
-		final String curi = uri + URI_PART_PROPERTIES + propertyName+ (useValue ? VALUE_STRING : "");
+		
+		final String curi = this.getThing().resolvePropertyUri(propertyName, index);
+		
 		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP observe " + coap.getURI() + " (Security=" + securityAsToken + ")");
@@ -253,8 +253,10 @@ public class CoapClientImpl extends AbstractClientImpl {
 	}
 	
 	public void action(final String actionName, Content actionValue, final Callback callback, String securityAsToken) {
-		final String uriPart = URI_PART_ACTIONS;
-		CoapClient coap = new CoapClient(uri + uriPart + actionName);
+
+		final String curi = this.getThing().resolveActionUri(actionName, index);
+		
+		CoapClient coap = new CoapClient(curi);
 		
 		log.info("CoAP post " + coap.getURI() + " (Security=" + securityAsToken + ")");
 		

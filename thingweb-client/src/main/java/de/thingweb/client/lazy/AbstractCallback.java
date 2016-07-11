@@ -58,7 +58,7 @@ public class AbstractCallback implements Callback {
     }
 
     @Override
-    public void onPutError(String propertyName) {
+    public void onPutError(String propertyName, String message) {
         throwEx("PUT",propertyName,true);
     }
 

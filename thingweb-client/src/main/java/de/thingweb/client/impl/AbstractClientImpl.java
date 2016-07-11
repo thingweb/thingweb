@@ -31,8 +31,8 @@ public abstract class AbstractClientImpl implements Client {
 	
   final Thing thing;
   
-	/** e.g., http://www.example.com:80/ledlamp or coap://localhost:5683/things/MyLED */
-	final String uri;
+	/** index of the Protocol Bindings array (uris, hrefs) */
+	final int index;
 
 	final String URI_PART_PROPERTIES = "/";
 	//final String URI_PART_PROPERTIES = "/properties/";
@@ -45,13 +45,9 @@ public abstract class AbstractClientImpl implements Client {
 	final boolean useValueInUrlFirst = false;
 	final String VALUE_STRING = "/value";
 
-	public AbstractClientImpl(String uri, Thing thing) {
+	public AbstractClientImpl(Thing thing, int uriIndex) {
 		this.thing = thing;
-		this.uri = uri;
-	}
-	
-	public String getUsedProtocolURI() {
-		return this.uri;
+		this.index = uriIndex;
 	}
 	
 	@Override

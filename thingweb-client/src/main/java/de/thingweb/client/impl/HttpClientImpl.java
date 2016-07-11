@@ -55,8 +55,8 @@ public class HttpClientImpl extends AbstractClientImpl {
 
 	Map<String, CoapObserveRelation> observes = new HashMap<>();
 	
-	public HttpClientImpl(String uri, Thing thing) {
-		super(uri, thing);
+	public HttpClientImpl(Thing thing, int uriIndex) {
+		super(thing, uriIndex);
 	}
 
 	public void put(String propertyName, Content propertyValue, Callback callback) throws UnsupportedException {
@@ -64,12 +64,13 @@ public class HttpClientImpl extends AbstractClientImpl {
 	}
 	
 	public void put(String propertyName, Content propertyValue, Callback callback, String securityAsToken) throws UnsupportedException {
+		
 		try {
 			CallbackPutActionTask cgt = new CallbackPutActionTask(propertyName, propertyValue, callback, false, securityAsToken);
 			executorService.submit(cgt);
 		} catch (Exception e) {
 			log.warn(e.getMessage());
-			callback.onPutError(propertyName);
+			callback.onPutError(propertyName, e.getMessage());
 		}
 	}
 
@@ -78,6 +79,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 	}
 	
 	public void get(String propertyName, Callback callback, String securityAsToken) throws UnsupportedException {
+		
 		try {
 			CallbackGetTask cgt = new CallbackGetTask(propertyName, callback, securityAsToken);
 			executorService.submit(cgt);
@@ -105,6 +107,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 	}
 	
 	public void action(String actionName, Content actionValue, Callback callback, String securityAsToken) throws UnsupportedException {
+		
 		try {
 			CallbackPutActionTask cgt = new CallbackPutActionTask(actionName, actionValue, callback, true, securityAsToken);
 			executorService.submit(cgt);
@@ -142,7 +145,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 		
 		protected void run(final boolean useValue) {
 			try {
-				URL url = new URL(uri + URI_PART_PROPERTIES + propertyName + (useValue ? VALUE_STRING : ""));
+				URL url = new URL(getThing().resolvePropertyUri(propertyName, index));
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setRequestMethod("GET");
 				if(securityAsToken != null) {
@@ -189,7 +192,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 		private final boolean isAction;
 		private final String securityAsToken;
 
-		CallbackPutActionTask(String name, Content propertyValue, Callback callback, boolean isAction) {
+		CallbackPutActionTask(String name, String href, Content propertyValue, Callback callback, boolean isAction) {
 			this(name, propertyValue, callback, isAction, null);
 		}
 		
@@ -209,7 +212,7 @@ public class HttpClientImpl extends AbstractClientImpl {
 			} else {
 				log.warn(e.getMessage());
 				if(!isAction) {
-					callback.onPutError(name);
+					callback.onPutError(name, e.getMessage());
 				} else {
 					callback.onActionError(name);
 				}
@@ -218,12 +221,11 @@ public class HttpClientImpl extends AbstractClientImpl {
 		
 		protected void run(final boolean useValue) {
 			try {
-				String uriPart = isAction ? URI_PART_PROPERTIES : URI_PART_ACTIONS;
 				URL url;
 				if(!isAction) {
-					url = new URL(uri + uriPart + name + (useValue ? VALUE_STRING : ""));
+					url = new URL(getThing().resolvePropertyUri(name, index));
 				} else {
-					url = new URL(uri + uriPart + name);
+					url = new URL(getThing().resolveActionUri(name, index));
 				}
 				HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 				httpCon.setDoOutput(true);
