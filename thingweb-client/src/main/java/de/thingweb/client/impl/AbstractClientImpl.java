@@ -24,6 +24,8 @@
 
 package de.thingweb.client.impl;
 
+import java.net.URI;
+
 import de.thingweb.client.Client;
 import de.thingweb.thing.Thing;
 
@@ -53,6 +55,10 @@ public abstract class AbstractClientImpl implements Client {
 	@Override
 	public Thing getThing() {
 	  return thing;
+	}
+	
+	public URI getUsedHref() {
+		return this.thing.getUri(this.index);
 	}
 
 }

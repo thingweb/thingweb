@@ -24,12 +24,16 @@
 
 package de.thingweb.client;
 
+import java.net.URI;
+
 import de.thingweb.thing.Content;
 import de.thingweb.thing.Thing;
 
 public interface Client {
 	
 	public Thing getThing();
+	
+	public URI getUsedHref();
 
 	public void put(String propertyName, Content propertyValue, Callback callback) throws UnsupportedException;
 	
