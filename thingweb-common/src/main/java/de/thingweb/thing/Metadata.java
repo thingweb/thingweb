@@ -1,77 +1,42 @@
 package de.thingweb.thing;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * 
- * Helper class to provide data structure to hold multiple values with the same key
+ * Helper class to provide data structure to hold metadata values
  *
  * @author Victor Charpenay
+ * @author https://github.com/danielpeintner
  *
  */
-public class Metadata
-{
-  
-	// TODO do we still need multiple values with the same name OR should it be a JsonArray instead
-	// TODO fix also description
-  // private Map<String, List<JsonNode>> items = new HashMap<String, List<JsonNode>>();
-	private Map<String, JsonNode> items = new HashMap<String, JsonNode>();
-  
-  public void add(String key, JsonNode value) {
-	  items.put(key, value);
-	  
-//    checkKey(key);
-//    items.get(key).add(value);
-  }
-  
-//  public void add(String key, JsonNode... values) {
-//    checkKey(key);
-//    for (JsonNode v : values) {
-//      items.get(key).add(v);
-//    }
-//  }
+public class Metadata {
 
-  public void clear(String key) {
-	  items.remove(key);
-	  
-//    if (items.containsKey(key)) {
-//      items.get(key).clear();
-//    }
-  }
-  
-  /**
-   * 
-   * @param key key
-   * @return either the value stored,
-   * one single value if multiple values stored (not deterministic)
-   * or null if key does not exist
-   */
-  public JsonNode get(String key) {
-	  return items.get(key);
-//	  if(items.containsKey(key)) {
-//		  return items.get(key).iterator().next();
-//	  } else {
-//		  return null;
-//	  }
-  }
-  
-//  public List<JsonNode> getAll(String key) {
-//    return items.get(key);
-// }
-  
-  public boolean contains(String key) {
-    return items.containsKey(key);
-  }
-  
-//  private void checkKey(String key) {
-//    if (!items.containsKey(key)) {
-//      items.put(key, new ArrayList<JsonNode>());
-//    }
-//  }
+	private Map<String, JsonNode> items = new HashMap<String, JsonNode>();
+
+	public void add(String key, JsonNode value) {
+		items.put(key, value);
+	}
+
+	public void clear(String key) {
+		items.remove(key);
+	}
+
+	/**
+	 * 
+	 * @param key
+	 *            key
+	 * @return the value stored
+	 */
+	public JsonNode get(String key) {
+		return items.get(key);
+	}
+
+	public boolean contains(String key) {
+		return items.containsKey(key);
+	}
 
 }
