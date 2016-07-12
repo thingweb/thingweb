@@ -26,6 +26,7 @@
 
 package de.thingweb.servient.impl;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.thingweb.binding.AbstractRESTListener;
@@ -207,6 +208,7 @@ public class MultiBindingThingServer implements ThingServer {
 
         final HypermediaIndex thingIndex = new HypermediaIndex(thinglinks);*/
         thingModel.getThingModel().getMetadata().clear("uris");
+        ArrayNode uris = jsonNodeFactory.arrayNode();
 
         // resources
         for (ResourceBuilder binding : m_bindings) {
@@ -216,10 +218,13 @@ public class MultiBindingThingServer implements ThingServer {
             //add thing
             createBinding(binding, thingModel,isProtected);
 
-            //update metadata
-            thingModel.getThingModel().getMetadata()
-                    .add("uris", jsonNodeFactory.textNode(binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName())));
+            // add uri
+            uris.add(jsonNodeFactory.textNode(binding.getBase() + Defines.BASE_THING_URL + urlize(thingModel.getName())));
         }
+        
+        //update uris metadata
+        thingModel.getThingModel().getMetadata().add("uris", uris);
+        
     }
     
     private void createBinding(ResourceBuilder resources, ServedThing servedThing, boolean isProtected) {

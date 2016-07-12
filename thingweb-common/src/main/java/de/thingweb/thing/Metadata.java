@@ -17,24 +17,31 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class Metadata
 {
   
-  private Map<String, List<JsonNode>> items = new HashMap<String, List<JsonNode>>();
+	// TODO do we still need multiple values with the same name OR should it be a JsonArray instead
+	// TODO fix also description
+  // private Map<String, List<JsonNode>> items = new HashMap<String, List<JsonNode>>();
+	private Map<String, JsonNode> items = new HashMap<String, JsonNode>();
   
   public void add(String key, JsonNode value) {
-    checkKey(key);
-    items.get(key).add(value);
+	  items.put(key, value);
+	  
+//    checkKey(key);
+//    items.get(key).add(value);
   }
   
-  public void add(String key, JsonNode... values) {
-    checkKey(key);
-    for (JsonNode v : values) {
-      items.get(key).add(v);
-    }
-  }
+//  public void add(String key, JsonNode... values) {
+//    checkKey(key);
+//    for (JsonNode v : values) {
+//      items.get(key).add(v);
+//    }
+//  }
 
   public void clear(String key) {
-    if (items.containsKey(key)) {
-      items.get(key).clear();
-    }
+	  items.remove(key);
+	  
+//    if (items.containsKey(key)) {
+//      items.get(key).clear();
+//    }
   }
   
   /**
@@ -45,25 +52,26 @@ public class Metadata
    * or null if key does not exist
    */
   public JsonNode get(String key) {
-	  if(items.containsKey(key)) {
-		  return items.get(key).iterator().next();
-	  } else {
-		  return null;
-	  }
+	  return items.get(key);
+//	  if(items.containsKey(key)) {
+//		  return items.get(key).iterator().next();
+//	  } else {
+//		  return null;
+//	  }
   }
   
-  public List<JsonNode> getAll(String key) {
-    return items.get(key);
- }
+//  public List<JsonNode> getAll(String key) {
+//    return items.get(key);
+// }
   
   public boolean contains(String key) {
     return items.containsKey(key);
   }
   
-  private void checkKey(String key) {
-    if (!items.containsKey(key)) {
-      items.put(key, new ArrayList<JsonNode>());
-    }
-  }
+//  private void checkKey(String key) {
+//    if (!items.containsKey(key)) {
+//      items.put(key, new ArrayList<JsonNode>());
+//    }
+//  }
 
 }
