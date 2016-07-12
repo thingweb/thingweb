@@ -2,11 +2,7 @@
 
 Thingweb is an open source implementation of the WoT servient model of W3C's interest group on the web of things (W3C WoT IG).
 
-For information about what it does, see also:
-
-* [the tutorial on thing description](https://github.com/w3c/wot/blob/master/TF-TD/Tutorial.md)
-* [the bindings specs for the WoT IG plugfest](https://github.com/w3c/wot/tree/master/plugfest)
-* 
+For information about what it does, see also the [WoT Current Practices] (http://w3c.github.io/wot/current-practices/wot-practices.htm).
 
 ### Using ###
 
