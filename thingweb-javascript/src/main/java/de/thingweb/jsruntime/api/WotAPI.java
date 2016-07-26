@@ -307,7 +307,7 @@ public class WotAPI {
 		 */
 		private class FunctionExecuter implements Runnable {
 			public void run() {
-				function.apply(args);
+				function.apply(args[0]);
 			}
 		}
 	}
