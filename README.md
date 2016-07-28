@@ -63,4 +63,3 @@ MIT License
 
 * W3C WoT IG Members from Siemens
 
-
