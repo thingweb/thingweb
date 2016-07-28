@@ -36,6 +36,8 @@ public enum MediaType {
 	
 	/** text/plain */
 	TEXT_PLAIN("text/plain"),
+	/** text/html */
+	TEXT_HTML("text/html"),
 	/** application/xml */
 	APPLICATION_XML("application/xml"),
 	/** application/exi */
@@ -50,6 +52,7 @@ public enum MediaType {
 	static Map<String, MediaType> mediaTypes = new HashMap<>();
 	static {
 		mediaTypes.put(TEXT_PLAIN.mediaType, TEXT_PLAIN);
+		mediaTypes.put(TEXT_HTML.mediaType, TEXT_HTML);
 		mediaTypes.put(APPLICATION_XML.mediaType, APPLICATION_XML);
 		mediaTypes.put(APPLICATION_EXI.mediaType, APPLICATION_EXI);
 		mediaTypes.put(APPLICATION_JSON.mediaType, APPLICATION_JSON);
