@@ -55,7 +55,14 @@ public class PropertyListener extends AbstractRESTListener implements Observer {
         }
 
         Object res = servedThing.getProperty(property);
-        return ContentHelper.makeJsonValue(res);
+        
+        if(res instanceof Content) {
+        	// use content as is --> allows to report other media-type values than JSON
+        	return (Content)res;
+        } else {
+        	// use JSON content type
+        	return ContentHelper.makeJsonValue(res);
+        }
 
     }
 
