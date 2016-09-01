@@ -134,11 +134,9 @@ public class MockupLauncher {
 
 		Thing mockup = new Thing("Room_Automation_CNB_H110");
 
-		List<String> cumbersomeVariableForListArgument = new ArrayList<String>();
-
-		cumbersomeVariableForListArgument.add("HVAC/RoomTemperature");
-
-		cumbersomeVariableForListArgument.add("HVAC/RoomTemperature");
+		List<String> hrefs = new ArrayList<String>();
+		hrefs.add("HVAC/RoomTemperature");
+//		hrefs.add("HVAC/RT");
 
 		mockup.addProperty(new Property.Builder("Room_temperature")
 
@@ -146,7 +144,7 @@ public class MockupLauncher {
 
 				.setPropertyType("[\"HVAC:TemperatureSensor\", \"BACnet:AnalogInputObject:presentValue\" ]")
 
-				.setHrefs(cumbersomeVariableForListArgument).build());
+				.setHrefs(hrefs).build());
 
 		MockupLauncher launcher = new MockupLauncher(mockup);
 		

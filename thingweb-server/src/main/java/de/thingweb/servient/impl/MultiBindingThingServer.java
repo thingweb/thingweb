@@ -242,13 +242,17 @@ public class MultiBindingThingServer implements ThingServer {
             final PropertyListener propertyListener = new PropertyListener(servedThing, property);
             if(isProtected) propertyListener.protectWith(getValidator());
             interactionListeners.put(url, propertyListener);
-            if(property.getHrefs().size() < m_bindings.size())
-                property.getHrefs().add(urlize(property.getName()));
+            if(property.getHrefs().size() < m_bindings.size()) {
+            	// TODO [DP] I am not really sure what is the intent of the following --> comment it out
+            	// String u = urlize(property.getName());
+                // property.getHrefs().add(u);
+                
 //            TODO I'll comment this out until we have /value on the microcontroller
 //            interactionListeners.put(url, new HypermediaIndex(
 //                    new HyperMediaLink("value","value"),
 //                    new HyperMediaLink("update","value","PUT","TBD")
 //            ));
+            }
 
             interactionListeners.put(url + "/value", propertyListener);
         }
