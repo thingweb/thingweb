@@ -110,7 +110,7 @@ public class Action {
 		 */
 		private JsonNode security = null;
 
-        private Builder(String name) {
+        public Builder(String name) {
             this.name = name;
         }
 
