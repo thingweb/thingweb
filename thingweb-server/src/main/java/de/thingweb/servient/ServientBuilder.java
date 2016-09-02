@@ -110,4 +110,8 @@ public final class ServientBuilder {
                 m_httpBinding.getResourceBuilder()
         );
     }
+
+    public static void deinit() {
+        initialized = false;
+    }
 }

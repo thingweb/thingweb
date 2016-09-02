@@ -26,11 +26,15 @@
 
 package de.thingweb.jsruntime;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.thingweb.desc.ThingDescriptionParser;
 import de.thingweb.servient.ServientBuilder;
 import de.thingweb.servient.ThingInterface;
 import de.thingweb.servient.ThingServer;
 import de.thingweb.thing.*;
+import de.thingweb.typesystem.jsonschema.JsonTypeHelper;
 import de.thingweb.util.encoding.ContentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,19 +56,13 @@ public class ServientLauncher {
 
     private static final Logger log = LoggerFactory.getLogger(ServientLauncher.class);
     private static final ExecutorService executor = Executors.newCachedThreadPool();
-    private final WotJavaScriptRuntime jsrt;
-    private final ThingServer server;
+    private WotJavaScriptRuntime jsrt;
+    private ThingServer server;
 
 
     public ServientLauncher() throws Exception {
         ServientBuilder.getHttpBinding().setPort(8088);
         ServientBuilder.getCoapBinding().setPort(5688);
-        ServientBuilder.initialize();
-
-        server = ServientBuilder.newThingServer();
-        jsrt = WotJavaScriptRuntime.createOn(server);
-
-        addServientInterfaceHandlers(server);
     }
 
     public static void main(String[] args) throws Exception {
@@ -73,9 +71,19 @@ public class ServientLauncher {
     }
 
     public void start() throws Exception {
+        ServientBuilder.initialize();
+        server = ServientBuilder.newThingServer();
+        jsrt = WotJavaScriptRuntime.createOn(server);
+        addServientInterfaceHandlers(server);
         ServientBuilder.start();
         runAutoLoad();
         runAutostart();
+    }
+
+    public void restart() throws Exception {
+        ServientBuilder.stop();
+        ServientBuilder.deinit();
+        start();
     }
 
     public void runAutoLoad() throws IOException {
@@ -108,16 +116,19 @@ public class ServientLauncher {
     }
 
     public void addServientInterfaceHandlers(ThingServer server) throws IOException {
+        final ObjectMapper mapper = new ObjectMapper();
+
         Thing srvThing = new Thing("servient");
 
         srvThing.addProperties(
-            Property.getBuilder("numberOfThings").setValueType("xsd:int").setWriteable(false).build(),
-            Property.getBuilder("securityEnabled").setValueType("xsd:boolean").setWriteable(true).build()
+            Property.getBuilder("numberOfThings").setValueType(JsonTypeHelper.integerType()).setWriteable(false).build(),
+            Property.getBuilder("securityEnabled").setValueType(JsonTypeHelper.booleanType()).setWriteable(true).build()
         );
 
         srvThing.addActions(
-            Action.getBuilder("createThing").setInputType("xsd:string").build(),
-            Action.getBuilder("addScript").setInputType("xsd:string").build()
+            Action.getBuilder("createThing").setInputType(JsonTypeHelper.stringType()).build(),
+            Action.getBuilder("addScript").setInputType(JsonTypeHelper.stringType()).build(),
+            Action.getBuilder("reset").build()
         );
 
         ThingInterface serverInterface = server.addThing(srvThing);
@@ -154,6 +165,17 @@ public class ServientLauncher {
                 throw new RuntimeException(e);
             }
             return new Content(new byte[0], MediaType.APPLICATION_JSON);
+        });
+
+        serverInterface.onActionInvoke("reset",(data) -> {
+            log.warn("invoking requested restart...");
+            try {
+                this.restart();
+                log.info("restarted");
+                return ContentHelper.wrap("Restarted",MediaType.TEXT_PLAIN);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 }
