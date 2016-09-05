@@ -27,7 +27,12 @@
 package de.thingweb.servient;
 
 import de.thingweb.desc.ThingDescriptionParser;
+import de.thingweb.servient.impl.MultiBindingThingServer;
+import de.thingweb.thing.Action;
+import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
+import de.thingweb.typesystem.jsonschema.JsonTypeHelper;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,6 +115,48 @@ public class ServientSetupTests {
         ServientBuilder.start();
         server.addThing(partialThing);
     }
+    
+    @Test
+    // see https://github.com/thingweb/thingweb/issues/21
+    public void testJScreationOfTD() throws Exception {
+    	ThingServer server  = ServientBuilder.newThingServer();
+    	
+        Thing srvThing = new Thing("servient");
+
+        srvThing.addProperties(
+            Property.getBuilder("numberOfThings").setValueType(JsonTypeHelper.integerType()).setWriteable(false).build(),
+            Property.getBuilder("securityEnabled").setValueType(JsonTypeHelper.booleanType()).setWriteable(true).build()
+        );
+
+        srvThing.addActions(
+            Action.getBuilder("createThing").setInputType(JsonTypeHelper.stringType()).build(),
+            Action.getBuilder("addScript").setInputType(JsonTypeHelper.stringType()).build(),
+            Action.getBuilder("reset").build()
+        );
+
+        ThingInterface serverInterface = server.addThing(srvThing);
+        
+        Thing tm = serverInterface.getThingModel();
+        
+        // Properties
+        Property p1 = tm.getProperty("numberOfThings");
+        assertTrue(p1.getHrefs().contains(MultiBindingThingServer.urlize("numberOfThings")));
+        Property p2 = tm.getProperty("securityEnabled");
+        assertTrue(p2.getHrefs().contains(MultiBindingThingServer.urlize("securityEnabled")));
+        
+        // Actions
+        Action a1 = tm.getAction("createThing");
+        assertTrue(a1.getHrefs().contains(MultiBindingThingServer.urlize("createThing")));
+        Action a2 = tm.getAction("addScript");
+        assertTrue(a2.getHrefs().contains(MultiBindingThingServer.urlize("addScript")));
+        Action a3 = tm.getAction("reset");
+        assertTrue(a3.getHrefs().contains(MultiBindingThingServer.urlize("reset")));
+        
+        
+//        System.out.println(tm);
+    }
+    
+    
 
     @After
     public void tearDown() throws IOException {

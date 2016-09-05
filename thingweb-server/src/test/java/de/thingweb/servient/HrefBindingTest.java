@@ -29,7 +29,9 @@ package de.thingweb.servient;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -81,8 +83,10 @@ public class HrefBindingTest {
 		ObjectNode valueTypeSpeed = JsonNodeFactory.instance.objectNode().put("type", "integer").put("minimum", 0)
 				.put("maximum", 255);
 
+		List<String> al = new ArrayList<>();
+		al.add("speedLeft");
 		Property pSpeedLeft = new Property.Builder("speedLeft").setValueType(valueTypeSpeed)
-				.setHrefs(Arrays.asList(new String[] { "speedLeft" })).setWriteable(true).build();
+				.setHrefs(al).setWriteable(true).build();
 		assertTrue(pSpeedLeft != null);
 		goPiGo.addProperty(pSpeedLeft);
 

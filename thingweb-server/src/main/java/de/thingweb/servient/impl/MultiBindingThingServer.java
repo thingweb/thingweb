@@ -99,7 +99,7 @@ public class MultiBindingThingServer implements ThingServer {
                 .collect(Collectors.joining("/"));
     }
 
-    private static String urlize(String name) {
+    public static String urlize(String name) {
         try {
             return URLEncoder.encode(name,"UTF-8").toLowerCase();
         } catch (UnsupportedEncodingException e) {
@@ -243,9 +243,9 @@ public class MultiBindingThingServer implements ThingServer {
             if(isProtected) propertyListener.protectWith(getValidator());
             interactionListeners.put(url, propertyListener);
             if(property.getHrefs().size() < m_bindings.size()) {
-            	// TODO [DP] I am not really sure what is the intent of the following --> comment it out
-            	// String u = urlize(property.getName());
-                // property.getHrefs().add(u);
+            	String up = urlize(property.getName());
+            	property.getHrefs().add(up);
+                
                 
 //            TODO I'll comment this out until we have /value on the microcontroller
 //            interactionListeners.put(url, new HypermediaIndex(
@@ -264,8 +264,10 @@ public class MultiBindingThingServer implements ThingServer {
             final ActionListener actionListener = new ActionListener(servedThing, action);
             if(isProtected) actionListener.protectWith(getValidator());
             interactionListeners.put(url, actionListener);
-            if(action.getHrefs().size() < m_bindings.size())
-                action.getHrefs().add(urlize(action.getName()));
+            if(action.getHrefs().size() < m_bindings.size()) {
+            	String ua = urlize(action.getName());
+                action.getHrefs().add(ua);
+            }
         }
 
         //add listener for thing description
