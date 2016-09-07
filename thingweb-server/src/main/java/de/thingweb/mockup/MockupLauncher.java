@@ -24,7 +24,6 @@
 
 package de.thingweb.mockup;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,8 @@ import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import de.thingweb.security.TokenRequirements;
 import de.thingweb.servient.ServientBuilder;
@@ -96,7 +97,7 @@ public class MockupLauncher {
 			// register onPropertyUpdate
 			ti.onPropertyUpdate(property.getName(), (input) -> {
 				log.info("setting " + property.getName() + " value to " + input);
-				thingProps.put(property.getName(), input);
+				 thingProps.put(property.getName(), input);
 			});
 		}
 
@@ -132,19 +133,11 @@ public class MockupLauncher {
 		// e.g., ServientBuilder.getCoapBinding().setPort(5699);
 		// ServientBuilder.getHttpBinding().setPort(8081);
 
-		Thing mockup = new Thing("Room_Automation_CNB_H110");
-
-		List<String> hrefs = new ArrayList<String>();
-		hrefs.add("HVAC/RoomTemperature");
-//		hrefs.add("HVAC/RT");
+		Thing mockup = new Thing("Room_Automation");
 
 		mockup.addProperty(new Property.Builder("Room_temperature")
-
-				.setValueType("BACtype:Real")
-
-				.setPropertyType("[\"HVAC:TemperatureSensor\", \"BACnet:AnalogInputObject:presentValue\" ]")
-
-				.setHrefs(hrefs).build());
+				.setValueType(JsonNodeFactory.instance.textNode("{ \"type\": \"number\" }"))
+				.setWriteable(true).build());
 
 		MockupLauncher launcher = new MockupLauncher(mockup);
 		
@@ -153,20 +146,5 @@ public class MockupLauncher {
 		thingIfc.setProperty("Room_temperature", 22.3);
 
 	}
-
-//	static class NicePlugFestTokenReqFactory {
-//
-//		private static final String ISSUER = "NicePlugfestAS";
-//		private static final String AUDIENCE = "NicePlugfestRS";
-//		private static final String PUBKEY_ES256 = "{\"keys\":[{\"kty\": \"EC\",\"d\": \"_hysUUk5sRGAHhl7RJN7x5UhBMiy6pl6kHR5-ZaWzpU\",\"use\": \"sig\",\"crv\": \"P-256\",\"kid\": \"PlugFestNice\",\"x\": \"CQsJZUvJWx5yB5EwuipDXRDye4Ybg0wwqxpGgZtcl3w\",\"y\": \"qzYskD2N7GrGDSgo6N9pPLXMIwr6jowFGyqsTJGmpz4\",\"alg\": \"ES256\"},{\"kty\": \"oct\",\"kid\": \"018c0ae5-4d9b-471b-bfd6-eef314bc7037\",\"use\": \"sig\",\"alg\": \"HS256\",\"k\": \"aEp0WElaMnVTTjVrYlFmYnRUTldicGRtaGtWOEZKRy1PbmJjNm14Q2NZZw==\"}]}";
-//		// private static final String SUBJECT =
-//		// "0c5f83a7-cf08-4f48-8337-bfc65ea149ff";
-//		private static final String TYPE = "org:w3:wot:jwt:as:min";
-//
-//		public static TokenRequirements createTokenRequirements() {
-//			return TokenRequirements.build().setIssuer(ISSUER).setAudience(AUDIENCE).setVerificationKeys(PUBKEY_ES256)
-//					.setTokenType(TYPE).createTokenRequirements();
-//		}
-//	}
 
 }
