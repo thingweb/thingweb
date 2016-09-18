@@ -14,6 +14,9 @@ public class JsonTypeHelper {
     public static JsonNode stringType() {
         return mapper.createObjectNode().put("type","string");
     }
+    public static JsonNode scriptType() {
+        return mapper.createObjectNode().put("type","javascript");
+    }
 
     public static JsonNode booleanType() {
         return mapper.createObjectNode().put("type","boolean");

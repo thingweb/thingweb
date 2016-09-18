@@ -125,9 +125,10 @@ public class ServientLauncher {
             Property.getBuilder("securityEnabled").setValueType(JsonTypeHelper.booleanType()).setWriteable(true).build()
         );
 
+
         srvThing.addActions(
             Action.getBuilder("createThing").setInputType(JsonTypeHelper.stringType()).build(),
-            Action.getBuilder("addScript").setInputType(JsonTypeHelper.stringType()).build(),
+            Action.getBuilder("addScript").setInputType(JsonTypeHelper.scriptType()).build(),
             Action.getBuilder("reset").build()
         );
 
