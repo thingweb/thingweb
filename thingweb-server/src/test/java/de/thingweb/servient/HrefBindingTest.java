@@ -55,7 +55,7 @@ public class HrefBindingTest {
 	@Test
 	public void testMultipleHrefs() throws Exception {
 		// create GoPiGo thing
-		Thing goPiGo = new Thing("GoPiGo");
+		Thing goPiGo = new Thing("GoPiGoTest");
 		assertTrue(goPiGo != null);
 		
 		ObjectNode valueTypeSpeed = JsonNodeFactory.instance.objectNode().put("type", "integer").put("minimum", 0)

@@ -24,6 +24,8 @@
 
 package de.thingweb.thing;
 
+import java.util.Arrays;
+
 public class Content {
 	
 	final byte[] content;
@@ -40,6 +42,17 @@ public class Content {
 	
 	public byte[] getContent() {
 		return this.content;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o != null && o instanceof Content) {
+			Content other = (Content) o;
+			if(this.mediaType == other.mediaType) {
+				return Arrays.equals(this.content, other.content);
+			}
+		}
+		return false;	
 	}
 	
 }
