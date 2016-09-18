@@ -40,9 +40,11 @@ import de.thingweb.util.encoding.ContentHelper;
 public class ConsumedThing {
 
     private final Client client;
+    public final String name;
 
     public ConsumedThing(Client client) {
         this.client = client;
+        this.name = client.getThing().getName();
     }
 
     public JsPromise setProperty(String propertyName, Object property) {
