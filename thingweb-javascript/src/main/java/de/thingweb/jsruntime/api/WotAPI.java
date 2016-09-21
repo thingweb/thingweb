@@ -183,7 +183,7 @@ public class WotAPI {
     }
 
 
-    public JsPromise newThing(String name) {
+    public JsPromise createThing(String name) {
         JsPromise promise = new JsPromise();
 
         executor.submit(() -> {
@@ -237,6 +237,10 @@ public class WotAPI {
 			task.cancel();
 		}
 	}
+
+    public synchronized int setInterval(Function function, long millis) {
+        return setInterval(function,millis,new Object[] {null});
+    }
 
 	/**
 	 * Creates a new Task for the specified function and the specified arguments
