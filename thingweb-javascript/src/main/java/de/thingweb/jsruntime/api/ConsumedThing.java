@@ -132,6 +132,12 @@ public class ConsumedThing {
             }
         };
 
+        try {
+            client.action(actionName, ContentHelper.makeJsonValue(param), myCb);
+        } catch (Exception e) {
+            promise.reject(e);
+        }
+
         return promise;
     }
 
