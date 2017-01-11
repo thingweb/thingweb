@@ -33,16 +33,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.siemens.ct.exi.EXIFactory;
 import com.siemens.ct.exi.exceptions.EXIException;
 import com.siemens.ct.exi.helpers.DefaultEXIFactory;
@@ -50,10 +53,13 @@ import com.siemens.ct.exi.json.EXIforJSONGenerator;
 
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Event;
+import de.thingweb.thing.Metadata;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
 
 public class ThingDescriptionParserTest {
+	
+	// Note: some test-cases are ignored given that the online resource (URL) does not exist anymore
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -71,21 +77,21 @@ public class ThingDescriptionParserTest {
     public void tearDown() throws Exception {
     }
 
-    @Test
+    @Ignore @Test
     public void testFromURLDoor() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/door.jsonld");
     	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
     
-    @Test
+    @Ignore @Test
     public void testFromURLLed() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led.jsonld");
     	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
     
-	@Test
+    @Ignore @Test
 	public void testFromURLLedEXI4JSON() throws JsonParseException, IOException, EXIException {
 		URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/led.jsonld");
 
@@ -121,14 +127,14 @@ public class ThingDescriptionParserTest {
     	}
     }
     
-    @Test
+    @Ignore @Test
     public void testFromURLOutlet() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/outlet.jsonld");
     	ThingDescriptionParser.fromURL(jsonld);
     	// TODO any further checks?
     }
     
-    @Test
+    @Ignore @Test
     public void testFromURLWeather() throws JsonParseException, IOException {
     	URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/weather.jsonld");
     	ThingDescriptionParser.fromURL(jsonld);
@@ -437,5 +443,239 @@ public class ThingDescriptionParserTest {
 		assertTrue(valueType.findValue("minItems").asInt() == 3);
 		assertTrue(valueType.findValue("maxItems").asInt() == 3);
     }
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////
+    // TESTS for WoT Current Practices (F2F meeting, February 2017, USA, Santa Clara)
+    /////////////////////////////////////////////////////////////////////////////////
+    
+    @Test
+    public void testV3_CP_Example1() throws JsonParseException, IOException {
+    	String json = "{\r\n" + 
+    			"  \"@context\": [\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\"],\r\n" + 
+    			"  \"@type\": \"Thing\",\r\n" + 
+    			"  \"name\": \"MyTemperatureThing\",\r\n" + 
+    			"  \"interactions\": [\r\n" + 
+    			"    {\r\n" + 
+    			"      \"@type\": [\"Property\"],\r\n" + 
+    			"      \"name\": \"temperature\",\r\n" + 
+    			"      \"outputData\": {\"valueType\": { \"type\": \"number\" }},\r\n" + 
+    			"      \"writable\": false,\r\n" + 
+    			"      \"links\": [{\r\n" + 
+    			"        \"href\" : \"coap://mytemp.example.com:5683/temp\",\r\n" + 
+    			"        \"mediaType\": \"application/json\"\r\n" + 
+    			"        }]\r\n" + 
+    			"    }\r\n" + 
+    			"  ]\r\n" + 
+    			"}";
+    	
+    	Thing td = ThingDescriptionParser.fromBytes(json.getBytes());
+    	
+    	// name
+    	assertTrue("MyTemperatureThing".equals(td.getName()));
+    	
+    	// metadata
+    	Metadata md = td.getMetadata();
+    	assertTrue(md.contains("@context"));
+    	assertTrue(md.get("@context").isArray());
+    	assertTrue(ThingDescriptionParser.stringOrArray(md.get("@context")).contains("http://w3c.github.io/wot/w3c-wot-td-context.jsonld"));
+    	assertTrue(md.contains("@type"));
+    	assertTrue(md.get("@type").textValue().equals("Thing"));
+    	assertTrue(ThingDescriptionParser.stringOrArray(md.get("encodings")).contains("application/json"));
+    	
+    	// Interactions
+    	Property p = td.getProperty("temperature");
+    	List<Property> props = td.getProperties();
+    	assertTrue(props.size() == 1);
+    	assertTrue(p != null);
+    	assertTrue(p == props.get(0));
+    	
+    	// Property temperature
+    	assertTrue("temperature".equals(p.getName()));
+    	JsonNode jnValueType = p.getValueType();
+    	assertTrue(jnValueType.has("type"));
+    	assertTrue("number".equals(jnValueType.get("type").asText()));
+    	assertTrue(!p.isWritable());
+    	assertTrue(p.getHrefs().size() == 1);
+    	assertTrue("coap://mytemp.example.com:5683/temp".equals(p.getHrefs().get(0)));
+    }
+    
+    
+    @Test
+    public void testV3_CP_Example2() throws JsonParseException, IOException {
+    	String json = "{\r\n" + 
+    			"\"@context\": [\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\",\r\n" + 
+    			"       { \"sensor\": \"http://example.org/sensors#\" }\r\n" + 
+    			"      ],\r\n" + 
+    			"  \"@type\": \"Thing\",\r\n" + 
+    			"  \"name\": \"MyTemperatureThing\",\r\n" + 
+    			"  \"interactions\": [\r\n" + 
+    			"    {\r\n" + 
+    			"      \"@type\": [\"Property\",\"sensor:Temperature\"\r\n" + 
+    			"],\r\n" + 
+    			"      \"name\": \"temperature\",\r\n" + 
+    			"      \"sensor:unit\": \"sensor:Celsius\",\r\n" + 
+    			"\r\n" + 
+    			"      \"outputData\": {\"valueType\": { \"type\": \"number\" }},\r\n" + 
+    			"      \"writable\": false,\r\n" + 
+    			"      \"links\": [{\r\n" + 
+    			"        \"href\" : \"coap://mytemp.example.com:5683/\",\r\n" + 
+    			"        \"mediaType\": \"application/json\"\r\n" + 
+    			"        }]\r\n" + 
+    			"    }\r\n" + 
+    			"  ]\r\n" + 
+    			"}";
+    	
+    	Thing td = ThingDescriptionParser.fromBytes(json.getBytes());
+    	
+    	// name
+    	assertTrue("MyTemperatureThing".equals(td.getName()));
+    	
+    	// metadata
+    	Metadata md = td.getMetadata();
+    	assertTrue(md.contains("@context"));
+    	assertTrue(md.get("@context").isArray());
+    	assertTrue(ThingDescriptionParser.stringOrArray(md.get("@context")).contains("http://w3c.github.io/wot/w3c-wot-td-context.jsonld"));
+    	// TODO @context { "sensor": "http://example.org/sensors#" }
+    	assertTrue(md.contains("@type"));
+    	assertTrue(md.get("@type").textValue().equals("Thing"));
+    	assertTrue(ThingDescriptionParser.stringOrArray(md.get("encodings")).contains("application/json"));
+    	
+    	// Interactions
+    	Property p = td.getProperty("temperature");
+    	List<Property> props = td.getProperties();
+    	assertTrue(props.size() == 1);
+    	assertTrue(p != null);
+    	assertTrue(p == props.get(0));
+    	
+    	// Property temperature
+    	assertTrue("temperature".equals(p.getName()));
+    	// TODO "sensor:unit": "sensor:Celsius",
+    	JsonNode jnValueType = p.getValueType();
+    	assertTrue(jnValueType.has("type"));
+    	assertTrue("number".equals(jnValueType.get("type").asText()));
+    	assertTrue(!p.isWritable());
+    	assertTrue(p.getHrefs().size() == 1);
+    	assertTrue("coap://mytemp.example.com:5683/".equals(p.getHrefs().get(0)));
+    }
+    
+    
+    @Test
+    public void testV3_CP_Example3() throws JsonParseException, IOException {
+    	String json = "{\r\n" + 
+    			"							\"@context\": [\r\n" + 
+    			"								\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\",\r\n" + 
+    			"								{ \"actuator\": \"http://example.org/actuator#\" }\r\n" + 
+    			"							],\r\n" + 
+    			"							\"@type\": \"Thing\",\r\n" + 
+    			"							\"name\": \"MyLEDThing\",\r\n" + 
+    			"							\"base\": \"coap://myled.example.com:5683/\",\r\n" + 
+    			"							\"security\": {\r\n" + 
+    			"									\"cat\": \"token:jwt\",\r\n" + 
+    			"									\"alg\": \"HS256\",\r\n" + 
+    			"									\"as\": \"https://authority-issuing.example.org\"\r\n" + 
+    			"								},\r\n" + 
+    			"							\"interactions\": [\r\n" + 
+    			"								{\r\n" + 
+    			"									\"@type\": [\"Property\",\"actuator:onOffStatus\"],\r\n" + 
+    			"									\"name\": \"status\",\r\n" + 
+    			"									\"outputData\": {\"valueType\": { \"type\": \"boolean\" }},\r\n" + 
+    			"									\"writable\": true,\r\n" + 
+    			"									\"links\": [{\r\n" + 
+    			"										\"href\" : \"pwr\", \r\n" + 
+    			"										\"mediaType\": \"application/exi\" \r\n" + 
+    			"									},\r\n" + 
+    			"									{\r\n" + 
+    			"										\"href\" : \"http://mytemp.example.com:8080/status\",\r\n" + 
+    			"										\"mediaType\": \"application/json\"\r\n" + 
+    			"									}]\r\n" + 
+    			"								},\r\n" + 
+    			"								{\r\n" + 
+    			"									\"@type\": [\"Action\",\"actuator:fadeIn\"],\r\n" + 
+    			"									\"name\": \"fadeIn\",\r\n" + 
+    			"									\"inputData\": {\r\n" + 
+    			"										\"valueType\": { \"type\": \"integer\" },\r\n" + 
+    			"										\"actuator:unit\": \"actuator:ms\"\r\n" + 
+    			"									},\r\n" + 
+    			"									\"links\": [{\r\n" + 
+    			"										\"href\" : \"in\", \r\n" + 
+    			"										\"mediaType\": \"application/exi\" \r\n" + 
+    			"									},\r\n" + 
+    			"									{\r\n" + 
+    			"										\"href\" : \"http://mytemp.example.com:8080/in\",\r\n" + 
+    			"										\"mediaType\": \"application/json\"\r\n" + 
+    			"									}]									\r\n" + 
+    			"								},\r\n" + 
+    			"								{\r\n" + 
+    			"									\"@type\": [\"Action\",\"actuator:fadeOut\"],\r\n" + 
+    			"									\"name\": \"fadeOut\",\r\n" + 
+    			"									\"inputData\": {\r\n" + 
+    			"										\"valueType\": { \"type\": \"integer\" },\r\n" + 
+    			"										\"actuator:unit\": \"actuator:ms\"\r\n" + 
+    			"									},\r\n" + 
+    			"									\"links\": [{\r\n" + 
+    			"										\"href\" : \"out\", \r\n" + 
+    			"										\"mediaType\": \"application/exi\" \r\n" + 
+    			"									},\r\n" + 
+    			"									{\r\n" + 
+    			"										\"href\" : \"http://mytemp.example.com:8080/out\",\r\n" + 
+    			"										\"mediaType\": \"application/json\"\r\n" + 
+    			"									}]									\r\n" + 
+    			"								},\r\n" + 
+    			"								{\r\n" + 
+    			"									\"@type\": [\"Event\",\"actuator:alert\"],\r\n" + 
+    			"									\"name\": \"criticalCondition\",\r\n" + 
+    			"									\"outputData\": {\"valueType\": { \"type\": \"string\" }},\r\n" + 
+    			"									\"links\": [{\r\n" + 
+    			"						              \"uri\" : \"ev\",\r\n" + 
+    			"						              \"mediaType\": \"application/exi\"\r\n" + 
+    			"						            }]	\r\n" + 
+    			"								}\r\n" + 
+    			"							]\r\n" + 
+    			"						}";
+    	
+    	Thing td = ThingDescriptionParser.fromBytes(json.getBytes());
+    	
+    	// name
+    	assertTrue("MyLEDThing".equals(td.getName()));
+    	
+    	// metadata
+    	Metadata md = td.getMetadata();
+    	assertTrue(md.contains("@context"));
+    	assertTrue(md.get("@context").isArray());
+    	assertTrue(ThingDescriptionParser.stringOrArray(md.get("@context")).contains("http://w3c.github.io/wot/w3c-wot-td-context.jsonld"));
+    	// TODO @context { "actuator": "http://example.org/actuator#" }
+    	assertTrue(md.contains("@type"));
+    	assertTrue(md.get("@type").textValue().equals("Thing"));
+    	assertTrue(ThingDescriptionParser.stringOrArray(md.get("encodings")).contains("application/json"));
+    	assertTrue(ThingDescriptionParser.stringOrArray(md.get("encodings")).contains("application/exi"));
+    	assertTrue(md.contains("security"));
+    	JsonNode jnSecurity = md.get("security");
+    	assertTrue("token:jwt".equals(jnSecurity.get("cat").asText()));
+    	assertTrue("HS256".equals(jnSecurity.get("alg").asText()));
+    	assertTrue("https://authority-issuing.example.org".equals(jnSecurity.get("as").asText()));
+    	
+    	// Interactions Properties
+    	Property p = td.getProperty("status");
+    	List<Property> props = td.getProperties();
+    	assertTrue(props.size() == 1);
+    	assertTrue(p != null);
+    	assertTrue(p == props.get(0));
+    	
+    	// Property status
+    	assertTrue("status".equals(p.getName()));
+    	// TODO "sensor:unit": "sensor:Celsius",
+    	JsonNode jnValueType = p.getValueType();
+    	assertTrue(jnValueType.has("type"));
+    	assertTrue("boolean".equals(jnValueType.get("type").asText()));
+    	assertTrue(p.isWritable());
+    	assertTrue(p.getHrefs().size() == 1);
+    	assertTrue("http://mytemp.example.com:8080/status".equals(p.getHrefs().get(0)));
+    	
+    	// TODO 2 x Action
+    	
+    	// TODO 1 x Event
+    }
+    
 
 }

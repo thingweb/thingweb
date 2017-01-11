@@ -50,12 +50,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class ThingDescriptionParser {
 
 	private static final String WOT_TD_CONTEXT = "http://w3c.github.io/wot/w3c-wot-td-context.jsonld";
 	private static final JsonNodeFactory factory = new JsonNodeFactory(false);
 	private static final ObjectMapper mapper = new ObjectMapper();
+	
+//	private static final Logger log = LoggerFactory.getLogger(ThingDescriptionParser.class);
+	private final static Logger LOGGER = Logger.getLogger(ThingDescriptionParser.class.getName());
 
 	public static Thing fromJavaMap(Object json) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
@@ -382,6 +386,10 @@ public class ThingDescriptionParser {
 		}
 	}
 
+	// Version0: TODO
+	// Version1: https://w3c.github.io/wot/current-practices/wot-practices-beijing-2016.html
+	// Version2: F2F meeting, February 2017, USA, Santa Clara
+	
 	private static Thing parse(JsonNode td) throws Exception {
 		// ProcessingReport report =
 		// JsonSchemaFactory.byDefault().getValidator().validate(TD_SCHEMA, td);
@@ -393,7 +401,11 @@ public class ThingDescriptionParser {
 
 		Iterator<String> tdIterator = td.fieldNames();
 		while (tdIterator.hasNext()) {
-			switch (tdIterator.next()) {
+			String fieldName = tdIterator.next();
+			switch (fieldName) {
+			case "name":
+				// name handled already before
+				break;
 			case "@context":
 				if (td.get("@context") == null || td.get("@context").getNodeType() == JsonNodeType.NULL) {
 					thing.getMetadata().add("@context", factory.textNode(WOT_TD_CONTEXT));
@@ -499,13 +511,93 @@ public class ThingDescriptionParser {
 			case "encodings":
 				thing.getMetadata().add("encodings", td.get("encodings"));
 				break;
+				
+			case "interactions":
+				JsonNode jnInteractions = td.get("interactions");
+				parseInteractions(jnInteractions, thing);
+				break;
+				
+			default:
+				LOGGER.warning("Field name '" + fieldName + "' in TD not handled");
+				break;
 			}
 		}
 
 		return thing;
 	}
+	
+	// F2F meeting, February 2017, USA, Santa Clara
+	private static void parseInteractions(JsonNode jnInteractions, Thing thing) throws Exception {
+		if(jnInteractions.isArray()) {
+			ArrayNode anInteractions = (ArrayNode) jnInteractions;
+			for (final JsonNode interaction : anInteractions) {
+		        System.out.println(interaction);
+						
+				List<String> types = stringOrArray(interaction.get("@type"));
+				
+				if(types.contains("Property")) {
+					Property.Builder pbuilder = Property.getBuilder(interaction.get("name").asText());
+					JsonNode jnOutputData = interaction.get("outputData");
+					
+					JsonNode jnValueType = jnOutputData.get("valueType");
+					pbuilder.setValueType(jnValueType);
+					
+					JsonNode jnWritable = interaction.get("writable");
+					if(jnWritable != null && jnWritable.isBoolean()) {
+						pbuilder.setWriteable(jnWritable.asBoolean());
+					}
+					
+					JsonNode jnLinks = interaction.get("links");
+					if(jnLinks != null && jnLinks.isArray()) {
+						ArrayNode anLinks = (ArrayNode) jnLinks;
+						for (final JsonNode link : anLinks) {
+							JsonNode jnHref = link.get("href");
+							
+							// Note: mediaType used to be encodings
+							JsonNode jnMediaType = link.get("mediaType");
+							
+							JsonNode jnEncodings = thing.getMetadata().get("encodings");
+							if(jnEncodings == null) {
+								// create new one
+								ArrayNode an = new ArrayNode(factory);
+								an.add(jnMediaType);
+								thing.getMetadata().add("encodings", an);
+							} else if(jnEncodings.isArray()) {
+								// add to entry
+								((ArrayNode)jnEncodings).add(jnMediaType);
+							} else {
+								// should never happen
+								throw new Exception("Field 'encodings' in TD is no array");
+							}
+							
+							// TODO collect all hrefs first?
+							pbuilder.setHrefs(stringOrArray(jnHref));
+							
+						}
+					}
+					
+					thing.addProperty(pbuilder.build());
+				}
+				if(types.contains("Action")) {
+					Action.Builder abuilder = Action.getBuilder(interaction.get("name").asText());
+					
+					LOGGER.warning("TODO handling of Actions");
+				}
+				if(types.contains("Event")) {
+					Event.Builder ebuilder = Event.getBuilder(interaction.get("name").asText());
+					
+					LOGGER.warning("TODO handling of Events");
+				}
+		    }
+			
+			
+		} else {
+			throw new Exception("JSON TD field-name interactions is not an array");
+		}
+	}
+	
 
-	private static List<String> stringOrArray(JsonNode node) {
+	static List<String> stringOrArray(JsonNode node) {
 		List<String> array = new ArrayList<String>();
 
 		if (node.isTextual()) {
