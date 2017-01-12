@@ -45,7 +45,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.siemens.ct.exi.EXIFactory;
 import com.siemens.ct.exi.exceptions.EXIException;
 import com.siemens.ct.exi.helpers.DefaultEXIFactory;
@@ -627,7 +626,7 @@ public class ThingDescriptionParserTest {
     			"									\"name\": \"criticalCondition\",\r\n" + 
     			"									\"outputData\": {\"valueType\": { \"type\": \"string\" }},\r\n" + 
     			"									\"links\": [{\r\n" + 
-    			"						              \"uri\" : \"ev\",\r\n" + 
+    			"						              \"href\" : \"ev\",\r\n" + 
     			"						              \"mediaType\": \"application/exi\"\r\n" + 
     			"						            }]	\r\n" + 
     			"								}\r\n" + 
@@ -647,6 +646,8 @@ public class ThingDescriptionParserTest {
     	// TODO @context { "actuator": "http://example.org/actuator#" }
     	assertTrue(md.contains("@type"));
     	assertTrue(md.get("@type").textValue().equals("Thing"));
+    	// base --> uris
+    	assertTrue(md.get("uris").textValue().equals("coap://myled.example.com:5683/"));
     	assertTrue(ThingDescriptionParser.stringOrArray(md.get("encodings")).contains("application/json"));
     	assertTrue(ThingDescriptionParser.stringOrArray(md.get("encodings")).contains("application/exi"));
     	assertTrue(md.contains("security"));
@@ -663,18 +664,75 @@ public class ThingDescriptionParserTest {
     	assertTrue(p == props.get(0));
     	
     	// Property status
-    	assertTrue("status".equals(p.getName()));
-    	// TODO "sensor:unit": "sensor:Celsius",
-    	JsonNode jnValueType = p.getValueType();
-    	assertTrue(jnValueType.has("type"));
-    	assertTrue("boolean".equals(jnValueType.get("type").asText()));
-    	assertTrue(p.isWritable());
-    	assertTrue(p.getHrefs().size() == 1);
-    	assertTrue("http://mytemp.example.com:8080/status".equals(p.getHrefs().get(0)));
+    	{
+        	assertTrue("status".equals(p.getName()));
+        	JsonNode jnValueType = p.getValueType();
+        	assertTrue(jnValueType.has("type"));
+        	assertTrue("boolean".equals(jnValueType.get("type").asText()));
+        	assertTrue(p.isWritable());
+        	assertTrue(p.getHrefs().size() == 2);
+        	assertTrue(p.getHrefs().contains("pwr"));
+        	assertTrue(p.getHrefs().contains("http://mytemp.example.com:8080/status"));    		
+    	}
+
+    	// Interactions Actions
+    	Action a1 = td.getAction("fadeIn");
+    	Action a2 = td.getAction("fadeOut");
+    	List<Action> actions = td.getActions();
+    	assertTrue(actions.size() == 2);
+    	assertTrue(a1 != null);
+    	assertTrue(a2 != null);
+    	assertTrue(actions.contains(a1));
+    	assertTrue(actions.contains(a2));
+    	// Action fadeIn
+    	{
+    		assertTrue("fadeIn".equals(a1.getName()));
+    		
+        	JsonNode jnInputType = a1.getInputType();
+        	assertTrue(jnInputType.has("type"));
+        	assertTrue("integer".equals(jnInputType.get("type").asText()));
+        	assertTrue(a1.getHrefs().size() == 2);
+        	assertTrue(a1.getHrefs().contains("in"));
+        	assertTrue(a1.getHrefs().contains("http://mytemp.example.com:8080/in"));
+        	
+        	assertTrue(a1.getOutputType() == null);
+        	assertTrue(a1.getSecurity() == null);
+    	}
+    	// Action fadeOut
+    	{
+    		assertTrue("fadeOut".equals(a2.getName()));
+    		
+        	JsonNode jnInputType = a2.getInputType();
+        	assertTrue(jnInputType.has("type"));
+        	assertTrue("integer".equals(jnInputType.get("type").asText()));
+        	assertTrue(a2.getHrefs().size() == 2);
+        	assertTrue(a2.getHrefs().contains("out"));
+        	assertTrue(a2.getHrefs().contains("http://mytemp.example.com:8080/out"));
+        	
+        	assertTrue(a2.getOutputType() == null);
+        	assertTrue(a2.getSecurity() == null);
+    	}
     	
-    	// TODO 2 x Action
     	
-    	// TODO 1 x Event
+    	// Interactions Events
+    	Event e = td.getEvent("criticalCondition");
+    	List<Event> events = td.getEvents();
+    	assertTrue(events.size() == 1);
+    	assertTrue(e != null);
+    	assertTrue(events.contains(e));
+    	// Event criticalCondition
+    	{
+    		assertTrue("criticalCondition".equals(e.getName()));
+    		
+        	JsonNode jnOutputType = e.getValueType();
+        	assertTrue(jnOutputType.has("type"));
+        	assertTrue("string".equals(jnOutputType.get("type").asText()));
+        	assertTrue(e.getHrefs().size() == 1);
+        	assertTrue(e.getHrefs().contains("ev"));
+        	
+        	assertTrue(a2.getSecurity() == null);
+    	}
+    	
     }
     
 

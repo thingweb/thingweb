@@ -24,6 +24,26 @@
 
 package de.thingweb.desc;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.logging.Logger;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,18 +59,11 @@ import com.siemens.ct.exi.EXIFactory;
 import com.siemens.ct.exi.exceptions.EXIException;
 import com.siemens.ct.exi.helpers.DefaultEXIFactory;
 import com.siemens.ct.exi.json.EXIforJSONParser;
+
 import de.thingweb.thing.Action;
 import de.thingweb.thing.Event;
 import de.thingweb.thing.Property;
 import de.thingweb.thing.Thing;
-
-import java.io.*;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.logging.Logger;
 
 public class ThingDescriptionParser {
 
@@ -413,8 +426,9 @@ public class ThingDescriptionParser {
 					thing.getMetadata().add("@context", td.get("@context"));
 				}
 				break;
-			case "uris":
-				thing.getMetadata().add("uris", td.get("uris"));
+			case "uris": // Version1
+			case "base": // Version2
+				thing.getMetadata().add("uris", td.get(fieldName));
 				break;
 			case "@type":
 				thing.getMetadata().add("@type", td.get("@type"));
@@ -512,7 +526,7 @@ public class ThingDescriptionParser {
 				thing.getMetadata().add("encodings", td.get("encodings"));
 				break;
 				
-			case "interactions":
+			case "interactions": // V2
 				JsonNode jnInteractions = td.get("interactions");
 				parseInteractions(jnInteractions, thing);
 				break;
@@ -531,49 +545,36 @@ public class ThingDescriptionParser {
 		if(jnInteractions.isArray()) {
 			ArrayNode anInteractions = (ArrayNode) jnInteractions;
 			for (final JsonNode interaction : anInteractions) {
-		        System.out.println(interaction);
-						
 				List<String> types = stringOrArray(interaction.get("@type"));
 				
 				if(types.contains("Property")) {
 					Property.Builder pbuilder = Property.getBuilder(interaction.get("name").asText());
-					JsonNode jnOutputData = interaction.get("outputData");
 					
+					// valueType
+					JsonNode jnOutputData = interaction.get("outputData");
 					JsonNode jnValueType = jnOutputData.get("valueType");
 					pbuilder.setValueType(jnValueType);
 					
+					// writable
 					JsonNode jnWritable = interaction.get("writable");
 					if(jnWritable != null && jnWritable.isBoolean()) {
 						pbuilder.setWriteable(jnWritable.asBoolean());
 					}
 					
+					// links/hrefs
 					JsonNode jnLinks = interaction.get("links");
-					if(jnLinks != null && jnLinks.isArray()) {
-						ArrayNode anLinks = (ArrayNode) jnLinks;
-						for (final JsonNode link : anLinks) {
-							JsonNode jnHref = link.get("href");
-							
-							// Note: mediaType used to be encodings
-							JsonNode jnMediaType = link.get("mediaType");
-							
-							JsonNode jnEncodings = thing.getMetadata().get("encodings");
-							if(jnEncodings == null) {
-								// create new one
-								ArrayNode an = new ArrayNode(factory);
-								an.add(jnMediaType);
-								thing.getMetadata().add("encodings", an);
-							} else if(jnEncodings.isArray()) {
-								// add to entry
-								((ArrayNode)jnEncodings).add(jnMediaType);
-							} else {
-								// should never happen
-								throw new Exception("Field 'encodings' in TD is no array");
-							}
-							
-							// TODO collect all hrefs first?
-							pbuilder.setHrefs(stringOrArray(jnHref));
-							
-						}
+					pbuilder.setHrefs(parseInteractionsLinks(jnLinks, thing));
+					
+					// stability: [optional]
+					JsonNode jnStability = interaction.get("stability");
+					if(jnStability != null && jnStability.isNumber()) {
+						pbuilder.setStability(jnStability.intValue());
+					}
+					
+					// security: [optional]
+					JsonNode jnSecurity = interaction.get("security");
+					if(jnSecurity != null) {
+						pbuilder.setSecurity(jnSecurity);
 					}
 					
 					thing.addProperty(pbuilder.build());
@@ -581,18 +582,89 @@ public class ThingDescriptionParser {
 				if(types.contains("Action")) {
 					Action.Builder abuilder = Action.getBuilder(interaction.get("name").asText());
 					
-					LOGGER.warning("TODO handling of Actions");
+					// valueType inputData: [optional] 
+					JsonNode jnInputData = interaction.get("inputData");
+					if(jnInputData != null) {
+						abuilder.setInputType(jnInputData.get("valueType"));
+					}
+					// valueType outputData: [optional]
+					JsonNode jnOutputData = interaction.get("outputData");
+					if(jnOutputData != null) {
+						abuilder.setOutputType(jnOutputData.get("valueType"));	
+					}
+					
+					// links/hrefs
+					JsonNode jnLinks = interaction.get("links");
+					abuilder.setHrefs(parseInteractionsLinks(jnLinks, thing));
+
+					// security: [optional]
+					JsonNode jnSecurity = interaction.get("security");
+					if(jnSecurity != null) {
+						abuilder.setSecurity(jnSecurity);
+					}
+					
+					thing.addAction(abuilder.build());
 				}
 				if(types.contains("Event")) {
 					Event.Builder ebuilder = Event.getBuilder(interaction.get("name").asText());
 					
-					LOGGER.warning("TODO handling of Events");
+					// links/hrefs
+					JsonNode jnLinks = interaction.get("links");
+					ebuilder.setHrefs(parseInteractionsLinks(jnLinks, thing));
+					
+					// valueType outputData: [optional]
+					JsonNode jnOutputData = interaction.get("outputData");
+					if(jnOutputData != null) {
+						ebuilder.setValueType(jnOutputData.get("valueType"));	
+					}
+					
+					// security: [optional]
+					JsonNode jnSecurity = interaction.get("security");
+					if(jnSecurity != null) {
+						ebuilder.setSecurity(jnSecurity);
+					}
+					
+					thing.addEvent(ebuilder.build());
 				}
 		    }
-			
-			
 		} else {
 			throw new Exception("JSON TD field-name interactions is not an array");
+		}
+	}
+	
+	private static List<String> parseInteractionsLinks(JsonNode jnLinks, Thing thing) throws Exception {
+		
+		List<String> hrefs = new ArrayList<>();
+		
+		if(jnLinks != null && jnLinks.isArray()) {
+			ArrayNode anLinks = (ArrayNode) jnLinks;
+			for (final JsonNode link : anLinks) {
+				JsonNode jnHref = link.get("href");
+				
+				// Note: mediaType in Version2 used to be encodings in Version1
+				JsonNode jnMediaType = link.get("mediaType");
+				
+				JsonNode jnEncodings = thing.getMetadata().get("encodings");
+				if(jnEncodings == null) {
+					// create new one
+					ArrayNode an = new ArrayNode(factory);
+					an.add(jnMediaType);
+					thing.getMetadata().add("encodings", an);
+				} else if(jnEncodings.isArray()) {
+					// add to entry
+					((ArrayNode)jnEncodings).add(jnMediaType);
+				} else {
+					// should never happen
+					throw new Exception("Field 'encodings' in TD is no array");
+				}
+				
+				// collect all hrefs first
+				hrefs.addAll(stringOrArray(jnHref));
+			}
+			
+			return hrefs;
+		} else {
+			throw new Exception("Field 'links' in TD is null or not an array");
 		}
 	}
 	
