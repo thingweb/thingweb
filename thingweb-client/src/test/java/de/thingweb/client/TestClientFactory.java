@@ -10,6 +10,8 @@ import de.thingweb.client.impl.CoapClientImpl;
 import de.thingweb.client.impl.HttpClientImpl;
 import de.thingweb.thing.*;
 import junit.framework.TestCase;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.*;
@@ -23,14 +25,16 @@ public class TestClientFactory extends TestCase {
 
 	private static final JsonNodeFactory factory = new JsonNodeFactory(false);
 	
-	@Test
-	public void testUrlTutorialDoor_OldTD() throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
-		URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/door.jsonld");
-		
-		ClientFactory cf = new ClientFactory();
-		Client client = cf.getClientUrl(jsonld);
-		assertTrue(client instanceof HttpClientImpl);
-	}
+	// Note: some test-cases are ignored given that the online resource (URL) does not exist anymore
+	
+//	@Ignore @Test
+//	public void testUrlTutorialDoor_OldTD() throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
+//		URL jsonld = new URL("https://raw.githubusercontent.com/w3c/wot/master/TF-TD/TD%20Samples/door.jsonld");
+//		
+//		ClientFactory cf = new ClientFactory();
+//		Client client = cf.getClientUrl(jsonld);
+//		assertTrue(client instanceof HttpClientImpl);
+//	}
 	
 	@Test
 	public void testFileTutorialDoor() throws JsonParseException, IOException, UnsupportedException, URISyntaxException {
