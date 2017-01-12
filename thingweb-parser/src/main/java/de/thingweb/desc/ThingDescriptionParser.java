@@ -67,6 +67,9 @@ import de.thingweb.thing.Thing;
 
 public class ThingDescriptionParser {
 
+	// Note: the internal representation in use is still VERSION_1
+	private static final ThingDescriptionVersion DEFAULT_TD_VERSION = ThingDescriptionVersion.VERSION_2;
+	
 	private static final String WOT_TD_CONTEXT = "http://w3c.github.io/wot/w3c-wot-td-context.jsonld";
 	private static final JsonNodeFactory factory = new JsonNodeFactory(false);
 	private static final ObjectMapper mapper = new ObjectMapper();
@@ -143,7 +146,11 @@ public class ThingDescriptionParser {
 	}
 
 	public static byte[] toBytes(Thing thing) throws IOException {
-		ObjectNode td = toJsonObject(thing);
+		return toBytes(thing, DEFAULT_TD_VERSION);
+	}
+	
+	public static byte[] toBytes(Thing thing, ThingDescriptionVersion tdVersion) throws IOException {
+		ObjectNode td = toJsonObject(thing, tdVersion);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -154,9 +161,31 @@ public class ThingDescriptionParser {
 		return baos.toByteArray();
 	}
 
+
 	// TODO set as private (and check it is not called elsewhere)
 	public static ObjectNode toJsonObject(Thing thing) {
-
+		return toJsonObject(thing, DEFAULT_TD_VERSION);
+	}
+	
+	// TODO set as private (and check it is not called elsewhere)
+	public static ObjectNode toJsonObject(Thing thing, ThingDescriptionVersion tdVersion) {
+		ObjectNode td = null;
+		switch(tdVersion) {
+		case VERSION_1:
+			td = toJsonObjectVersion1(thing);
+			break;
+		case VERSION_2:
+			td = toJsonObjectVersion2(thing);
+			break;
+		default:
+			// TODO Error handling for other versions
+			break;
+		}
+		
+		return td;
+	}
+		
+	private static ObjectNode toJsonObjectVersion1(Thing thing) {
 		ObjectNode td = factory.objectNode();
 		if (thing.getMetadata().get("@context") == null
 				|| thing.getMetadata().get("@context").getNodeType() == JsonNodeType.NULL) {
@@ -277,6 +306,164 @@ public class ThingDescriptionParser {
 			events.add(a);
 		}
 		td.put("events", events);
+
+		return td;
+	}
+	
+	private static ObjectNode toJsonObjectVersion2(Thing thing) {
+		ObjectNode td = factory.objectNode();
+		if (thing.getMetadata().get("@context") == null
+				|| thing.getMetadata().get("@context").getNodeType() == JsonNodeType.NULL) {
+			td.put("@context", factory.textNode(WOT_TD_CONTEXT));
+		} else {
+			td.put("@context", thing.getMetadata().get("@context"));
+		}
+		td.put("name", thing.getName());
+		if (thing.getMetadata().contains("@type")) {
+			td.put("@type", thing.getMetadata().get("@type"));
+		}
+
+		if (thing.getMetadata().contains("security")) {
+			td.put("security", thing.getMetadata().get("security"));
+		}
+
+//		if (thing.getMetadata().contains("encodings")) {
+//			// ArrayNode encodings = factory.arrayNode();
+//			// for (String e : thing.getMetadata().getAll("encodings")) {
+//			// encodings.add(e);
+//			// }
+//			td.put("encodings", thing.getMetadata().get("encodings"));
+//		}
+
+		if (thing.getMetadata().contains("uris")) {
+			// base
+			// This version just allows ONE base uri
+			JsonNode jnUris = thing.getMetadata().get("uris");
+			if(jnUris.isTextual()) {
+				td.put("base", thing.getMetadata().get("uris"));
+			} else {
+				// pick first uri ?
+				if(jnUris.isArray()) {
+					ArrayNode anUris = (ArrayNode) jnUris;
+					td.put("base", anUris.get(0));
+				}
+			}
+		}
+		
+		// Interactions
+		ArrayNode interactions = factory.arrayNode();
+		
+		for (Property prop : thing.getProperties()) {
+			ObjectNode p = factory.objectNode();
+			
+			ArrayNode anTypes = factory.arrayNode();
+			anTypes.add("Property");
+			if (prop.getPropertyType() != null && prop.getPropertyType().length() > 0) {
+				anTypes.add(prop.getPropertyType());
+			}
+			p.put("@type", anTypes);
+			
+			
+			p.put("name", prop.getName());
+			p.put("writable", prop.isWritable());
+			
+			ObjectNode outputData = factory.objectNode();
+			outputData.put("valueType", prop.getValueType());
+			p.put("outputData", outputData);
+			
+			ArrayNode links = factory.arrayNode();
+			for(String href : prop.getHrefs()) {
+				ObjectNode link = factory.objectNode();
+				link.put("href", href);
+				
+				// TODO multiple encodings
+				JsonNode encs = thing.getMetadata().get("encodings");
+				if(encs.isTextual()) {
+					link.put("mediaType", encs);
+				} else if(encs.isArray() && ((ArrayNode)encs).size() == 1 ) {
+					link.put("mediaType", ((ArrayNode)encs).get(0));
+				} else {
+					LOGGER.warning("Loss of information given that field \"encodings\" contains more than one entry: " + encs);
+				}
+				
+				links.add(link);
+			}
+			p.put("links", links);
+
+			if (prop.getStability() != null) {
+				p.put("stability", prop.getStability());
+			}
+
+			interactions.add(p);
+		}
+
+		for (Action action : thing.getActions()) {
+			ObjectNode a = factory.objectNode();
+			
+			ArrayNode anTypes = factory.arrayNode();
+			anTypes.add("Action");
+			if (action.getActionType() != null && action.getActionType().length() > 0) {
+				anTypes.add(action.getActionType());
+			}
+			a.put("@type", anTypes);
+			
+			a.put("name", action.getName());
+
+			if (action.getInputType() != null) {
+				ObjectNode in = factory.objectNode();
+				in.put("valueType", action.getInputType());
+				a.put("inputData", in);
+			}
+
+			if (action.getOutputType() != null) {
+				ObjectNode out = factory.objectNode();
+				out.put("valueType", action.getOutputType());
+				a.put("outputData", out);
+			}
+
+			if (action.getHrefs().size() > 1) {
+				ArrayNode hrefs = factory.arrayNode();
+				for (String href : action.getHrefs()) {
+					hrefs.add(href);
+				}
+				a.put("hrefs", hrefs);
+			} else if (action.getHrefs().size() == 1) {
+				a.put("hrefs", factory.textNode(action.getHrefs().get(0)));
+			}
+
+			interactions.add(a);
+		}
+
+		for (Event event : thing.getEvents()) {
+			ObjectNode a = factory.objectNode();
+			
+			ArrayNode anTypes = factory.arrayNode();
+			anTypes.add("Event");
+			if (event.getEventType() != null && event.getEventType().length() > 0) {
+				anTypes.add(event.getEventType());
+			}
+			a.put("@type", anTypes);
+			
+			a.put("name", event.getName());
+
+			if (event.getValueType() != null) {
+				a.put("valueType", event.getValueType());
+			}
+
+			if (event.getHrefs().size() > 1) {
+				ArrayNode hrefs = factory.arrayNode();
+				for (String href : event.getHrefs()) {
+					hrefs.add(href);
+				}
+				a.put("hrefs", hrefs);
+			} else if (event.getHrefs().size() == 1) {
+				a.put("hrefs", factory.textNode(event.getHrefs().get(0)));
+			}
+
+			interactions.add(a);
+		}
+		
+		td.put("interactions", interactions);
 
 		return td;
 	}

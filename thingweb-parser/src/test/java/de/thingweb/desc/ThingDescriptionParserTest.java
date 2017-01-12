@@ -253,7 +253,8 @@ public class ThingDescriptionParserTest {
       ObjectMapper mapper = new ObjectMapper();
       
       JsonNode original = mapper.readValue(tdSample, JsonNode.class);
-      JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes())), JsonNode.class);
+      final ThingDescriptionVersion tdVersion = ThingDescriptionVersion.VERSION_1;
+      JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes()), tdVersion), JsonNode.class);
       
       assertTrue(original.equals(generated));
     }
@@ -296,9 +297,41 @@ public class ThingDescriptionParserTest {
         ObjectMapper mapper = new ObjectMapper();
         
         JsonNode original = mapper.readValue(tdSample, JsonNode.class);
-        JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes())), JsonNode.class);
+        final ThingDescriptionVersion tdVersion = ThingDescriptionVersion.VERSION_1;
+        JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes()), tdVersion), JsonNode.class);
         
         assertTrue(original.equals(generated));
+        
+    }
+    
+    @Test
+    public void testRoundtrip3() throws Exception
+    {
+    	// Version 2
+    	String tdSample = "{\r\n" + 
+    			"  \"@context\": [\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\"],\r\n" + 
+    			"  \"@type\": \"Thing\",\r\n" + 
+    			"  \"name\": \"MyTemperatureThing\",\r\n" + 
+    			"  \"interactions\": [\r\n" + 
+    			"    {\r\n" + 
+    			"      \"@type\": [\"Property\"],\r\n" + 
+    			"      \"name\": \"temperature\",\r\n" + 
+    			"      \"outputData\": {\"valueType\": { \"type\": \"number\" }},\r\n" + 
+    			"      \"writable\": false,\r\n" + 
+    			"      \"links\": [{\r\n" + 
+    			"        \"href\" : \"coap://mytemp.example.com:5683/temp\",\r\n" + 
+    			"        \"mediaType\": \"application/json\"\r\n" + 
+    			"        }]\r\n" + 
+    			"    }\r\n" + 
+    			"  ]\r\n" + 
+    			"}";
+    	
+        ObjectMapper mapper = new ObjectMapper();
+        
+        JsonNode original = mapper.readValue(tdSample, JsonNode.class);
+        JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes())), JsonNode.class);
+        
+        assertTrue("\n" + original + "\n vs. \n" + generated, original.equals(generated));
         
     }
     
