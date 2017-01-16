@@ -45,6 +45,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.siemens.ct.exi.EXIFactory;
 import com.siemens.ct.exi.exceptions.EXIException;
 import com.siemens.ct.exi.helpers.DefaultEXIFactory;
@@ -184,155 +185,292 @@ public class ThingDescriptionParserTest {
       }
     }
     
+    
+	// TODO shall we test round tripping of any node? e.g, "actuator:unit": "actuator:ms" as part of inputData
+	
+    // String filename = "jsonld" + File.separator + "led.v2.plain.jsonld";
+    String tdRoundtrip1 = "{\r\n" + 
+    		"  \"@context\": [\r\n" + 
+    		"    \"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\",\r\n" + 
+    		"    { \"actuator\": \"http://example.org/actuator#\" }\r\n" + 
+    		"  ],\r\n" + 
+    		"  \"@type\": \"Thing\",\r\n" + 
+    		"  \"name\": \"MyLEDThing\",\r\n" + 
+    		"  \"uris\": [\r\n" + 
+    		"    \"coap://myled.example.com:5683/\",\r\n" + 
+    		"    \"http://mything.example.com:8080/myled/\"\r\n" + 
+    		"  ],\r\n" + 
+    		"  \"encodings\": [ \"JSON\",\"EXI\"],\r\n" + 
+    		"  \"security\": {\r\n" + 
+    		"    \"cat\": \"token:jwt\",\r\n" + 
+    		"    \"alg\": \"HS256\",\r\n" + 
+    		"    \"as\": \"https://authority-issuing.example.org\"\r\n" + 
+    		"  },\r\n" + 
+    		"  \"properties\": [\r\n" + 
+    		"    {\r\n" + 
+    		"      \"@type\": \"actuator:onOffStatus\",\r\n" + 
+    		"      \"name\": \"status\",\r\n" + 
+    		"      \"valueType\": { \"type\": \"boolean\" },\r\n" + 
+    		"      \"writable\": true,\r\n" + 
+    		"      \"hrefs\": [ \"pwr\", \"status\" ]\r\n" + 
+    		"    }\r\n" + 
+    		"  ],\r\n" + 
+    		"  \"actions\": [\r\n" + 
+    		"    {\r\n" + 
+    		"      \"@type\": \"actuator:fadeIn\",\r\n" + 
+    		"      \"name\": \"fadeIn\",\r\n" + 
+    		"      \"inputData\": {\r\n" + 
+    		"        \"valueType\": { \"type\": \"integer\" }"
+//    		+ ",\r\n" + 
+//    		"        \"actuator:unit\": \"actuator:ms\"\r\n"
+    		+ 
+    		"      },\r\n" + 
+    		"      \"hrefs\": [\"in\", \"led/in\"  ]\r\n" + 
+    		"    },\r\n" + 
+    		"    {\r\n" + 
+    		"      \"@type\": \"actuator:fadeOut\",\r\n" + 
+    		"      \"name\": \"fadeOut\",\r\n" + 
+    		"      \"inputData\": {\r\n" + 
+    		"        \"valueType\": { \"type\": \"integer\" }"
+//    		+ ",\r\n" + 
+//    		"        \"actuator:unit\": \"actuator:ms\"\r\n"
+    		+ 
+    		"      },\r\n" + 
+    		"      \"hrefs\": [\"out\", \"led/out\" ]\r\n" + 
+    		"    }\r\n" + 
+    		"  ],\r\n" + 
+    		"  \"events\": [\r\n" + 
+    		"    {\r\n" + 
+    		"      \"@type\": \"actuator:alert\",\r\n" + 
+    		"      \"name\": \"criticalCondition\",\r\n" + 
+    		"      \"valueType\": { \"type\": \"string\" },\r\n" + 
+    		"      \"hrefs\": [ \"ev\", \"alert\" ]\r\n" + 
+    		"    }\r\n" + 
+    		"  ]\r\n" + 
+    		"}";
+    
     @Test
     public void testRoundtrip1() throws Exception
     {
-    	// TODO shall we test round tripping of any node? e.g, "actuator:unit": "actuator:ms" as part of inputData
-    	
-      // String filename = "jsonld" + File.separator + "led.v2.plain.jsonld";
-      String tdSample = "{\r\n" + 
-      		"  \"@context\": [\r\n" + 
-      		"    \"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\",\r\n" + 
-      		"    { \"actuator\": \"http://example.org/actuator#\" }\r\n" + 
-      		"  ],\r\n" + 
-      		"  \"@type\": \"Thing\",\r\n" + 
-      		"  \"name\": \"MyLEDThing\",\r\n" + 
-      		"  \"uris\": [\r\n" + 
-      		"    \"coap://myled.example.com:5683/\",\r\n" + 
-      		"    \"http://mything.example.com:8080/myled/\"\r\n" + 
-      		"  ],\r\n" + 
-      		"  \"encodings\": [ \"JSON\",\"EXI\"],\r\n" + 
-      		"  \"security\": {\r\n" + 
-      		"    \"cat\": \"token:jwt\",\r\n" + 
-      		"    \"alg\": \"HS256\",\r\n" + 
-      		"    \"as\": \"https://authority-issuing.example.org\"\r\n" + 
-      		"  },\r\n" + 
-      		"  \"properties\": [\r\n" + 
-      		"    {\r\n" + 
-      		"      \"@type\": \"actuator:onOffStatus\",\r\n" + 
-      		"      \"name\": \"status\",\r\n" + 
-      		"      \"valueType\": { \"type\": \"boolean\" },\r\n" + 
-      		"      \"writable\": true,\r\n" + 
-      		"      \"hrefs\": [ \"pwr\", \"status\" ]\r\n" + 
-      		"    }\r\n" + 
-      		"  ],\r\n" + 
-      		"  \"actions\": [\r\n" + 
-      		"    {\r\n" + 
-      		"      \"@type\": \"actuator:fadeIn\",\r\n" + 
-      		"      \"name\": \"fadeIn\",\r\n" + 
-      		"      \"inputData\": {\r\n" + 
-      		"        \"valueType\": { \"type\": \"integer\" }"
-//      		+ ",\r\n" + 
-//      		"        \"actuator:unit\": \"actuator:ms\"\r\n"
-      		+ 
-      		"      },\r\n" + 
-      		"      \"hrefs\": [\"in\", \"led/in\"  ]\r\n" + 
-      		"    },\r\n" + 
-      		"    {\r\n" + 
-      		"      \"@type\": \"actuator:fadeOut\",\r\n" + 
-      		"      \"name\": \"fadeOut\",\r\n" + 
-      		"      \"inputData\": {\r\n" + 
-      		"        \"valueType\": { \"type\": \"integer\" }"
-//      		+ ",\r\n" + 
-//      		"        \"actuator:unit\": \"actuator:ms\"\r\n"
-      		+ 
-      		"      },\r\n" + 
-      		"      \"hrefs\": [\"out\", \"led/out\" ]\r\n" + 
-      		"    }\r\n" + 
-      		"  ],\r\n" + 
-      		"  \"events\": [\r\n" + 
-      		"    {\r\n" + 
-      		"      \"@type\": \"actuator:alert\",\r\n" + 
-      		"      \"name\": \"criticalCondition\",\r\n" + 
-      		"      \"valueType\": { \"type\": \"string\" },\r\n" + 
-      		"      \"hrefs\": [ \"ev\", \"alert\" ]\r\n" + 
-      		"    }\r\n" + 
-      		"  ]\r\n" + 
-      		"}";
-    	
       ObjectMapper mapper = new ObjectMapper();
       
-      JsonNode original = mapper.readValue(tdSample, JsonNode.class);
+      JsonNode original = mapper.readValue(tdRoundtrip1, JsonNode.class);
       final ThingDescriptionVersion tdVersion = ThingDescriptionVersion.VERSION_1;
-      JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes()), tdVersion), JsonNode.class);
+      JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdRoundtrip1.getBytes()), tdVersion), JsonNode.class);
       
       assertTrue(original.equals(generated));
     }
     
+    
+    @Test
+    public void testRoundtrip1_ToV2() throws Exception
+    {
+      ObjectMapper mapper = new ObjectMapper();
+      
+      JsonNode original = mapper.readValue(tdRoundtrip1, JsonNode.class);
+      JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdRoundtrip1.getBytes())), JsonNode.class);
+      
+      // assertTrue(original.equals(generated));
+      
+      assertTrue(original.get("@context").equals(generated.get("@context")));
+      assertTrue(original.get("@type").equals(generated.get("@type")));
+      assertTrue(original.get("name").equals(generated.get("name")));
+      // TODO multiple base not possible, pick first, other uris net to be expanded in local definitions?
+      assertTrue(ThingDescriptionParser.stringOrArray(original.get("uris")).get(0).equals(generated.get("base").asText()));
+      assertTrue(original.get("security").equals(generated.get("security")));
+      
+      assertTrue(!generated.has("properties"));
+      assertTrue(!generated.has("actions"));
+      assertTrue(!generated.has("events"));
+      
+      assertTrue(generated.has("interactions"));
+      assertTrue(generated.get("interactions").isArray());
+      ArrayNode anInteractions = (ArrayNode) generated.get("interactions");
+      
+      // 1 x prop, 2 x act, 1 x ev
+      assertTrue(anInteractions.size() == 4);
+      for (final JsonNode interaction : anInteractions) {
+    	  List<String> types = ThingDescriptionParser.stringOrArray(interaction.get("@type"));
+    	  if(types.contains("Property")) {
+    		  assertTrue("status".equals(interaction.get("name").textValue()));
+    		  assertTrue(ThingDescriptionParser.stringOrArray(interaction.get("@type")).contains("actuator:onOffStatus"));
+    		  assertTrue(interaction.get("outputData").get("valueType").get("type").asText().equals("boolean"));
+    		  assertTrue(interaction.get("writable").asBoolean());
+    		  assertTrue(interaction.get("links").isArray());
+    		  ArrayNode anLinks = (ArrayNode) interaction.get("links");
+    		  for(JsonNode link : anLinks) {
+    			  // TODO not sure what to do with multiple base uris
+    			  if(link.get("href").asText().equals("pwr")) {
+    				  assertTrue(link.get("mediaType").asText().equals("JSON"));
+    			  } else if(link.get("href").asText().equals("status")) {
+    				  assertTrue(link.get("mediaType").asText().equals("EXI"));
+    			  } else {
+    				  throw new Exception("Unsupported href " + link.get("href"));
+    			  }
+    		  }
+    	  } else if(types.contains("Action")) {
+    		  boolean bIn = "fadeIn".equals(interaction.get("name").textValue());
+    		  boolean bOut = "fadeOut".equals(interaction.get("name").textValue());
+    		  assertTrue(bIn || bOut);
+    		  
+    		  if(bIn) {
+    			  assertTrue(ThingDescriptionParser.stringOrArray(interaction.get("@type")).contains("actuator:fadeIn"));
+    			  assertTrue(interaction.get("inputData").get("valueType").get("type").asText().equals("integer"));
+        		  ArrayNode anLinks = (ArrayNode) interaction.get("links");
+        		  for(JsonNode link : anLinks) {
+        			  // TODO not sure what to do with multiple base uris
+        			  if(link.get("href").asText().equals("in")) {
+        				  assertTrue(link.get("mediaType").asText().equals("JSON"));
+        			  } else if(link.get("href").asText().equals("led/in")) {
+        				  assertTrue(link.get("mediaType").asText().equals("EXI"));
+        			  } else {
+        				  throw new Exception("Unsupported href " + link.get("href"));
+        			  }
+        		  }
+    		  } else {
+    			  // bOut
+    			  assertTrue(ThingDescriptionParser.stringOrArray(interaction.get("@type")).contains("actuator:fadeOut"));
+    			  assertTrue(interaction.get("inputData").get("valueType").get("type").asText().equals("integer"));
+    			  ArrayNode anLinks = (ArrayNode) interaction.get("links");
+        		  for(JsonNode link : anLinks) {
+        			  // TODO not sure what to do with multiple base uris
+        			  if(link.get("href").asText().equals("out")) {
+        				  assertTrue(link.get("mediaType").asText().equals("JSON"));
+        			  } else if(link.get("href").asText().equals("led/out")) {
+        				  assertTrue(link.get("mediaType").asText().equals("EXI"));
+        			  } else {
+        				  throw new Exception("Unsupported href " + link.get("href"));
+        			  }
+        		  }
+    		  }
+    	  } else if(types.contains("Event")) {
+    		  assertTrue("criticalCondition".equals(interaction.get("name").textValue()));
+    		  assertTrue(ThingDescriptionParser.stringOrArray(interaction.get("@type")).contains("actuator:alert"));
+    		  assertTrue(interaction.get("outputData").get("valueType").get("type").asText().equals("string"));
+			  ArrayNode anLinks = (ArrayNode) interaction.get("links");
+    		  for(JsonNode link : anLinks) {
+    			  // TODO not sure what to do with multiple base uris
+    			  if(link.get("href").asText().equals("ev")) {
+    				  assertTrue(link.get("mediaType").asText().equals("JSON"));
+    			  } else if(link.get("href").asText().equals("alert")) {
+    				  assertTrue(link.get("mediaType").asText().equals("EXI"));
+    			  } else {
+    				  throw new Exception("Unsupported href " + link.get("href"));
+    			  }
+    		  }
+    	  } else {
+    		  throw new Exception("Unsupported @type " + types);
+    	  }
+    	  
+      }
+    }
+    
+    
+	String tdRoundtrip2 = "{\r\n" + 
+			"	\"@context\": {\r\n" + 
+			"		\"name\": \"http://www.w3c.org/wot/td#name\",\r\n" + 
+			"		\"uris\": \"http://www.w3c.org/wot/td#associatedUri\",\r\n" + 
+			"		\"unit\": \"http://purl.oclc.org/NET/ssnx/qu/qu-rec20#unit\",\r\n" + 
+			"		\"Thing\": \"http://www.w3c.org/wot/td#Thing\"\r\n" + 
+			"	},\r\n" + 
+			"	\"name\": \"Test\",\r\n" + 
+			"	\"properties\": [],\r\n" + 
+			"	\"actions\": [],\r\n" + 
+			"	\"events\": []\r\n" + 
+			"}";
+    
     @Test
     public void testRoundtrip2() throws Exception
-    {
-    	// e.g, JSON  Object, see http://w3c.github.io/wot/current-practices/wot-practices.html#td-context
-//    	{
-//    		  "@context": {
-//    		    "name": "http://www.w3c.org/wot/td#name",
-//    		    "uris": "http://www.w3c.org/wot/td#associatedUri",
-//    		    "unit": "http://purl.oclc.org/NET/ssnx/qu/qu-rec20#unit",
-//    		    "Thing": "http://www.w3c.org/wot/td#Thing",
-//    		    ...
-//    		  }
-//    		}
-    	
-    	String tdSample = "{\r\n" + 
-    			"	\"@context\": {\r\n" + 
-    			"		\"name\": \"http://www.w3c.org/wot/td#name\",\r\n" + 
-    			"		\"uris\": \"http://www.w3c.org/wot/td#associatedUri\",\r\n" + 
-    			"		\"unit\": \"http://purl.oclc.org/NET/ssnx/qu/qu-rec20#unit\",\r\n" + 
-    			"		\"Thing\": \"http://www.w3c.org/wot/td#Thing\"\r\n" + 
-    			"	},\r\n" + 
-    			"	\"name\": \"Test\",\r\n" + 
-    			"	\"properties\": [],\r\n" + 
-    			"	\"actions\": [],\r\n" + 
-    			"	\"events\": []\r\n" + 
-    			"}";
-    	
-//    	Thing t = new Thing("myName");
-//    	ObjectNode on = factory.objectNode();
-//    	on.put("name", factory.textNode("http://www.w3c.org/wot/td#name"));
-//    	on.put("uris", factory.textNode("http://www.w3c.org/wot/td#associatedUri"));
-//    	on.put("unit", factory.textNode("http://purl.oclc.org/NET/ssnx/qu/qu-rec20#unit"));
-//    	on.put("Thing", factory.textNode("http://www.w3c.org/wot/td#Thing"));
-//    	t.getMetadata().add("@context", on);
-    	
+    {    	
         ObjectMapper mapper = new ObjectMapper();
         
-        JsonNode original = mapper.readValue(tdSample, JsonNode.class);
+        JsonNode original = mapper.readValue(tdRoundtrip2, JsonNode.class);
         final ThingDescriptionVersion tdVersion = ThingDescriptionVersion.VERSION_1;
-        JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes()), tdVersion), JsonNode.class);
+        JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdRoundtrip2.getBytes()), tdVersion), JsonNode.class);
         
-        assertTrue(original.equals(generated));
+        assertTrue(original.equals(generated));   
+    }
+    
+    @Test
+    public void testRoundtrip2_ToV2() throws Exception
+    {    	
+        ObjectMapper mapper = new ObjectMapper();
+        
+		JsonNode original = mapper.readValue(tdRoundtrip2, JsonNode.class);
+        JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdRoundtrip2.getBytes())), JsonNode.class);
+        
+        assertTrue(original.get("@context").equals(generated.get("@context")));
+        assertTrue(original.get("name").equals(generated.get("name")));
+        
+        assertTrue(!generated.has("properties"));
+        assertTrue(!generated.has("actions"));
+        assertTrue(!generated.has("events"));
+        
+        assertTrue(generated.has("interactions"));
+        
+        // assertTrue("\n" + original + "\n vs. \n" + generated, original.equals(generated));   
         
     }
+    
+    
+	// Version 2
+	String tdRoundtrip3 = "{\r\n" + 
+			"  \"@context\": [\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\"],\r\n" + 
+			"  \"@type\": \"Thing\",\r\n" + 
+			"  \"name\": \"MyTemperatureThing\",\r\n" + 
+			"  \"interactions\": [\r\n" + 
+			"    {\r\n" + 
+			"      \"@type\": [\"Property\"],\r\n" + 
+			"      \"name\": \"temperature\",\r\n" + 
+			"      \"outputData\": {\"valueType\": { \"type\": \"number\" }},\r\n" + 
+			"      \"writable\": false,\r\n" + 
+			"      \"links\": [{\r\n" + 
+			"        \"href\" : \"coap://mytemp.example.com:5683/temp\",\r\n" + 
+			"        \"mediaType\": \"application/json\"\r\n" + 
+			"        }]\r\n" + 
+			"    }\r\n" + 
+			"  ]\r\n" + 
+			"}";
     
     @Test
     public void testRoundtrip3() throws Exception
     {
-    	// Version 2
-    	String tdSample = "{\r\n" + 
-    			"  \"@context\": [\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\"],\r\n" + 
-    			"  \"@type\": \"Thing\",\r\n" + 
-    			"  \"name\": \"MyTemperatureThing\",\r\n" + 
-    			"  \"interactions\": [\r\n" + 
-    			"    {\r\n" + 
-    			"      \"@type\": [\"Property\"],\r\n" + 
-    			"      \"name\": \"temperature\",\r\n" + 
-    			"      \"outputData\": {\"valueType\": { \"type\": \"number\" }},\r\n" + 
-    			"      \"writable\": false,\r\n" + 
-    			"      \"links\": [{\r\n" + 
-    			"        \"href\" : \"coap://mytemp.example.com:5683/temp\",\r\n" + 
-    			"        \"mediaType\": \"application/json\"\r\n" + 
-    			"        }]\r\n" + 
-    			"    }\r\n" + 
-    			"  ]\r\n" + 
-    			"}";
-    	
         ObjectMapper mapper = new ObjectMapper();
         
-        JsonNode original = mapper.readValue(tdSample, JsonNode.class);
-        JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdSample.getBytes())), JsonNode.class);
+        JsonNode original = mapper.readValue(tdRoundtrip3, JsonNode.class);
+        // ThingDescriptionVersion.VERSION_2
+        JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdRoundtrip3.getBytes())), JsonNode.class);
         
-        assertTrue("\n" + original + "\n vs. \n" + generated, original.equals(generated));
+        assertTrue("\n" + original + "\n vs. \n" + generated, original.equals(generated)); 
+    }
+    
+    @Test
+    public void testRoundtrip3_ToV1() throws Exception
+    {
+        ObjectMapper mapper = new ObjectMapper();
         
+        @SuppressWarnings("unused")
+		JsonNode original = mapper.readValue(tdRoundtrip3, JsonNode.class);
+        final ThingDescriptionVersion tdVersion = ThingDescriptionVersion.VERSION_1;
+        JsonNode generated = mapper.readValue(ThingDescriptionParser.toBytes(ThingDescriptionParser.fromBytes(tdRoundtrip3.getBytes()), tdVersion), JsonNode.class);
+        
+        // assertTrue("\n" + original + "\n vs. \n" + generated, original.equals(generated)); 
+        
+        assertTrue(generated.has("properties"));
+        assertTrue(!generated.has("interactions"));
+        
+        assertTrue(generated.get("properties").isArray());
+        ArrayNode an = (ArrayNode) generated.get("properties");
+        assertTrue(an.size() == 1);
+        JsonNode jn0 = an.get(0);
+        assertTrue(jn0.has("hrefs"));
+        assertTrue(jn0.get("hrefs").asText().equals("coap://mytemp.example.com:5683/temp"));
+        assertTrue(jn0.has("name"));
+        assertTrue(jn0.get("name").asText().equals("temperature"));
+        assertTrue(jn0.has("valueType"));
+        assertTrue(jn0.get("valueType").has("type"));
+        assertTrue(jn0.has("writable"));
+        assertTrue(jn0.get("writable").asBoolean() == false);
     }
     
 //    @Test

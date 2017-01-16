@@ -242,6 +242,9 @@ public class ThingDescriptionParser {
 			if (prop.getStability() != null) {
 				p.put("stability", prop.getStability());
 			}
+			if (prop.getSecurity() != null) {
+				p.put("security", prop.getSecurity());
+			}
 
 			properties.add(p);
 		}
@@ -276,6 +279,9 @@ public class ThingDescriptionParser {
 			} else if (action.getHrefs().size() == 1) {
 				a.put("hrefs", factory.textNode(action.getHrefs().get(0)));
 			}
+			if (action.getSecurity() != null) {
+				a.put("security", action.getSecurity());
+			}
 
 			actions.add(a);
 		}
@@ -283,14 +289,14 @@ public class ThingDescriptionParser {
 
 		ArrayNode events = factory.arrayNode();
 		for (Event event : thing.getEvents()) {
-			ObjectNode a = factory.objectNode();
+			ObjectNode e = factory.objectNode();
 			if (event.getEventType() != null && event.getEventType().length() > 0) {
-				a.put("@type", event.getEventType());
+				e.put("@type", event.getEventType());
 			}
-			a.put("name", event.getName());
+			e.put("name", event.getName());
 
 			if (event.getValueType() != null) {
-				a.put("valueType", event.getValueType());
+				e.put("valueType", event.getValueType());
 			}
 
 			if (event.getHrefs().size() > 1) {
@@ -298,12 +304,15 @@ public class ThingDescriptionParser {
 				for (String href : event.getHrefs()) {
 					hrefs.add(href);
 				}
-				a.put("hrefs", hrefs);
+				e.put("hrefs", hrefs);
 			} else if (event.getHrefs().size() == 1) {
-				a.put("hrefs", factory.textNode(event.getHrefs().get(0)));
+				e.put("hrefs", factory.textNode(event.getHrefs().get(0)));
+			}
+			if (event.getSecurity() != null) {
+				e.put("security", event.getSecurity());
 			}
 
-			events.add(a);
+			events.add(e);
 		}
 		td.put("events", events);
 
@@ -326,14 +335,6 @@ public class ThingDescriptionParser {
 		if (thing.getMetadata().contains("security")) {
 			td.put("security", thing.getMetadata().get("security"));
 		}
-
-//		if (thing.getMetadata().contains("encodings")) {
-//			// ArrayNode encodings = factory.arrayNode();
-//			// for (String e : thing.getMetadata().getAll("encodings")) {
-//			// encodings.add(e);
-//			// }
-//			td.put("encodings", thing.getMetadata().get("encodings"));
-//		}
 
 		if (thing.getMetadata().contains("uris")) {
 			// base
@@ -371,27 +372,13 @@ public class ThingDescriptionParser {
 			outputData.put("valueType", prop.getValueType());
 			p.put("outputData", outputData);
 			
-			ArrayNode links = factory.arrayNode();
-			for(String href : prop.getHrefs()) {
-				ObjectNode link = factory.objectNode();
-				link.put("href", href);
-				
-				// TODO multiple encodings
-				JsonNode encs = thing.getMetadata().get("encodings");
-				if(encs.isTextual()) {
-					link.put("mediaType", encs);
-				} else if(encs.isArray() && ((ArrayNode)encs).size() == 1 ) {
-					link.put("mediaType", ((ArrayNode)encs).get(0));
-				} else {
-					LOGGER.warning("Loss of information given that field \"encodings\" contains more than one entry: " + encs);
-				}
-				
-				links.add(link);
-			}
-			p.put("links", links);
+			p.put("links", processLinks(prop.getHrefs(), thing.getMetadata().get("encodings")));
 
 			if (prop.getStability() != null) {
 				p.put("stability", prop.getStability());
+			}
+			if (prop.getSecurity() != null) {
+				p.put("security", prop.getSecurity());
 			}
 
 			interactions.add(p);
@@ -421,51 +408,69 @@ public class ThingDescriptionParser {
 				a.put("outputData", out);
 			}
 
-			if (action.getHrefs().size() > 1) {
-				ArrayNode hrefs = factory.arrayNode();
-				for (String href : action.getHrefs()) {
-					hrefs.add(href);
-				}
-				a.put("hrefs", hrefs);
-			} else if (action.getHrefs().size() == 1) {
-				a.put("hrefs", factory.textNode(action.getHrefs().get(0)));
+			a.put("links", processLinks(action.getHrefs(), thing.getMetadata().get("encodings")));
+			
+			if (action.getSecurity() != null) {
+				a.put("security", action.getSecurity());
 			}
 
 			interactions.add(a);
 		}
 
 		for (Event event : thing.getEvents()) {
-			ObjectNode a = factory.objectNode();
+			ObjectNode e = factory.objectNode();
 			
 			ArrayNode anTypes = factory.arrayNode();
 			anTypes.add("Event");
 			if (event.getEventType() != null && event.getEventType().length() > 0) {
 				anTypes.add(event.getEventType());
 			}
-			a.put("@type", anTypes);
+			e.put("@type", anTypes);
 			
-			a.put("name", event.getName());
+			e.put("name", event.getName());
 
 			if (event.getValueType() != null) {
-				a.put("valueType", event.getValueType());
+				ObjectNode out = factory.objectNode();
+				out.put("valueType", event.getValueType());
+				e.put("outputData", out);
 			}
 
-			if (event.getHrefs().size() > 1) {
-				ArrayNode hrefs = factory.arrayNode();
-				for (String href : event.getHrefs()) {
-					hrefs.add(href);
-				}
-				a.put("hrefs", hrefs);
-			} else if (event.getHrefs().size() == 1) {
-				a.put("hrefs", factory.textNode(event.getHrefs().get(0)));
+			e.put("links", processLinks(event.getHrefs(), thing.getMetadata().get("encodings")));
+			
+			if (event.getSecurity() != null) {
+				e.put("security", event.getSecurity());
 			}
 
-			interactions.add(a);
+			interactions.add(e);
 		}
 		
 		td.put("interactions", interactions);
 
 		return td;
+	}
+	
+	
+	private static ArrayNode processLinks(List<String> hrefs, JsonNode encs) {
+		ArrayNode links = factory.arrayNode();
+		for(int i=0; i<hrefs.size(); i++) {
+			String href = hrefs.get(i);
+			ObjectNode link = factory.objectNode();
+			link.put("href", href);
+			
+			// TODO multiple encodings
+			// JsonNode encs = thing.getMetadata().get("encodings");
+			if(encs.isTextual()) {
+				link.put("mediaType", encs);
+			} else if(encs.isArray() && ((ArrayNode)encs).size() == 1 ) {
+				link.put("mediaType", ((ArrayNode)encs).get(0));
+			} else if(encs.isArray() && ((ArrayNode)encs).size() == hrefs.size() ) {
+				link.put("mediaType", ((ArrayNode)encs).get(i));
+			} else {
+				 LOGGER.warning("Loss of information given that field \"encodings\" contains more than one entry: " + encs);
+			}
+			links.add(link);
+		}
+		return links;
 	}
 
 	/**
