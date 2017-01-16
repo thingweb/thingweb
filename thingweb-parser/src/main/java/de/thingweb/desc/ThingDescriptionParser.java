@@ -457,17 +457,19 @@ public class ThingDescriptionParser {
 			ObjectNode link = factory.objectNode();
 			link.put("href", href);
 			
-			// TODO multiple encodings
-			// JsonNode encs = thing.getMetadata().get("encodings");
-			if(encs.isTextual()) {
-				link.put("mediaType", encs);
-			} else if(encs.isArray() && ((ArrayNode)encs).size() == 1 ) {
-				link.put("mediaType", ((ArrayNode)encs).get(0));
-			} else if(encs.isArray() && ((ArrayNode)encs).size() == hrefs.size() ) {
-				link.put("mediaType", ((ArrayNode)encs).get(i));
-			} else {
-				 LOGGER.warning("Loss of information given that field \"encodings\" contains more than one entry: " + encs);
+			if(encs != null) {
+				// TODO multiple encodings
+				if(encs.isTextual()) {
+					link.put("mediaType", encs);
+				} else if(encs.isArray() && ((ArrayNode)encs).size() == 1 ) {
+					link.put("mediaType", ((ArrayNode)encs).get(0));
+				} else if(encs.isArray() && ((ArrayNode)encs).size() == hrefs.size() ) {
+					link.put("mediaType", ((ArrayNode)encs).get(i));
+				} else {
+					 LOGGER.warning("Loss of information given that field \"encodings\" contains more than one entry: " + encs);
+				}
 			}
+			
 			links.add(link);
 		}
 		return links;
