@@ -91,7 +91,7 @@ public class ThingDescriptionRoundtripTest {
     	// MultiBindingThingServer mbts = new MultiBindingThingServer();
     	mbts.addThing(ThingDescriptionParser.fromBytes(tdVoter.getBytes()));
     	ThingInterface ti = mbts.getThing("testvoter");
-    	ObjectNode generated = ThingDescriptionParser.toJsonObject(ti.getThingModel());
+    	ObjectNode generated = ThingDescriptionParser.toJsonObject(ti.getThingModel(), ThingDescriptionVersion.VERSION_1);
     	
     	// Note: on should stil contains array of uris
     	JsonNode jn = generated.get("uris");

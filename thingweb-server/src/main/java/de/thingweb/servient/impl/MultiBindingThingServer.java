@@ -193,7 +193,8 @@ public class MultiBindingThingServer implements ThingServer {
                 final ObjectNode response = jsonNodeFactory.objectNode();
                 things.forEach(
                         (name, thing) -> {
-                                response.put(name, ThingDescriptionParser.toJsonObject(thing.getThingModel()));
+                        		ObjectNode td = ThingDescriptionParser.toJsonObject(thing.getThingModel());
+                                response.put(name, td);
                         }
                 );
                 return ContentHelper.wrap(response, MediaType.APPLICATION_JSON);
