@@ -75,6 +75,12 @@ distributions {
     }
 }
 
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+
+
 // only our subprojects have a bintray configuration. replace the root project's
 // `bintrayUpload` task with one that restricts the calls to the subprojects.
 // project.afterEvaluate {
