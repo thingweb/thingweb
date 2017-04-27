@@ -765,6 +765,13 @@ public class ThingDescriptionParser {
 						pbuilder.setStability(jnStability.intValue());
 					}
 					
+					// @type
+					if(types.size() > 1) {
+						// TODO currently string, should be list!
+						types.remove("Property");
+						pbuilder.setPropertyType(types.get(0));
+					}
+					
 					// security: [optional]
 					JsonNode jnSecurity = interaction.get("security");
 					if(jnSecurity != null) {
@@ -791,6 +798,13 @@ public class ThingDescriptionParser {
 					JsonNode jnLinks = interaction.get("links");
 					abuilder.setHrefs(parseInteractionsLinks(jnLinks, thing));
 
+					// @type
+					if(types.size() > 1) {
+						// TODO currently string, should be list!
+						types.remove("Action");
+						abuilder.setActionType(types.get(0));
+					}
+					
 					// security: [optional]
 					JsonNode jnSecurity = interaction.get("security");
 					if(jnSecurity != null) {
@@ -810,6 +824,13 @@ public class ThingDescriptionParser {
 					JsonNode jnOutputData = interaction.get("outputData");
 					if(jnOutputData != null) {
 						ebuilder.setValueType(jnOutputData.get("valueType"));	
+					}
+					
+					// @type
+					if(types.size() > 1) {
+						// TODO currently string, should be list!
+						types.remove("Event");
+						ebuilder.setEventType(types.get(0));
 					}
 					
 					// security: [optional]

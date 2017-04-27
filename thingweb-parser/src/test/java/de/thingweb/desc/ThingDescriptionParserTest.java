@@ -906,5 +906,43 @@ public class ThingDescriptionParserTest {
     	
     }
     
+    
+    @Test
+    public void test_ExampleType() throws JsonParseException, IOException {
+    	String json = "{\r\n" + 
+    			"	\"@context\": [\r\n" + 
+    			"		\"http://w3c.github.io/wot/w3c-wot-td-context.jsonld\"\r\n" + 
+    			"	],\r\n" + 
+    			"	\"@type\": \"Thing\",\r\n" + 
+    			"	\"name\": \"MyLatitude\",\r\n" + 
+    			"	\"base\": \"coap://myled.example.com:5683/\",\r\n" + 
+    			"	\"interactions\": [{\r\n" + 
+    			"		\"@type\": [\r\n" + 
+    			"			\"Property\",\r\n" + 
+    			"			\"schema:latitude\"\r\n" + 
+    			"		],\r\n" + 
+    			"		\"name\": \"latitude\",\r\n" + 
+    			"		\"outputData\": {\r\n" + 
+    			"			\"valueType\": {\r\n" + 
+    			"				\"type\": \"schema:latitude\"\r\n" + 
+    			"			}\r\n" + 
+    			"		},\r\n" + 
+    			"		\"writable\": true,\r\n" + 
+    			"		\"links\": [{\r\n" + 
+    			"			\"href\": \"latitude\",\r\n" + 
+    			"			\"mediaType\": \"application/json\"\r\n" + 
+    			"		}]\r\n" + 
+    			"	}]\r\n" + 
+    			"}";
+    	
+    	Thing td = ThingDescriptionParser.fromBytes(json.getBytes());
+    	
+    	// name
+    	assertTrue("MyLatitude".equals(td.getName()));
+    	
+    	// name property
+    	assertTrue("latitude".equals(td.getProperty("latitude").getName()));
+    	assertTrue("schema:latitude".equals(td.getProperty("latitude").getPropertyType()));
+    }
 
 }
